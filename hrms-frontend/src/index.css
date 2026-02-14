@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme {
+    /* Premium Color Palette (Zinc-based for sleek/sharp look) */
+    --color-slate-950: #09090b;
+    --color-slate-900: #18181b;
+    --color-slate-800: #27272a;
+    --color-slate-700: #3f3f46;
+    --color-slate-600: #52525b;
+    --color-slate-500: #71717a;
+
+    --color-primary-500: #2563eb;
+    /* Royal Blue */
+    --color-primary-600: #1d4ed8;
+
+    --color-border: #27272a;
+    --color-background: #09090b;
+    --color-foreground: #fafafa;
+
+    --font-heading: 'Geist', 'Inter', system-ui, sans-serif;
+    --font-body: 'Geist', 'Inter', system-ui, sans-serif;
+
+    /* Animations */
+    --animate-in: in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    --animate-out: out 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    --animate-glow: glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    --animate-float: float 6s ease-in-out infinite;
+
+    @keyframes glow {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+}
+
+/* Base Styles */
+:root {
+    font-family: var(--font-body);
+    line-height: 1.4;
+    font-weight: 400;
+
+    color-scheme: dark;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    @apply selection:bg-primary-500/30 selection:text-white;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-slate-800 rounded-full hover:bg-slate-700 transition-colors;
+}
+
+/* Custom Utilities */
+@layer components {
+    .premium-card {
+        @apply bg-slate-900 border border-slate-800 rounded-xl shadow-lg transition-all duration-300;
+    }
+
+    .premium-btn {
+        @apply px-4 py-2 rounded-lg bg-primary-600 text-white font-medium text-sm transition-all hover:bg-primary-500 active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+    }
+
+    .compact-input {
+        @apply h-9 px-3 w-full bg-slate-900 border border-slate-800 rounded-md text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-primary-500 transition-all;
+    }
+
+    /* Motion */
+    .motion-safe-transition {
+        @apply transition-all duration-200 ease-out;
+    }
+}
