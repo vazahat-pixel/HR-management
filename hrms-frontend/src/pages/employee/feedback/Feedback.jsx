@@ -27,7 +27,8 @@ const Feedback = () => {
                 <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full py-2.5 bg-primary-600 hover:bg-primary-500 text-white font-medium rounded-lg shadow-lg shadow-primary-500/20 transition-all"
+                    onClick={(e) => { e.preventDefault(); alert("Dummy Action: Feedback Submitted Successfully!"); }}
+                    className="w-full py-2.5 bg-primary-600 hover:bg-primary-500 text-white font-medium rounded-lg shadow-lg shadow-primary-500/20 transition-all cursor-pointer"
                 >
                     Submit Feedback
                 </motion.button>

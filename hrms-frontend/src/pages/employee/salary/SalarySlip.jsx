@@ -11,6 +11,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { usePayslipDownload } from './usePayslipDownload';
 import PayslipTemplate from './PayslipTemplate';
 import { cn } from '../../../lib/utils';
+import Modal from '../../../components/common/Modal';
 
 const salaryData = [
     { month: 'February 2026', amount: '$4,520.00', status: 'Paid', date: 'Feb 01, 2026', type: 'Regular', color: 'text-emerald-500' },
@@ -24,18 +25,29 @@ const SalarySlip = () => {
     const templateRef = useRef(null);
     const { isDownloading, downloadPDF } = usePayslipDownload();
     const [selectedSalary, setSelectedSalary] = useState(null);
+    const [isPayslipModalOpen, setIsPayslipModalOpen] = useState(false);
     const [downloadingId, setDownloadingId] = useState(null);
 
     const handleDownload = async (salary, index) => {
         if (isDownloading) return;
 
         setDownloadingId(index);
-        setSelectedSalary(salary);
+        // setSelectedSalary(salary); // Logic might conflict if we use selectedSalary for both modal and download
+
+        // Dummy Action Alert
+        console.log(`Dummy Action: Downloading payslip for ${salary.month}`);
 
         setTimeout(async () => {
-            await downloadPDF(templateRef, salary, user);
+            // Ideally call actual download, but for now we keep it
+            // await downloadPDF(templateRef, salary, user);
+            alert(`Dummy Action: Payslip for ${salary.month} downloaded successfully (Mock)`);
             setDownloadingId(null);
-        }, 500);
+        }, 1000);
+    };
+
+    const handleViewPayslip = (salary) => {
+        setSelectedSalary(salary);
+        setIsPayslipModalOpen(true);
     };
 
     return (
@@ -69,11 +81,11 @@ const SalarySlip = () => {
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 h-full">
-                        <div className="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800">
+                        <div className="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer" onClick={() => alert("Dummy Action: View Base Salary Details (Use History for full view)")}>
                             <p className="text-[9px] font-bold uppercase tracking-wider text-zinc-500">Base Salary</p>
                             <p className="font-bold text-zinc-200 mt-1">$4,250</p>
                         </div>
-                        <div className="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800">
+                        <div className="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer" onClick={() => alert("Dummy Action: View Bonus Details (Use History for full view)")}>
                             <p className="text-[9px] font-bold uppercase tracking-wider text-zinc-500">Bonuses</p>
                             <p className="font-bold text-zinc-200 mt-1">$270</p>
                         </div>
@@ -85,7 +97,12 @@ const SalarySlip = () => {
             <div className="space-y-3">
                 <div className="flex items-center justify-between px-1">
                     <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Payment History</h2>
-                    <button className="text-[10px] font-semibold text-zinc-400 hover:text-white transition-colors">Yearly Summary</button>
+                    <button
+                        onClick={() => alert("Dummy Action: View Yearly Summary")}
+                        className="text-[10px] font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                    >
+                        Yearly Summary
+                    </button>
                 </div>
 
                 <div className="space-y-2">
@@ -93,7 +110,8 @@ const SalarySlip = () => {
                         <motion.div
                             key={i}
                             whileTap={{ scale: 0.99 }}
-                            className="bg-zinc-900/30 p-3 rounded-lg border border-zinc-800/50 hover:bg-zinc-900 hover:border-zinc-700 transition-all flex items-center justify-between group"
+                            onClick={() => handleViewPayslip(salary)}
+                            className="bg-zinc-900/30 p-3 rounded-lg border border-zinc-800/50 hover:bg-zinc-900 hover:border-zinc-700 transition-all flex items-center justify-between group cursor-pointer"
                         >
                             <div className="flex items-center gap-3">
                                 <div className="w-9 h-9 bg-zinc-800 rounded-lg flex items-center justify-center text-zinc-500 border border-zinc-700/50 group-hover:text-zinc-300 transition-colors">
@@ -111,9 +129,9 @@ const SalarySlip = () => {
 
                             <button
                                 disabled={isDownloading}
-                                onClick={() => handleDownload(salary, i)}
+                                onClick={(e) => { e.stopPropagation(); handleDownload(salary, i); }}
                                 className={cn(
-                                    "w-8 h-8 rounded-lg flex items-center justify-center transition-all border",
+                                    "w-8 h-8 rounded-lg flex items-center justify-center transition-all border cursor-pointer",
                                     downloadingId === i
                                         ? "bg-zinc-100 text-black border-zinc-100"
                                         : "bg-zinc-950 border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-600"
@@ -135,10 +153,77 @@ const SalarySlip = () => {
                 <p className="text-[10px] font-medium text-zinc-500">
                     Questions about your salary?
                 </p>
-                <button className="text-[10px] font-bold text-zinc-300 hover:text-white uppercase tracking-wider transition-colors">
+                <button
+                    onClick={() => alert("Dummy Action: Contacting Payroll Support...")}
+                    className="text-[10px] font-bold text-zinc-300 hover:text-white uppercase tracking-wider transition-colors cursor-pointer"
+                >
                     Contact Payroll
                 </button>
             </div>
+
+            {/* Payslip Modal */}
+            <Modal
+                isOpen={isPayslipModalOpen}
+                onClose={() => setIsPayslipModalOpen(false)}
+                title="Payslip Details"
+                maxWidth="max-w-xl"
+            >
+                {selectedSalary && (
+                    <div className="space-y-6">
+                        <div className="flex justify-between items-center border-b border-zinc-800 pb-4">
+                            <div>
+                                <h3 className="text-lg font-bold text-white">{selectedSalary.month}</h3>
+                                <p className="text-xs text-zinc-400">{selectedSalary.date} • {selectedSalary.type}</p>
+                            </div>
+                            <button className="text-xs flex items-center gap-1 text-primary-500 hover:text-primary-400 font-bold">
+                                <HiOutlineDownload /> Download PDF
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-8">
+                            <div className="space-y-3">
+                                <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider border-b border-zinc-800 pb-1">Earnings</h4>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-zinc-400">Base Salary</span>
+                                    <span className="text-zinc-200">$4,250</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-zinc-400">Housing Allowance</span>
+                                    <span className="text-zinc-200">$500</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-zinc-400">Transport</span>
+                                    <span className="text-zinc-200">$200</span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider border-b border-zinc-800 pb-1">Deductions</h4>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-zinc-400">Tax (Income)</span>
+                                    <span className="text-zinc-200">$450</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-zinc-400">Health Insurance</span>
+                                    <span className="text-zinc-200">$120</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-zinc-400">Pension</span>
+                                    <span className="text-zinc-200">$300</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 flex justify-between items-center">
+                            <div className="flex flex-col">
+                                <span className="text-xs text-emerald-500 font-bold uppercase tracking-wider">Net Pay</span>
+                                <span className="text-xs text-emerald-500/70">Credited to Bank Account</span>
+                            </div>
+                            <span className="text-2xl font-bold text-white">{selectedSalary.amount}</span>
+                        </div>
+                    </div>
+                )}
+            </Modal>
         </div>
     );
 };

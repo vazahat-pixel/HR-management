@@ -102,7 +102,7 @@ const Login = () => {
 
             <div className="text-center mt-6">
                 <p className="text-[11px] text-zinc-500 font-medium">
-                    Don't have an account? <span className="text-zinc-400 cursor-not-allowed hover:text-zinc-300 transition-colors">Contact HR</span>
+                    Don't have an account? <span onClick={() => alert("Dummy Action: Please contact your HR department to create an account.")} className="text-zinc-400 cursor-pointer hover:text-zinc-300 transition-colors">Contact HR</span>
                 </p>
             </div>
         </div>

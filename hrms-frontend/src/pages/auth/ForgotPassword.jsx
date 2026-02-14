@@ -9,6 +9,7 @@ const ForgotPassword = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        alert(`Dummy Action: Password reset link sent to ${email}`);
         setSubmitted(true);
         // Add API call logic here
     };

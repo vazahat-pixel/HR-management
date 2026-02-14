@@ -10,7 +10,10 @@ const Reports = () => {
                     <h1 className="text-2xl font-bold text-white tracking-tight">Performance Reports</h1>
                     <p className="text-slate-400 text-sm mt-1">View and download your monthly performance analytics.</p>
                 </div>
-                <button className="px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-all">
+                <button
+                    onClick={() => alert("Dummy Action: Exporting All Reports...")}
+                    className="px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-all cursor-pointer"
+                >
                     <HiOutlineDownload className="w-4 h-4" />
                     Export All
                 </button>
@@ -24,6 +27,7 @@ const Reports = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: item * 0.1 }}
                         className="p-5 rounded-xl bg-slate-900 border border-slate-800 hover:border-primary-500/50 transition-all group cursor-pointer"
+                        onClick={() => alert(`Dummy Action: View Report details for Month ${item}`)}
                     >
                         <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-primary-400 group-hover:bg-primary-500/10 transition-colors mb-4">
                             <HiOutlineDocumentReport className="w-6 h-6" />

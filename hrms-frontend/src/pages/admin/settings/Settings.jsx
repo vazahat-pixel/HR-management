@@ -12,11 +12,19 @@ const Settings = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-400">Company Name</label>
-                            <input type="text" defaultValue="Krishikart" className="w-full h-10 px-3 bg-slate-900 border border-slate-800 rounded-lg text-white focus:border-primary-500" />
+                            <input
+                                type="text"
+                                defaultValue="Krishikart"
+                                className="w-full h-10 px-3 bg-slate-900 border border-slate-800 rounded-lg text-white focus:border-primary-500"
+                                onChange={(e) => console.log("Dummy Action: Name changed to", e.target.value)}
+                            />
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-400">Timezone</label>
-                            <select className="w-full h-10 px-3 bg-slate-900 border border-slate-800 rounded-lg text-white">
+                            <select
+                                className="w-full h-10 px-3 bg-slate-900 border border-slate-800 rounded-lg text-white cursor-pointer"
+                                onChange={(e) => alert("Dummy Action: Timezone changed to " + e.target.value)}
+                            >
                                 <option>IST (UTC+05:30)</option>
                                 <option>UTC</option>
                             </select>
@@ -30,7 +38,10 @@ const Settings = () => {
                         {['Attendance Tracking', 'Payroll Automation', 'Employee Portal', 'Recruitment'].map((module, i) => (
                             <div key={i} className="flex items-center justify-between p-3 bg-slate-900 border border-slate-800 rounded-lg">
                                 <span className="text-white font-medium text-sm">{module}</span>
-                                <div className="w-10 h-6 bg-primary-600 rounded-full relative cursor-pointer">
+                                <div
+                                    className="w-10 h-6 bg-primary-600 rounded-full relative cursor-pointer"
+                                    onClick={() => alert(`Dummy Action: Toggled ${module}`)}
+                                >
                                     <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
                                 </div>
                             </div>
@@ -39,7 +50,12 @@ const Settings = () => {
                 </section>
 
                 <div className="pt-4">
-                    <button className="px-6 py-2 bg-primary-600 text-white font-bold rounded-lg shadow-lg hover:bg-primary-500 transition-all">Save Changes</button>
+                    <button
+                        onClick={() => alert("Dummy Action: Settings Saved Successfully!")}
+                        className="px-6 py-2 bg-primary-600 text-white font-bold rounded-lg shadow-lg hover:bg-primary-500 transition-all cursor-pointer"
+                    >
+                        Save Changes
+                    </button>
                 </div>
             </div>
         </div>

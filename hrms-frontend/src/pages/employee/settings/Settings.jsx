@@ -65,7 +65,7 @@ const Settings = () => {
                     icon={HiOutlineKey}
                     title="Change Password"
                     description="Update your security credentials"
-                    action={<button className="text-[10px] font-bold bg-zinc-900 text-zinc-300 hover:text-white px-3 py-1.5 rounded-md border border-zinc-800 transition-colors">Update</button>}
+                    action={<button onClick={() => alert("Dummy Action: Open Change Password Modal")} className="text-[10px] font-bold bg-zinc-900 text-zinc-300 hover:text-white px-3 py-1.5 rounded-md border border-zinc-800 transition-colors cursor-pointer">Update</button>}
                 />
             </div>
 

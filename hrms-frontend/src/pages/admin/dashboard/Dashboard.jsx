@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     HiOutlineUsers,
     HiOutlineBriefcase,
@@ -19,6 +19,7 @@ import {
     BarChart,
     Bar
 } from 'recharts';
+import Modal from '../../../components/common/Modal';
 
 const AdminDashboard = () => {
     // Mock Data
@@ -39,6 +40,19 @@ const AdminDashboard = () => {
         { name: 'Sun', value: 3490, value2: 4300 },
     ];
 
+    const [isMetricModalOpen, setIsMetricModalOpen] = useState(false);
+    const [selectedMetric, setSelectedMetric] = useState(null);
+    const [isChartModalOpen, setIsChartModalOpen] = useState(false);
+
+    const handleMetricClick = (title) => {
+        setSelectedMetric(title);
+        setIsMetricModalOpen(true);
+    };
+
+    const handleChartOptions = () => {
+        setIsChartModalOpen(true);
+    };
+
     return (
         <div className="space-y-6 animate-in fade-in zoom-in duration-500">
             {/* Header */}
@@ -55,7 +69,8 @@ const AdminDashboard = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="p-5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors group relative overflow-hidden"
+                        onClick={() => handleMetricClick(metric.title)}
+                        className="p-5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors group relative overflow-hidden cursor-pointer"
                     >
                         <div className="flex justify-between items-start mb-4">
                             <div className={cn("p-2 rounded-lg", metric.bg, metric.color)}>
@@ -87,7 +102,10 @@ const AdminDashboard = () => {
                 >
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-semibold text-white">Performance Analytics</h3>
-                        <button className="p-1 hover:bg-slate-800 rounded text-slate-400">
+                        <button
+                            onClick={handleChartOptions}
+                            className="p-1 hover:bg-slate-800 rounded text-slate-400 cursor-pointer"
+                        >
                             <HiOutlineDotsVertical />
                         </button>
                     </div>
@@ -163,6 +181,58 @@ const AdminDashboard = () => {
                     </div>
                 </motion.div>
             </div>
+
+            {/* Metric Modal */}
+            <Modal
+                isOpen={isMetricModalOpen}
+                onClose={() => setIsMetricModalOpen(false)}
+                title={selectedMetric || "Metric Details"}
+            >
+                <div className="space-y-4">
+                    <p className="text-sm text-slate-400">Detailed breakdown and recent trends for {selectedMetric}.</p>
+                    <div className="border border-slate-800 rounded-lg overflow-hidden">
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-slate-950/50">
+                                <tr>
+                                    <th className="p-3 font-semibold text-slate-400">Category</th>
+                                    <th className="p-3 font-semibold text-slate-400 text-right">Value</th>
+                                    <th className="p-3 font-semibold text-slate-400 text-right">Change</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-800">
+                                {[1, 2, 3, 4, 5].map((i) => (
+                                    <tr key={i} className="hover:bg-slate-800/30">
+                                        <td className="p-3 text-slate-300">Sub-category {i}</td>
+                                        <td className="p-3 text-right text-white font-mono">{Math.floor(Math.random() * 1000)}</td>
+                                        <td className="p-3 text-right text-emerald-500 text-xs font-bold">+ {Math.floor(Math.random() * 10)}%</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Chart Options Modal */}
+            <Modal
+                isOpen={isChartModalOpen}
+                onClose={() => setIsChartModalOpen(false)}
+                title="Chart Options"
+                maxWidth="max-w-sm"
+            >
+                <div className="space-y-2">
+                    {['View Full Report', 'Export as PDF', 'Export as CSV', 'Print Chart', 'Share Analysis'].map((action, i) => (
+                        <button
+                            key={i}
+                            className="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition-colors text-sm font-medium flex items-center justify-between group"
+                            onClick={() => { alert(`Dummy Action: ${action}`); setIsChartModalOpen(false); }}
+                        >
+                            {action}
+                            <HiOutlineTrendingUp className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-primary-500" />
+                        </button>
+                    ))}
+                </div>
+            </Modal>
         </div>
     );
 };
