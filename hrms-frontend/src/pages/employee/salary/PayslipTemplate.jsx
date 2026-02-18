@@ -21,9 +21,9 @@ const PayslipTemplate = React.forwardRef(({ data, user }, ref) => {
                 return (
                     <>
                         {/* Header */}
-                        <div className="flex justify-between items-start border-b-2 border-primary-600 pb-8 mb-8">
+                        <div className="flex justify-between items-start border-b-2 border-emerald-600 pb-8 mb-8">
                             <div>
-                                <h1 className="text-3xl font-black text-primary-600 tracking-tighter">HRMS PRO</h1>
+                                <h1 className="text-3xl font-black text-emerald-600 tracking-tighter">LAXMART HRMS</h1>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-loose">Enterprise HR Solutions</p>
                                 <div className="mt-4 text-xs font-medium text-slate-500 space-y-1">
                                     <p>123 Corporate Blvd, Silicon Valley</p>
@@ -32,9 +32,9 @@ const PayslipTemplate = React.forwardRef(({ data, user }, ref) => {
                                 </div>
                             </div>
                             <div className="text-right">
-                                <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Payslip</h2>
-                                <p className="text-sm font-bold text-primary-600">Period: {data.month}</p>
-                                <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-widest">Payslip ID: #PS-{user?.id || 'EMP102'}-{data.month.replace(' ', '')}</p>
+                                <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Statement of Earnings</h2>
+                                <p className="text-sm font-bold text-emerald-600 uppercase tracking-widest">Period: {data.month}</p>
+                                <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-widest">Payslip ID: #PS-{user?.employeeId || 'EMP102'}-{data.month.replace(' ', '')}</p>
                             </div>
                         </div>
 
@@ -45,11 +45,11 @@ const PayslipTemplate = React.forwardRef(({ data, user }, ref) => {
                                 <div className="space-y-3">
                                     <div className="flex justify-between">
                                         <span className="text-xs font-bold text-slate-500 uppercase tracking-tight">Name:</span>
-                                        <span className="text-xs font-black text-slate-800">{user?.name}</span>
+                                        <span className="text-xs font-black text-slate-800">{user?.fullName}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-xs font-bold text-slate-500 uppercase tracking-tight">Employee ID:</span>
-                                        <span className="text-xs font-black text-slate-800">{user?.id || 'EMP102'}</span>
+                                        <span className="text-xs font-black text-slate-800">{user?.employeeId || 'EMP102'}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-xs font-bold text-slate-500 uppercase tracking-tight">Designation:</span>
@@ -70,7 +70,7 @@ const PayslipTemplate = React.forwardRef(({ data, user }, ref) => {
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-xs font-bold text-slate-500 uppercase tracking-tight">Status:</span>
-                                        <span className="text-xs font-black text-emerald-600">PAID (BANK TRANSFER)</span>
+                                        <span className="text-xs font-black text-emerald-600 uppercase tracking-tighter">PAID (DIRECT DEPOSIT)</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-xs font-bold text-slate-500 uppercase tracking-tight">Currency:</span>
@@ -84,9 +84,9 @@ const PayslipTemplate = React.forwardRef(({ data, user }, ref) => {
                         <div className="mb-12">
                             <table className="w-full text-left">
                                 <thead>
-                                    <tr className="bg-primary-600 text-white">
-                                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest rounded-tl-2xl">Description</th>
-                                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-right rounded-tr-2xl">Amount</th>
+                                    <tr className="bg-emerald-600 text-white">
+                                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest rounded-tl-2xl">Income Description</th>
+                                        <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-right rounded-tr-2xl">Net Amount (₹)</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 border-x border-b border-slate-100 rounded-b-2xl overflow-hidden">
@@ -123,13 +123,12 @@ const PayslipTemplate = React.forwardRef(({ data, user }, ref) => {
                             </div>
                         </div>
 
-                        {/* Footer */}
                         <div className="mt-auto pt-24 text-center">
-                            <div className="inline-block p-4 bg-primary-50 rounded-2xl border border-primary-100">
-                                <p className="text-[10px] font-bold text-primary-600 uppercase tracking-widest">CONFIDENTIAL DOCUMENT</p>
+                            <div className="inline-block p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                                <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">System Generated Confidential Document</p>
                             </div>
                             <p className="text-[9px] font-medium text-slate-400 mt-6 tracking-wide uppercase">
-                                Generated on {new Date().toLocaleDateString()} via HRMS PRO Secure Portal
+                                Generated on {new Date().toLocaleDateString()} via LAXMART HRMS Secure Portal
                             </p>
                         </div>
                     </>

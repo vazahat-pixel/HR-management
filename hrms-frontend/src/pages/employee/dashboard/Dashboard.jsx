@@ -1,256 +1,304 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom'; // ADDED: Import navigate
 import {
-    HiOutlineClock,
-    HiOutlineCalendar,
-    HiOutlineCurrencyRupee,
+    HiOutlineCurrencyDollar,
+    HiOutlineClipboardCheck,
+    HiOutlineBell,
     HiOutlineTrendingUp,
-    HiOutlineBriefcase
+    HiOutlineCalendar,
+    HiOutlineDocumentText,
+    HiOutlineUser,
+    HiOutlineChatAlt2,
+    HiOutlineCheckCircle,
+    HiOutlineClock,
+    HiOutlineDownload,
+    HiOutlineExclamationCircle,
+    HiOutlineTicket
 } from 'react-icons/hi';
-import { cn } from '../../../lib/utils';
+import { useAuth } from '../../../context/AuthContext';
+import { dashboardAPI, notificationsAPI } from '../../../services/api';
 import Modal from '../../../components/common/Modal';
+import { cn } from '../../../lib/utils';
+import toast from 'react-hot-toast';
 
-const StatCard = ({ title, value, subtext, icon: Icon, delay }) => (
-    <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: delay * 0.1 }}
-        onClick={() => alert(`Dummy Action: View details for ${title}`)}
-        className="p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl flex items-center justify-between group hover:border-zinc-700 transition-all shadow-sm cursor-pointer"
-    >
-        <div>
-            <p className="text-[10px] text-zinc-500 font-bold tracking-wider uppercase">{title}</p>
-            <h3 className="text-lg font-bold text-zinc-100 mt-1">{value}</h3>
-            <p className="text-[10px] text-zinc-600 mt-0.5 font-medium">{subtext}</p>
-        </div>
-        <div className="p-2.5 rounded-lg bg-zinc-800/50 text-zinc-400 group-hover:text-zinc-200 transition-colors border border-zinc-700/50">
-            <Icon className="w-4 h-4" />
-        </div>
-    </motion.div>
-);
+const Dashboard = () => {
+    const { user } = useAuth();
+    const navigate = useNavigate(); // ADDED: Using useNavigate
+    const [dashData, setDashData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [showReportDetails, setShowReportDetails] = useState(false);
+    const [notifications, setNotifications] = useState([]);
 
-const EmployeeDashboard = () => {
-    const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
-    const [selectedActivity, setSelectedActivity] = useState(null);
-    const [isSalaryModalOpen, setIsSalaryModalOpen] = useState(false);
-    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+    useEffect(() => {
+        loadDashboard();
+    }, []);
 
-    const handleActivityClick = (item) => {
-        setSelectedActivity(item);
-        setIsActivityModalOpen(true);
+    const loadDashboard = async () => {
+        try {
+            const res = await dashboardAPI.getEmployee();
+            setDashData(res.data);
+            setNotifications(res.data.recentNotifications || []);
+        } catch (err) {
+            console.error('Dashboard load error:', err);
+        } finally {
+            setLoading(false);
+        }
     };
 
+    const handleDownloadReport = () => {
+        // Placeholder for download functionality
+        toast.success("Downloading Report...");
+        // In a real app, this would trigger a PDF/CSV download
+    };
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    const greeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return "Good Morning";
+        if (hour < 18) return "Good Afternoon";
+        return "Good Evening";
+    };
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center h-96 space-y-4">
+                <div className="w-12 h-12 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin"></div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse">Syncing Hub...</p>
+            </div>
+        );
+    }
+
+    const reportExists = !!dashData?.todayReport;
+
     return (
-        <div className="space-y-6 pb-20 max-w-lg mx-auto">
+        <div className="space-y-5 pb-32 max-w-lg mx-auto">
             {/* Header */}
-            <header className="flex items-center justify-between py-2">
+            <div className="flex items-center justify-between px-1 pt-2">
                 <div>
-                    <h1 className="text-xl font-bold text-zinc-100 tracking-tight">Good Morning, Alex</h1>
-                    <p className="text-[11px] text-zinc-500 font-semibold uppercase tracking-wider mt-0.5">Software Engineer II</p>
+                    <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+                        {greeting()}, <span className="text-emerald-600">{user?.fullName?.split(' ')[0]}</span>
+                    </h1>
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mt-0.5">
+                        {user?.designation || 'Team Member'} • {user?.department || 'Operations'}
+                    </p>
                 </div>
-                <div
-                    className="h-9 w-9 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-300 shadow-sm cursor-pointer hover:bg-zinc-700 transition-colors"
-                    onClick={() => setIsProfileModalOpen(true)}
+                <button
+                    onClick={() => setShowProfileModal(true)}
+                    className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-emerald-600 hover:border-emerald-200 shadow-sm active:scale-95 transition-all"
                 >
-                    AM
-                </div>
-            </header>
+                    <HiOutlineUser className="w-5 h-5" />
+                </button>
+            </div>
 
-            {/* Main Card - Salary */}
+            {/* Daily Report Section - Clickable */}
             <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                onClick={() => setIsSalaryModalOpen(true)}
-                className="p-5 rounded-2xl bg-[#0c0a09] border border-zinc-800 relative overflow-hidden group cursor-pointer"
+                onClick={() => navigate('/employee/performance')}
+                className={cn(
+                    "rounded-xl p-4 shadow-sm border bg-white transition-all duration-300 cursor-pointer active:scale-95 hover:shadow-md",
+                    reportExists
+                        ? "border-emerald-100 border-l-4 border-l-emerald-500"
+                        : "border-amber-100 border-l-4 border-l-amber-500"
+                )}
             >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-zinc-800/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-
-                <div className="relative z-10">
-                    <div className="flex justify-between items-start mb-6">
-                        <div>
-                            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Next Payout</p>
-                            <h2 className="text-3xl font-extrabold text-white tracking-tight mt-1">₹85,000</h2>
-                        </div>
-                        <div className="p-2 bg-zinc-900 border border-zinc-700 rounded-lg text-zinc-400">
-                            <HiOutlineCurrencyRupee className="w-5 h-5" />
-                        </div>
-                    </div>
-
-                    <div>
-                        <div className="flex justify-between text-[10px] font-bold text-zinc-400 mb-1.5 uppercase tracking-wide">
-                            <span>Processing</span>
-                            <span className="text-zinc-200">85%</span>
-                        </div>
-                        <div className="h-1.5 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800/50">
-                            <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: '85%' }}
-                                transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
-                                className="h-full bg-zinc-100 rounded-full"
-                            />
-                        </div>
-                        <p className="text-[10px] text-zinc-600 mt-2 font-medium flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/50"></span>
-                            Expected on 30th Sep 2026
-                        </p>
-                    </div>
-                </div>
-            </motion.div>
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-3">
-                <StatCard
-                    title="Attendance"
-                    value="09:15 AM"
-                    subtext="Punched In Today"
-                    icon={HiOutlineClock}
-                    delay={3}
-                />
-                <StatCard
-                    title="Leave Balance"
-                    value="12 Days"
-                    subtext="Available Leaves"
-                    icon={HiOutlineCalendar}
-                    delay={4}
-                />
-            </div>
-
-            {/* Recent Activity */}
-            <div>
-                <div className="flex items-center justify-between mb-3 px-1">
-                    <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Recent Activity</h3>
-                    <button
-                        onClick={() => alert("Dummy Action: Viewing all activities")}
-                        className="text-[10px] font-semibold text-zinc-600 hover:text-zinc-300 transition-colors cursor-pointer"
-                    >
-                        View All
-                    </button>
-                </div>
-                <div className="space-y-2">
-                    {[
-                        { title: 'Salary Credited', date: 'Yesterday', amount: '+ ₹82,000', icon: HiOutlineBriefcase, highlight: true, details: "Your salary for August 2026 has been successfully credited to your bank account ending in 1234." },
-                        { title: 'Leave Approved', date: '2 days ago', amount: 'Sick Leave', icon: HiOutlineCalendar, highlight: false, details: "Your sick leave request for Sep 12th has been approved by your manager." },
-                        { title: 'Late Mark', date: '3 days ago', amount: '-15 mins', icon: HiOutlineClock, highlight: false, details: "You were marked late by 15 minutes on Sep 10th. Please ensure timely arrival." }
-                    ].map((item, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.4 + (i * 0.1) }}
-                            onClick={() => handleActivityClick(item)}
-                            className="flex items-center justify-between p-3 rounded-lg bg-zinc-900/30 border border-zinc-800/50 hover:bg-zinc-900 hover:border-zinc-700 transition-all cursor-pointer group"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className={cn("p-2 rounded-md border border-zinc-800 transition-colors", item.highlight ? "bg-zinc-100 text-black border-zinc-100" : "bg-zinc-900 text-zinc-500 group-hover:text-zinc-300")}>
-                                    <item.icon className="w-3.5 h-3.5" />
-                                </div>
-                                <div className="flex flex-col">
-                                    <h4 className="text-[13px] font-semibold text-zinc-200 group-hover:text-white transition-colors">{item.title}</h4>
-                                    <p className="text-[10px] text-zinc-600 font-medium">{item.date}</p>
-                                </div>
-                            </div>
-                            <span className={cn("text-[11px] font-bold px-2 py-1 rounded-md bg-zinc-950 border border-zinc-800", item.highlight ? "text-emerald-500" : "text-zinc-400")}>
-                                {item.amount}
+                {reportExists ? (
+                    <div className="flex flex-col gap-3 pointer-events-none">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                <HiOutlineClipboardCheck className="w-4 h-4 text-emerald-500" />
+                                Daily Activity Logged
+                            </h2>
+                            <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-600 uppercase tracking-wide">
+                                Verified
                             </span>
-                        </motion.div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Modals */}
-
-            {/* Salary Breakdown Modal */}
-            <Modal
-                isOpen={isSalaryModalOpen}
-                onClose={() => setIsSalaryModalOpen(false)}
-                title="Current Month Forecast"
-            >
-                <div className="space-y-4">
-                    <div className="bg-zinc-950 rounded-xl p-4 border border-zinc-800">
-                        <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Estimated Payout</p>
-                        <h3 className="text-2xl font-bold text-white">₹85,000.00</h3>
-                        <p className="text-xs text-emerald-500 font-bold mt-1">+ Bonus Included</p>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                        <div className="flex justify-between text-zinc-400 p-2 bg-zinc-900/50 rounded-lg">
-                            <span>Base Salary</span>
-                            <span className="text-zinc-200">₹70,000</span>
                         </div>
-                        <div className="flex justify-between text-zinc-400 p-2 bg-zinc-900/50 rounded-lg">
-                            <span>Performance Bonus</span>
-                            <span className="text-zinc-200">₹15,000</span>
-                        </div>
-                        <div className="flex justify-between text-zinc-400 p-2 bg-zinc-900/50 rounded-lg">
-                            <span>Deductions</span>
-                            <span className="text-rose-400">- ₹0</span>
-                        </div>
-                    </div>
-                </div>
-            </Modal>
 
-            {/* Activity Details Modal */}
-            <Modal
-                isOpen={isActivityModalOpen}
-                onClose={() => setIsActivityModalOpen(false)}
-                title="Activity Details"
-            >
-                {selectedActivity && (
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-3 pb-4 border-b border-zinc-800">
-                            <div className="p-3 bg-zinc-800 rounded-xl text-white">
-                                <selectedActivity.icon className="w-6 h-6" />
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-100">
+                                <p className="text-[9px] font-bold text-slate-400 uppercase">Delivered</p>
+                                <p className="text-lg font-bold text-slate-900 leading-none mt-1">{dashData.todayReport.delivered}</p>
                             </div>
-                            <div>
-                                <h3 className="text-lg font-bold text-white">{selectedActivity.title}</h3>
-                                <p className="text-sm text-zinc-400">{selectedActivity.date}</p>
+                            <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-100">
+                                <p className="text-[9px] font-bold text-slate-400 uppercase">Picked Up</p>
+                                <p className="text-lg font-bold text-slate-900 leading-none mt-1">{dashData.todayReport.picked}</p>
                             </div>
                         </div>
-                        <p className="text-zinc-300 leading-relaxed text-sm">
-                            {selectedActivity.details}
+
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setShowReportDetails(true); }}
+                            className="w-full py-2 bg-emerald-50 text-emerald-700 rounded-lg font-semibold text-xs border border-emerald-100 hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2 pointer-events-auto"
+                        >
+                            View Details <HiOutlineDocumentText className="w-3 h-3" />
+                        </button>
+                    </div>
+                ) : (
+                    <div>
+                        <div className="flex items-center justify-between mb-2">
+                            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                <HiOutlineClock className="w-4 h-4 text-amber-500" />
+                                Reporting Status
+                            </h2>
+                            <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-600 uppercase tracking-wide">
+                                Pending
+                            </span>
+                        </div>
+                        <p className="text-xs text-slate-500 font-medium leading-relaxed mb-3">
+                            Performance data for today has not been uploaded by HR yet.
                         </p>
-                        <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-center">
-                            <p className="text-xs text-zinc-500 uppercase tracking-widest">Impact</p>
-                            <p className="text-lg font-bold text-white mt-1">{selectedActivity.amount}</p>
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 uppercase tracking-wide mt-2">
+                            <span>Tap to view history</span>
+                            <HiOutlineTrendingUp className="w-3 h-3" />
                         </div>
                     </div>
                 )}
+            </motion.div>
+
+            {/* Quick Stats Grid - 2x2 Compact */}
+            <div className="grid grid-cols-2 gap-3">
+                {[
+                    { label: 'Working Days', value: dashData?.monthWorkingDays || 0, icon: HiOutlineCalendar, color: 'text-blue-600', bg: 'bg-blue-50' },
+                    { label: 'Advance Due', value: `₹${dashData?.pendingAdvances || 0}`, icon: HiOutlineCurrencyDollar, color: 'text-rose-600', bg: 'bg-rose-50' },
+                    { label: 'Open Tickets', value: dashData?.openComplaints || 0, icon: HiOutlineChatAlt2, color: 'text-amber-600', bg: 'bg-amber-50' },
+                    { label: 'Performance', value: '98%', icon: HiOutlineTrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
+                ].map((stat, i) => (
+                    <motion.div
+                        key={i}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: i * 0.05 }}
+                        className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between"
+                    >
+                        <div>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">{stat.label}</p>
+                            <p className="text-base font-bold text-slate-900 mt-0.5">{stat.value}</p>
+                        </div>
+                        <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", stat.bg, stat.color)}>
+                            <stat.icon className="w-4 h-4" />
+                        </div>
+                    </motion.div>
+                ))}
+            </div>
+
+            {/* Financial Card - Light Theme - Clickable */}
+            <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                onClick={() => navigate('/employee/salary')}
+                className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex items-center justify-between relative overflow-hidden group cursor-pointer active:scale-95 hover:border-emerald-300 transition-all"
+            >
+                <div className="absolute top-0 right-0 w-20 h-full bg-emerald-50 skew-x-12 translate-x-10 group-hover:translate-x-5 transition-transform duration-500" />
+                <div className="relative z-10">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 group-hover:text-emerald-600 transition-colors">Net Salary Payload</p>
+                    <div className="flex items-baseline gap-1">
+                        <span className="text-sm font-semibold text-slate-500">₹</span>
+                        <span className="text-2xl font-black text-slate-900 tracking-tight">
+                            {dashData?.latestPayslip?.netPayable?.toLocaleString() || '0'}
+                        </span>
+                    </div>
+                    <p className="text-[8px] font-bold text-emerald-600 uppercase tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0">View Slip &rarr;</p>
+                </div>
+                <div className="relative z-10 w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center border border-emerald-200 group-hover:scale-110 transition-transform">
+                    <HiOutlineCurrencyDollar className="w-5 h-5" />
+                </div>
+            </motion.div>
+
+            {/* Minimal Notifications */}
+            <div className="pt-1">
+                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 px-1">Recent Updates</h3>
+                <div className="space-y-2">
+                    {notifications.length > 0 ? (
+                        notifications.slice(0, 3).map((notif, i) => (
+                            <div key={i} className="flex gap-3 p-3 bg-white rounded-lg border border-slate-100 shadow-sm">
+                                <div className="w-1.5 h-1.5 mt-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
+                                <div>
+                                    <h4 className="text-xs font-bold text-slate-900">{notif.title}</h4>
+                                    <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">{notif.message}</p>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center py-4 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                            <p className="text-[10px] text-slate-400">No recent updates</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Profile Modal */}
+            <Modal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} title="Operative Identity">
+                <div className="p-4 space-y-6">
+                    <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-emerald-500/20">
+                            {user?.fullName?.[0]}
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-black text-slate-900">{user?.fullName}</h3>
+                            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{user?.employeeId}</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="p-3 bg-white border border-slate-100 rounded-xl">
+                            <p className="text-[9px] font-bold text-slate-400 uppercase">Department</p>
+                            <p className="text-xs font-bold text-slate-900">{user?.department || 'N/A'}</p>
+                        </div>
+                        <div className="p-3 bg-white border border-slate-100 rounded-xl">
+                            <p className="text-[9px] font-bold text-slate-400 uppercase">Hub Location</p>
+                            <p className="text-xs font-bold text-slate-900">{user?.hubName || 'N/A'}</p>
+                        </div>
+                    </div>
+                    <button onClick={() => setShowProfileModal(false)} className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest">Close Dossier</button>
+                </div>
             </Modal>
 
-            {/* Profile Modal Summary */}
-            <Modal
-                isOpen={isProfileModalOpen}
-                onClose={() => setIsProfileModalOpen(false)}
-                title="My Profile"
-            >
-                <div className="text-center space-y-4">
-                    <div className="w-20 h-20 bg-zinc-800 rounded-full mx-auto flex items-center justify-center text-2xl font-bold text-zinc-400 border-2 border-zinc-700">
-                        AM
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-bold text-white">Alex Morgan</h3>
-                        <p className="text-sm text-zinc-400">Software Engineer II</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div className="p-3 bg-zinc-900 rounded-lg border border-zinc-800">
-                            <p className="text-xs text-zinc-500">Employee ID</p>
-                            <p className="text-zinc-200 font-bold">EMP-1024</p>
+            {/* Report Details Modal */}
+            <Modal isOpen={showReportDetails} onClose={() => setShowReportDetails(false)} title="Performance Telemetry">
+                {dashData?.todayReport ? (
+                    <div className="p-4 space-y-6">
+                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                            <div className="flex justify-between items-center mb-4">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Date</span>
+                                <span className="text-xs font-bold text-slate-900">{new Date(dashData.todayReport.reportDate).toLocaleDateString()}</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Out For Delivery</p>
+                                    <p className="text-xl font-black text-slate-900">{dashData.todayReport.ofd}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Delivered</p>
+                                    <p className="text-xl font-black text-emerald-600">{dashData.todayReport.delivered}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Out For Pickup</p>
+                                    <p className="text-xl font-black text-slate-900">{dashData.todayReport.ofp}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Picked Up</p>
+                                    <p className="text-xl font-black text-indigo-600">{dashData.todayReport.picked}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div className="p-3 bg-zinc-900 rounded-lg border border-zinc-800">
-                            <p className="text-xs text-zinc-500">Join Date</p>
-                            <p className="text-zinc-200 font-bold">Jan 2023</p>
-                        </div>
+
+                        <button
+                            onClick={handleDownloadReport}
+                            className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
+                        >
+                            Download Receipt <HiOutlineDownload className="w-4 h-4" />
+                        </button>
                     </div>
-                    <button
-                        className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-lg transition-colors cursor-pointer"
-                        onClick={() => alert("Dummy Action: Navigate to Full Profile Page")}
-                    >
-                        View Full Profile
-                    </button>
-                </div>
+                ) : (
+                    <div className="p-8 text-center">
+                        <p className="text-sm font-bold text-slate-400">No data available.</p>
+                    </div>
+                )}
             </Modal>
         </div>
     );
 };
 
-export default EmployeeDashboard;
+export default Dashboard;

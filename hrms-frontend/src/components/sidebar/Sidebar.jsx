@@ -10,7 +10,8 @@ import {
     HiOutlineChatAlt2,
     HiOutlineGift,
     HiOutlineCog,
-    HiOutlineLogout
+    HiOutlineLogout,
+    HiOutlineBell
 } from 'react-icons/hi';
 import { useAuth } from '../../context/AuthContext';
 
@@ -32,6 +33,7 @@ const Sidebar = ({ role }) => {
                 { name: 'Attendance', icon: HiOutlineCalendar, path: '/admin/attendance' },
             ] : [
                 { name: 'Overview', icon: HiOutlineViewGrid, path: '/employee/dashboard' },
+                { name: 'Daily Reports', icon: HiOutlineDocumentReport, path: '/employee/performance' },
                 { name: 'Attendance', icon: HiOutlineCalendar, path: '/employee/attendance' },
             ]
         },
@@ -41,8 +43,8 @@ const Sidebar = ({ role }) => {
                 { name: 'Salary Hub', icon: HiOutlineCash, path: '/admin/salary' },
                 { name: 'Reports', icon: HiOutlineDocumentReport, path: '/admin/reports' },
             ] : [
-                { name: 'Payslips', icon: HiOutlineCash, path: '/employee/salary' },
-                { name: 'Analytics', icon: HiOutlineDocumentReport, path: '/employee/reports' },
+                { name: 'Salary Reports', icon: HiOutlineCash, path: '/employee/salary' },
+                { name: 'Notifications', icon: HiOutlineBell, path: '/employee/notifications' },
             ]
         },
         {

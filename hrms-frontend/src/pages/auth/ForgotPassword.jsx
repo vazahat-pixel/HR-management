@@ -15,56 +15,62 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center">
-                <h2 className="text-2xl font-bold text-white tracking-tight">Reset Password</h2>
-                <p className="text-slate-400 mt-2 text-sm">Enter your email to receive recovery instructions.</p>
+                <div className="w-20 h-20 bg-emerald-50 rounded-[28px] flex items-center justify-center mx-auto mb-6 shadow-inner border border-emerald-100/50">
+                    <HiOutlineMail className="w-10 h-10 text-emerald-600" />
+                </div>
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Identity Recovery</h1>
+                <p className="text-slate-500 mt-3 font-medium flex items-center justify-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                    Initiating credential reset protocol
+                </p>
             </div>
 
             {!submitted ? (
-                <form onSubmit={handleSubmit} className="space-y-6 mt-8">
-                    <div className="space-y-1">
-                        <label className="text-xs font-medium text-slate-300 uppercase tracking-wider ml-1">Email Address</label>
+                <form onSubmit={handleSubmit} className="space-y-8">
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-1">Network Email Address</label>
                         <div className="relative group">
-                            <HiOutlineMail className="absolute left-3 top-3 w-5 h-5 text-slate-500 group-focus-within:text-primary-500 transition-colors" />
+                            <HiOutlineMail className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
                             <input
                                 type="email"
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 rounded-lg text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 transition-all font-medium"
-                                placeholder="name@company.com"
+                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-14 pr-6 py-4 text-sm text-slate-900 font-extrabold outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all placeholder:text-slate-200"
+                                placeholder="name@laxmart.com"
                             />
                         </div>
                     </div>
 
                     <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        whileHover={{ scale: 1.01, translateY: -2 }}
+                        whileTap={{ scale: 0.99 }}
                         type="submit"
-                        className="w-full py-3 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-lg shadow-lg shadow-primary-500/20 transition-all"
+                        className="w-full py-5 bg-slate-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl shadow-2xl shadow-slate-200 hover:bg-emerald-600 transition-all"
                     >
-                        Send Reset Link
+                        Transmit Recovery Link
                     </motion.button>
                 </form>
             ) : (
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-xl"
+                    className="text-center p-10 bg-emerald-50 border border-emerald-100 rounded-[32px] shadow-inner"
                 >
-                    <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-500 mx-auto mb-3">
-                        <HiOutlineMail className="w-6 h-6" />
+                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-emerald-500 mx-auto mb-6 shadow-sm">
+                        <HiOutlineMail className="w-8 h-8" />
                     </div>
-                    <h3 className="text-emerald-400 font-bold mb-1">Check your inbox</h3>
-                    <p className="text-emerald-500/70 text-sm">If an account exists for {email}, we have sent password reset instructions.</p>
+                    <h3 className="text-emerald-900 font-black uppercase tracking-tight mb-2">Check Network Inbox</h3>
+                    <p className="text-emerald-600/70 text-[11px] font-bold leading-relaxed">If an account exists for {email}, recovery instructions have been dispatched.</p>
                 </motion.div>
             )}
 
-            <div className="text-center mt-6">
-                <Link to="/auth/login" className="inline-flex items-center text-sm text-slate-400 hover:text-white transition-colors gap-2">
-                    <HiOutlineArrowLeft className="w-4 h-4" />
-                    Back to Login
+            <div className="text-center pt-4">
+                <Link to="/auth/login" className="inline-flex items-center text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-emerald-500 transition-all gap-3 group">
+                    <HiOutlineArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                    Return to Login Terminal
                 </Link>
             </div>
         </div>

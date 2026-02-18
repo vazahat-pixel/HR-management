@@ -1,0 +1,140 @@
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:5000/api';
+
+const api = axios.create({
+    baseURL: API_BASE_URL,
+    headers: { 'Content-Type': 'application/json' },
+});
+
+// Attach JWT token to every request
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('hrms_token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+// Handle 401 responses globally
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            const token = localStorage.getItem('hrms_token');
+            const isLoginRequest = error.config?.url?.includes('/auth/login') ||
+                error.config?.url?.includes('/auth/verify-otp');
+
+            // Only logout if token exists and this isn't a login attempt
+            if (token && !isLoginRequest && window.location.pathname !== '/auth/login') {
+                localStorage.removeItem('hrms_token');
+                localStorage.removeItem('hrms_user');
+                window.location.href = '/auth/login';
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
+// ========== AUTH ==========
+export const authAPI = {
+    login: (employeeId, password) => api.post('/auth/login', { employeeId, password }),
+    sendOtp: (mobile) => api.post('/auth/send-otp', { mobile }),
+    verifyOtp: (data) => api.post('/auth/verify-otp', data),
+    newJoining: (data) => api.post('/auth/new-joining', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+    register: (data) => api.post('/auth/register', data),
+    adminRegister: (data) => api.post('/auth/admin/register', data),
+    approveJoining: (id) => api.post(`/auth/approve-joining/${id}`),
+    rejectJoining: (id) => api.post(`/auth/reject-joining/${id}`),
+    getMe: () => api.get('/auth/me'),
+    updateProfile: (data) => api.put('/auth/me/profile', data),
+};
+
+// ========== EMPLOYEES ==========
+export const employeesAPI = {
+    getAll: (params) => api.get('/employees', { params }),
+    getById: (id) => api.get(`/employees/${id}`),
+    update: (id, data) => api.put(`/employees/${id}`, data),
+    delete: (id) => api.delete(`/employees/${id}`),
+};
+
+// ========== JOINING REQUESTS ==========
+export const joiningAPI = {
+    getAll: (params) => api.get('/joining-requests', { params }),
+    approve: (id, config) => api.put(`/joining-requests/${id}/approve`, config),
+    reject: (id, remarks) => api.put(`/joining-requests/${id}/reject`, { remarks }),
+    exportExcel: () => api.get('/joining-requests/export/excel', { responseType: 'blob' }),
+};
+
+// ========== DAILY REPORTS ==========
+export const reportsAPI = {
+    submit: (data) => api.post('/daily-reports', data),
+    getAll: (params) => api.get('/daily-reports', { params }),
+};
+
+// ========== ADVANCE REQUESTS ==========
+export const advanceAPI = {
+    submit: (data) => api.post('/advance-requests', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+    getAll: (params) => api.get('/advance-requests', { params }),
+    update: (id, data) => api.put(`/advance-requests/${id}`, data),
+};
+
+// ========== COMPLAINTS ==========
+export const complaintsAPI = {
+    submit: (data) => api.post('/complaints', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+    getAll: (params) => api.get('/complaints', { params }),
+    update: (id, data) => api.put(`/complaints/${id}`, data),
+};
+
+// ========== OFFERS ==========
+export const offersAPI = {
+    create: (data) => api.post('/offers', data),
+    getAll: (params) => api.get('/offers', { params }),
+    update: (id, data) => api.put(`/offers/${id}`, data),
+    deactivate: (id) => api.delete(`/offers/${id}`),
+};
+
+// ========== NOTIFICATIONS ==========
+export const notificationsAPI = {
+    getAll: (params) => api.get('/notifications', { params }),
+    getUnreadCount: () => api.get('/notifications/unread-count'),
+    markRead: (id) => api.put(`/notifications/${id}/read`),
+    markAllRead: () => api.put('/notifications/read-all'),
+    saveFcmToken: (token) => api.post('/notifications/fcm-token', { token }),
+};
+
+// ========== PAYROLL ==========
+export const payrollAPI = {
+    generatePayslip: (userId, data) => api.post(`/payroll/generate/${userId}`, data),
+    generateBulk: (data) => api.post('/payroll/generate-bulk', data),
+    getSalaryStructure: (userId) => api.get(`/payroll/salary-structure/${userId}`),
+    updateSalaryStructure: (userId, data) => api.post(`/payroll/salary-structure/${userId}`, data),
+    getPayslips: (params) => api.get('/payroll/payslips', { params }),
+    downloadPayslipPDF: (id) => api.get(`/payroll/payslips/${id}/pdf`, { responseType: 'blob' }),
+    getPayoutReport: (params) => api.get('/payroll/payout', { params }),
+    downloadPayoutPDF: (params) => api.get('/payroll/payout/pdf', { params, responseType: 'blob' }),
+    downloadPayoutExcel: (params) => api.get('/payroll/payout/excel', { params, responseType: 'blob' }),
+};
+
+// ========== DASHBOARD ==========
+export const dashboardAPI = {
+    getAdmin: () => api.get('/dashboard/admin'),
+    getEmployee: () => api.get('/dashboard/employee'),
+};
+
+// Daily Reports API
+export const dailyReportsAPI = {
+    upload: (formData) => api.post('/daily-reports/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+    getSummary: (params) => api.get('/daily-reports/summary', { params }),
+    getEmployeeReports: (params) => api.get('/daily-reports/employee', { params })
+};
+
+export default api;

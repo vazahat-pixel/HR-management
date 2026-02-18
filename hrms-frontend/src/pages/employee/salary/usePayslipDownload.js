@@ -49,7 +49,7 @@ export const usePayslipDownload = () => {
             const monthParts = salaryData.month.split(' ');
             const monthShort = monthParts[0].substring(0, 3);
             const year = monthParts[1];
-            const empId = user?.id || 'EMP102';
+            const empId = user?.employeeId || 'EMP102';
             const fileName = `payslip_${empId}_${monthShort}_${year}.pdf`;
 
             pdf.save(fileName);
@@ -75,8 +75,8 @@ export const usePayslipDownload = () => {
                 ["PAYSLIP FOR PERIOD", salaryData.month.toUpperCase()],
                 ["", ""],
                 ["EMPLOYEE DETAILS", ""],
-                ["Name", user?.name],
-                ["Employee ID", user?.id || 'EMP102'],
+                ["Name", user?.fullName],
+                ["Employee ID", user?.employeeId || 'EMP102'],
                 ["Designation", "Senior Product Designer"],
                 ["", ""],
                 ["SALARY BREAKDOWN", ""],
@@ -102,7 +102,7 @@ export const usePayslipDownload = () => {
             const monthParts = salaryData.month.split(' ');
             const monthShort = monthParts[0].substring(0, 3);
             const year = monthParts[1];
-            const empId = user?.id || 'EMP102';
+            const empId = user?.employeeId || 'EMP102';
             const fileName = `payslip_${empId}_${monthShort}_${year}.xlsx`;
 
             const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });

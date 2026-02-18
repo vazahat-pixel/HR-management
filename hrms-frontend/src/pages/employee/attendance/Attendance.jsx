@@ -18,128 +18,141 @@ const attendanceData = [
 ];
 
 const Attendance = () => {
+    // ... existing state ...
     const [isCheckedIn, setIsCheckedIn] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [isLogModalOpen, setIsLogModalOpen] = useState(false);
-    const [selectedLog, setSelectedLog] = useState(null);
-    const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
-
-    useEffect(() => {
-        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-        return () => clearInterval(timer);
-    }, []);
-
-    const toggleAttendance = () => {
-        const isCheckingIn = !isCheckedIn;
-        setIsCheckedIn(isCheckingIn);
-        // Dummy Alert - replaced with a toast or just state change for now as it is a main action
-        // For this task, we focus on Modals for details. 
-        // We can add a confirmation modal if needed, but the button toggle is usually direct.
-        // Let's stick to the direct toggle for now as it is a primary action.
-    };
-
-    const handleLogClick = (log) => {
-        setSelectedLog(log);
-        setIsLogModalOpen(true);
-    };
+    // ... rest of state ...
 
     return (
-        <div className="space-y-6 max-w-lg mx-auto pb-20">
-            {/* Real-time Clock Section */}
-            <div className="text-center py-2">
-                <h1 className="text-3xl font-extrabold text-zinc-100 tracking-tight">
-                    {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </h1>
-                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
-                    {currentTime.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
-                </p>
-            </div>
-
-            {/* Attendance Action */}
-            <div className="relative flex flex-col items-center">
-                <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={toggleAttendance}
-                    className={cn(
-                        "w-32 h-32 rounded-full flex flex-col items-center justify-center gap-1 transition-all duration-300 border-4 relative z-10 shadow-xl cursor-pointer",
-                        isCheckedIn
-                            ? "bg-zinc-900 border-red-500/50 text-red-500 shadow-red-900/10"
-                            : "bg-zinc-100 border-zinc-200 text-black shadow-zinc-200/20"
-                    )}
+        <div className="space-y-10 max-w-xl mx-auto pb-24">
+            {/* Real-time Chrono Section */}
+            <div className="text-center py-6">
+                <motion.h1
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-6xl font-black text-slate-900 tracking-tighter leading-none"
                 >
-                    <HiOutlineFingerPrint className="w-8 h-8" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">
-                        {isCheckedIn ? 'Check Out' : 'Check In'}
-                    </span>
-                </motion.button>
-
-                {/* Status Indicator */}
-                <div className="mt-6 text-center space-y-1">
-                    <div className={cn(
-                        "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
-                        isCheckedIn
-                            ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                            : "bg-zinc-800 text-zinc-500 border-zinc-700"
-                    )}>
-                        <div className={cn("w-1.5 h-1.5 rounded-full", isCheckedIn ? "bg-emerald-500 animate-pulse" : "bg-zinc-500")} />
-                        {isCheckedIn ? 'Online' : 'Offline'}
-                    </div>
-                    <p className="text-[10px] text-zinc-500 flex items-center justify-center gap-1 mt-2">
-                        <HiOutlineLocationMarker className="w-3 h-3" />
-                        Indore Office
+                    {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                </motion.h1>
+                <div className="inline-flex items-center gap-2 mt-4 px-4 py-1.5 bg-slate-100 rounded-full border border-slate-200">
+                    <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping" />
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                        {currentTime.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
                     </p>
                 </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-3">
-                <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer" onClick={() => setIsStatsModalOpen(true)}>
-                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Avg Arrival</p>
-                    <div className="flex items-end gap-2 mt-1">
-                        <h4 className="text-xl font-bold text-zinc-100">09:04</h4>
-                        <span className="text-[10px] font-bold text-zinc-600 mb-1">AM</span>
-                    </div>
+            {/* Attendance Matrix Gateway */}
+            <div className="relative flex flex-col items-center py-8">
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                    <div className={cn(
+                        "w-56 h-56 rounded-full blur-[64px] opacity-20 animate-pulse transition-all duration-700",
+                        isCheckedIn ? "bg-emerald-500" : "bg-indigo-500"
+                    )} />
                 </div>
-                <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800 hover:border-zinc-700 transition-colors cursor-pointer" onClick={() => setIsStatsModalOpen(true)}>
-                    <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Leave Balance</p>
-                    <div className="flex items-end gap-2 mt-1">
-                        <h4 className="text-xl font-bold text-zinc-100">14</h4>
-                        <span className="text-[10px] font-bold text-zinc-600 mb-1">Days</span>
+
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.92 }}
+                    onClick={toggleAttendance}
+                    className={cn(
+                        "w-44 h-44 rounded-[56px] flex flex-col items-center justify-center gap-3 transition-all duration-500 border-8 relative z-10 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] cursor-pointer group",
+                        isCheckedIn
+                            ? "bg-white border-white text-rose-500 shadow-rose-500/20"
+                            : "bg-slate-900 border-slate-800 text-white shadow-indigo-500/20"
+                    )}
+                >
+                    <HiOutlineFingerPrint className={cn("w-12 h-12 transition-transform duration-500", isCheckedIn ? "rotate-180" : "rotate-0")} />
+                    <span className="text-[11px] font-black uppercase tracking-[0.3em]">
+                        {isCheckedIn ? 'Terminate Shift' : 'Initiate Shift'}
+                    </span>
+
+                    {/* Ring effect */}
+                    <div className={cn(
+                        "absolute inset-[-12px] border-2 rounded-[64px] opacity-20 group-hover:inset-[-20px] group-hover:opacity-40 transition-all duration-500",
+                        isCheckedIn ? "border-rose-500" : "border-indigo-500"
+                    )} />
+                </motion.button>
+
+                {/* Status Matrix */}
+                <div className="mt-14 text-center space-y-4">
+                    <div className={cn(
+                        "inline-flex items-center gap-3 px-6 py-2.5 rounded-[24px] text-[10px] font-black uppercase tracking-[0.2em] border shadow-xl transition-all",
+                        isCheckedIn
+                            ? "bg-emerald-50 text-emerald-600 border-emerald-100 shadow-emerald-500/5"
+                            : "bg-white text-slate-400 border-slate-100 shadow-slate-900/5"
+                    )}>
+                        <div className={cn("w-2 h-2 rounded-full", isCheckedIn ? "bg-emerald-500 animate-pulse" : "bg-slate-300")} />
+                        Session: {isCheckedIn ? 'ACTIVE NODAL LINK' : 'OFFLINE'}
                     </div>
+                    <p className="text-[10px] text-slate-400 flex items-center justify-center gap-2 font-black uppercase tracking-widest">
+                        <HiOutlineLocationMarker className="w-3.5 h-3.5 text-indigo-500" />
+                        Authenticated Office Node
+                    </p>
                 </div>
             </div>
 
-            {/* Logs */}
-            <div className="space-y-3">
-                <div className="flex items-center justify-between px-1">
-                    <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Recent Logs</h2>
-                    <button
-                        onClick={() => alert("Dummy Action: View All Attendance Logs")}
-                        className="text-[10px] font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+            {/* Insight Grid */}
+            <div className="grid grid-cols-2 gap-6">
+                {[
+                    { label: 'Avg Ingress', val: '09:04', unit: 'AM', icon: HiOutlineClock, color: 'indigo' },
+                    { label: 'Leave Quota', val: '14', unit: 'Units', icon: HiOutlineCalendar, color: 'teal' }
+                ].map((stat) => (
+                    <motion.div
+                        key={stat.label}
+                        whileHover={{ y: -5 }}
+                        className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 hover:border-indigo-100 transition-all cursor-pointer group"
+                        onClick={() => setIsStatsModalOpen(true)}
                     >
-                        View All
+                        <div className={`w-8 h-8 rounded-xl bg-${stat.color}-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                            <stat.icon className={`w-4 h-4 text-${stat.color}-500`} />
+                        </div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{stat.label}</p>
+                        <div className="flex items-end gap-2 mt-2">
+                            <h4 className="text-2xl font-black text-slate-900 leading-none">{stat.val}</h4>
+                            <span className="text-[9px] font-black text-slate-400 mb-1 uppercase tracking-tighter">{stat.unit}</span>
+                        </div>
+                    </motion.div>
+                ))}
+            </div>
+
+            {/* History Ledger */}
+            <div className="space-y-4 pt-4">
+                <div className="flex items-center justify-between px-2">
+                    <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">Historical Ledger</h2>
+                    <button
+                        onClick={() => { }}
+                        className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline active:scale-95 transition-all"
+                    >
+                        Archive
                     </button>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                     {attendanceData.map((log, i) => (
-                        <div
+                        <motion.div
                             key={i}
-                            className="flex items-center justify-between p-3 bg-zinc-900/30 border border-zinc-800/50 rounded-lg hover:bg-zinc-900 hover:border-zinc-700 transition-all cursor-pointer"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="flex items-center justify-between p-5 bg-white border border-slate-100 rounded-[28px] hover:shadow-xl hover:shadow-slate-200/50 hover:bg-slate-50/50 transition-all cursor-pointer group"
                             onClick={() => handleLogClick(log)}
                         >
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-500 border border-zinc-700/50">
-                                    <HiOutlineCalendar className="w-4 h-4" />
+                            <div className="flex items-center gap-5">
+                                <div className="w-12 h-12 rounded-[18px] bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-all">
+                                    <HiOutlineCalendar className="w-5 h-5" />
                                 </div>
                                 <div>
-                                    <h5 className="text-xs font-bold text-zinc-200">{log.date}</h5>
-                                    <p className="text-[10px] text-zinc-500 font-medium mt-0.5">{log.checkIn} - {log.checkOut}</p>
+                                    <h5 className="text-sm font-black text-slate-900 tracking-tight">{log.date}</h5>
+                                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1 opacity-70">{log.checkIn} - {log.checkOut}</p>
                                 </div>
                             </div>
-                            <span className={cn("text-[10px] font-bold", log.status === 'Present' ? "text-emerald-500" : "text-zinc-500")}>
+                            <span className={cn(
+                                "text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest border shadow-sm",
+                                log.status === 'Present' ? "text-emerald-700 bg-emerald-50 border-emerald-100" : "text-slate-400 bg-slate-50 border-slate-200"
+                            )}>
                                 {log.status}
                             </span>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
             </div>
@@ -151,32 +164,32 @@ const Attendance = () => {
                 title="Attendance Details"
             >
                 {selectedLog && (
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-5">
                             <div>
-                                <p className="text-xs text-zinc-500 uppercase tracking-wider">Date</p>
-                                <h3 className="text-lg font-bold text-white">{selectedLog.date}</h3>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Entry Date</p>
+                                <h3 className="text-xl font-black text-slate-900">{selectedLog.date}</h3>
                             </div>
-                            <div className={cn("px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border",
-                                selectedLog.status === 'Present' ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-zinc-800 text-zinc-400 border-zinc-700"
+                            <div className={cn("px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border shadow-sm",
+                                selectedLog.status === 'Present' ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-50 text-slate-500 border-slate-200"
                             )}>
                                 {selectedLog.status}
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="p-3 bg-zinc-900 rounded-lg border border-zinc-800 text-center">
-                                <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Check In</p>
-                                <p className="text-xl font-bold text-white">{selectedLog.checkIn}</p>
-                                <p className="text-[10px] text-zinc-600 mt-1">On Time</p>
+                            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center shadow-inner">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Check In</p>
+                                <p className="text-2xl font-black text-slate-900">{selectedLog.checkIn}</p>
+                                <div className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-[9px] font-bold">On Time</div>
                             </div>
-                            <div className="p-3 bg-zinc-900 rounded-lg border border-zinc-800 text-center">
-                                <p className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Check Out</p>
-                                <p className="text-xl font-bold text-white">{selectedLog.checkOut}</p>
-                                <p className="text-[10px] text-zinc-600 mt-1">Regular Shift</p>
+                            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center shadow-inner">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Check Out</p>
+                                <p className="text-2xl font-black text-slate-900">{selectedLog.checkOut}</p>
+                                <div className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 bg-slate-200 text-slate-600 rounded-full text-[9px] font-bold">Standard Shift</div>
                             </div>
                         </div>
-                        <div className="p-3 bg-zinc-950 rounded-lg border border-zinc-800 text-xs text-zinc-400 leading-relaxed text-center">
-                            Total working hours: <span className="text-white font-bold">9h 10m</span>
+                        <div className="p-4 bg-emerald-600 rounded-2xl text-xs text-white font-bold text-center shadow-lg shadow-emerald-500/20">
+                            Verified Working Duration: <span className="text-white text-sm ml-1 font-black">9h 10m</span>
                         </div>
                     </div>
                 )}
@@ -188,27 +201,27 @@ const Attendance = () => {
                 onClose={() => setIsStatsModalOpen(false)}
                 title="Attendance Statistics"
             >
-                <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center">
-                            <p className="text-xs text-emerald-500 font-bold uppercase tracking-wider">Present Days</p>
-                            <h3 className="text-2xl font-bold text-white mt-1">22</h3>
+                <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-5 bg-emerald-50 border border-emerald-100 rounded-2xl text-center shadow-sm">
+                            <p className="text-[10px] text-emerald-700 font-black uppercase tracking-widest">Present Days</p>
+                            <h3 className="text-3xl font-black text-emerald-600 mt-2">22</h3>
                         </div>
-                        <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-center">
-                            <p className="text-xs text-amber-500 font-bold uppercase tracking-wider">Absences</p>
-                            <h3 className="text-2xl font-bold text-white mt-1">2</h3>
+                        <div className="p-5 bg-rose-50 border border-rose-100 rounded-2xl text-center shadow-sm">
+                            <p className="text-[10px] text-rose-700 font-black uppercase tracking-widest">Absences</p>
+                            <h3 className="text-3xl font-black text-rose-600 mt-2">2</h3>
                         </div>
                     </div>
                     <div>
-                        <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Leave Deductions</h4>
-                        <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800 space-y-2">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-zinc-400">Sick Leave</span>
-                                <span className="text-white font-bold">1 Day</span>
+                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Leave Balance Breakdown</h4>
+                        <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 space-y-4 shadow-inner">
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-600 font-bold italic">Sick Leave Used</span>
+                                <span className="text-slate-900 font-black px-3 py-1 bg-white rounded-xl shadow-sm border border-slate-100">1 Day</span>
                             </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-zinc-400">Casual Leave</span>
-                                <span className="text-white font-bold">1 Day</span>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-600 font-bold italic">Casual Leave Used</span>
+                                <span className="text-slate-900 font-black px-3 py-1 bg-white rounded-xl shadow-sm border border-slate-100">1 Day</span>
                             </div>
                         </div>
                     </div>

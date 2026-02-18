@@ -1,23 +1,26 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 
 import AdminDashboard from '../pages/admin/dashboard/Dashboard';
+import AdminJoiningRequests from '../pages/admin/employees/JoiningRequests';
 import AdminEmployeeList from '../pages/admin/employees/EmployeeList';
-import AdminAttendance from '../pages/admin/attendance/Attendance';
 import AdminSalary from '../pages/admin/salary/SalaryManagement';
 import AdminReports from '../pages/admin/reports/Reports';
+import DailyReportUpload from '../pages/admin/reports/DailyReportUpload';
 import AdminFeedback from '../pages/admin/feedback/Feedback';
 import AdminSettings from '../pages/admin/settings/Settings';
 import AdminOffers from '../pages/admin/offers/Offers';
+import AdminAdvances from '../pages/admin/salary/AdvanceManagement';
 
 import EmployeeDashboard from '../pages/employee/dashboard/Dashboard';
-import EmployeeAttendance from '../pages/employee/attendance/Attendance';
 import EmployeeSalary from '../pages/employee/salary/SalarySlip';
-import EmployeeReports from '../pages/employee/reports/Reports';
+import MyPerformance from '../pages/employee/reports/MyPerformance';
 import EmployeeFeedback from '../pages/employee/feedback/Feedback';
+import EmployeeAdvances from '../pages/employee/salary/AdvanceRequest';
 import EmployeeOffers from '../pages/employee/offers/Offers';
-import EmployeeExcel from '../pages/employee/excel/ExcelUpload';
+import EmployeeNotifications from '../pages/employee/notifications/Notifications';
 import EmployeeProfile from '../pages/employee/profile/Profile';
 import EmployeeSettings from '../pages/employee/settings/Settings';
 
@@ -26,6 +29,7 @@ import AdminLayout from '../layouts/AdminLayout';
 import EmployeeLayout from '../layouts/EmployeeLayout';
 
 import Login from '../pages/auth/Login';
+import AdminLogin from '../pages/auth/AdminLogin';
 import ForgotPassword from '../pages/auth/ForgotPassword';
 
 import {
@@ -62,8 +66,17 @@ const Placeholder = ({ title, icon: Icon = HiOutlineViewGrid }) => (
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const { user } = useAuth();
+    const location = useLocation();
 
     if (!user) return <Navigate to="/auth/login" replace />;
+
+    // Force Profile Completion
+    if (user.role === 'employee' && user.isProfileCompleted === false) {
+        if (location.pathname !== '/employee/profile') {
+            return <Navigate to="/employee/profile" replace />;
+        }
+    }
+
     if (allowedRoles && !allowedRoles.includes(user.role)) {
         return <Navigate to={user.role === 'admin' ? '/admin/dashboard' : '/employee/dashboard'} replace />;
     }
@@ -73,58 +86,66 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
 const AppRoutes = () => {
     return (
-        <Routes>
-            {/* Redirect Root */}
-            <Route path="/" element={<Navigate to="/auth/login" replace />} />
+        <>
+            <Routes>
+                {/* Redirect Root */}
+                <Route path="/" element={<Navigate to="/auth/login" replace />} />
 
-            {/* Auth Routes */}
-            <Route path="/auth" element={<AuthLayout />}>
-                <Route path="login" element={<Login />} />
-                <Route path="forgot-password" element={<ForgotPassword />} />
-                <Route path="reset-password" element={<Placeholder title="Reset Password" icon={HiOutlineLockClosed} />} />
-            </Route>
+                {/* Auth Routes */}
+                <Route path="/auth" element={<AuthLayout />}>
+                    <Route path="login" element={<Login />} />
+                    <Route path="forgot-password" element={<ForgotPassword />} />
+                    <Route path="reset-password" element={<Placeholder title="Reset Password" icon={HiOutlineLockClosed} />} />
+                </Route>
 
-            {/* Admin Routes */}
-            <Route
-                path="/admin"
-                element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                        <AdminLayout />
-                    </ProtectedRoute>
-                }
-            >
-                <Route path="dashboard" element={<AdminDashboard />} />
-                <Route path="employees" element={<AdminEmployeeList />} />
-                <Route path="attendance" element={<AdminAttendance />} />
-                <Route path="salary" element={<AdminSalary />} />
-                <Route path="reports" element={<AdminReports />} />
-                <Route path="feedback" element={<AdminFeedback />} />
-                <Route path="offers" element={<AdminOffers />} />
-                <Route path="settings" element={<AdminSettings />} />
-            </Route>
+                {/* HR Admin Portal */}
+                <Route path="/admin-login" element={<AdminLogin />} />
 
-            {/* Employee Routes */}
-            <Route
-                path="/employee"
-                element={
-                    <ProtectedRoute allowedRoles={['employee']}>
-                        <EmployeeLayout />
-                    </ProtectedRoute>
-                }
-            >
-                <Route path="dashboard" element={<EmployeeDashboard />} />
-                <Route path="attendance" element={<EmployeeAttendance />} />
-                <Route path="salary" element={<EmployeeSalary />} />
-                <Route path="reports" element={<EmployeeReports />} />
-                <Route path="feedback" element={<EmployeeFeedback />} />
-                <Route path="offers" element={<EmployeeOffers />} />
-                <Route path="excel" element={<EmployeeExcel />} />
-                <Route path="profile" element={<EmployeeProfile />} />
-                <Route path="settings" element={<EmployeeSettings />} />
-            </Route>
-            {/* 404 */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+                {/* Admin Routes */}
+                <Route
+                    path="/admin"
+                    element={
+                        <ProtectedRoute allowedRoles={['admin']}>
+                            <AdminLayout />
+                        </ProtectedRoute>
+                    }
+                >
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="joining-requests" element={<AdminJoiningRequests />} />
+                    <Route path="employees" element={<AdminEmployeeList />} />
+                    <Route path="salary" element={<AdminSalary />} />
+                    <Route path="advances" element={<AdminAdvances />} />
+                    <Route path="reports" element={<AdminReports />} />
+                    <Route path="reports/upload" element={<DailyReportUpload />} />
+                    <Route path="feedback" element={<AdminFeedback />} />
+                    <Route path="offers" element={<AdminOffers />} />
+                    <Route path="settings" element={<AdminSettings />} />
+                </Route>
+
+                {/* Employee Routes */}
+                <Route
+                    path="/employee"
+                    element={
+                        <ProtectedRoute allowedRoles={['employee']}>
+                            <EmployeeLayout />
+                        </ProtectedRoute>
+                    }
+                >
+                    <Route path="dashboard" element={<EmployeeDashboard />} />
+                    <Route path="salary" element={<EmployeeSalary />} />
+                    <Route path="notifications" element={<EmployeeNotifications />} />
+                    <Route path="advance" element={<EmployeeAdvances />} />
+                    <Route path="performance" element={<MyPerformance />} />
+                    <Route path="feedback" element={<EmployeeFeedback />} />
+                    <Route path="offers" element={<EmployeeOffers />} />
+                    <Route path="profile" element={<EmployeeProfile />} />
+                    <Route path="settings" element={<EmployeeSettings />} />
+                </Route>
+                {/* 404 */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+            <Toaster position="top-right" />
+        </>
     );
 };
 
