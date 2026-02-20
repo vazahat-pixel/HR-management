@@ -14,7 +14,7 @@ const { sendNotification } = require('../services/notificationService');
 // Generate JWT
 const generateToken = (user) => {
     return jwt.sign(
-        { id: user._id, role: user.role, employeeId: user.employeeId },
+        { id: user._id, role: user.role, employeeId: user.employeeId, fhrId: user.fhrId },
         process.env.JWT_SECRET,
         { expiresIn: '7d' }
     );
@@ -28,12 +28,21 @@ const generatePassword = () => {
 // POST /api/auth/login — Employee ID + Password
 router.post('/login', async (req, res) => {
     try {
-        const { employeeId, password } = req.body;
-        if (!employeeId || !password) {
-            return res.status(400).json({ error: 'Employee ID and password are required.' });
+        const { employeeId, password, fhrId } = req.body;
+        const loginIdentifier = fhrId || employeeId;
+
+        if (!loginIdentifier || !password) {
+            return res.status(400).json({ error: 'Employee ID (FHRID) and password are required.' });
         }
 
-        const user = await User.findOne({ employeeId });
+        // Try to find user by fhrId first, then by employeeId
+        const user = await User.findOne({
+            $or: [
+                { fhrId: loginIdentifier },
+                { employeeId: loginIdentifier }
+            ]
+        });
+
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials.' });
         }
@@ -150,6 +159,10 @@ router.post('/new-joining', uploadCloud.fields([
             mobile, email, address, hubName, aadhaar, pan,
             accountName, accountNumber, ifscCode, profileId, officeLocation
         } = req.body;
+
+        if (!req.files?.['photo']?.[0]) {
+            return res.status(400).json({ error: 'Selfie photo is mandatory for registration.' });
+        }
 
         if (await User.findOne({ mobile })) {
             return res.status(400).json({ error: 'User with this mobile already exists.' });
@@ -279,6 +292,10 @@ router.post('/register', uploadCloud.fields([
             fullName, mobile, email, password, employeeId,
             hubName, aadhaar, pan, bankAccount, ifscCode, profileId, officeLocation, ehrId
         } = req.body;
+
+        if (!req.files?.['photo']?.[0]) {
+            return res.status(400).json({ error: 'Selfie photo is mandatory for registration.' });
+        }
 
         if (await User.findOne({ mobile })) return res.status(400).json({ error: 'Mobile already registered' });
         if (employeeId && await User.findOne({ employeeId })) return res.status(400).json({ error: 'Employee ID already taken' });

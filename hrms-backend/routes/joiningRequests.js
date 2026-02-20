@@ -38,62 +38,72 @@ router.put('/:id/approve', authenticate, authorizeAdmin, async (req, res) => {
         const generatedPassword = crypto.randomBytes(4).toString('hex') + 'A1!';
         let finalPassword = customPassword && customPassword.trim() ? customPassword.trim() : generatedPassword;
 
-        // ID Logic
-        if (customEmployeeId && customEmployeeId.trim()) {
-            employeeId = customEmployeeId.trim();
-            // Check uniqueness if custom ID provided
-            if (await User.findOne({ employeeId })) {
-                return res.status(400).json({ error: `Employee ID ${employeeId} is already taken.` });
+        // FHRID Logic
+        let fhrId = customEmployeeId && customEmployeeId.trim() ? customEmployeeId.trim() : null;
+
+        if (fhrId) {
+            // Check uniqueness if custom FHRID provided
+            const existingUser = await User.findOne({ fhrId });
+            if (existingUser) {
+                return res.status(400).json({ error: `FHRID ${fhrId} is already taken by ${existingUser.fullName}.` });
             }
         } else {
-            const count = await User.countDocuments({ employeeId: { $regex: /^EMP-/ } });
-            employeeId = `EMP-${year}-${String(count + 1).padStart(3, '0')}`;
+            // Auto-generate FHRID if not provided
+            const count = await User.countDocuments({ fhrId: { $regex: /^FHR-/ } });
+            fhrId = `FHR-${year}-${String(count + 1).padStart(3, '0')}`;
         }
+
+        // employeeId backup (redundant but keeping context)
+        employeeId = fhrId;
 
         if (request.userId) {
             // Update existing pending user
             user = await User.findById(request.userId);
             if (user) {
-                // If user self-registered, they might already have an ID or password
-                // Always update ID and password with what was determined at approval time
-                user.employeeId = employeeId;
+                console.log(`Updating existing user: ${user.fullName} (ID: ${user._id})`);
+                console.log(`Setting FHRID: ${fhrId}`);
+
+                // Explicitly set fields
+                user.fhrId = fhrId;
+                user.employeeId = fhrId; // Keep in sync
                 user.password = finalPassword;
-                user.isSelfRegistered = false; // Transitioned to managed account
-                // If user IS self-registered and admin didn't provide password, we keep user's existing password.
-                // So finalPassword variable might be misleading here if we don't update it to match user's actual password for the email.
-                // But we can't retrieve user's hashed password. 
-                // So if isSelfRegistered is true and no custom password, we send "Use your existing password" in email.
+                user.isSelfRegistered = false;
 
                 user.role = 'employee';
                 user.status = 'Active';
                 user.isApproved = true;
                 user.isAccountActivated = true;
                 user.joiningDate = new Date();
-                user.officeLocation = user.officeLocation || request.officeLocation;
-                user.hubName = user.hubName || request.hubName;
-                user.bankAccount = user.bankAccount || request.bankAccount;
-                user.accountName = user.accountName || request.accountName;
-                user.accountNumber = user.accountNumber || request.accountNumber;
-                user.ifscCode = user.ifscCode || request.ifscCode;
-                user.profileId = user.profileId || request.profileId;
 
-                // Securely encrypt and transfer identity documents
-                if (!user.aadhaar && request.aadhaar) user.aadhaar = encrypt(request.aadhaar);
-                if (!user.pan && request.pan) user.pan = encrypt(request.pan);
-                if (!user.photoUrl && request.photoUrl) user.photoUrl = request.photoUrl;
-                if (!user.aadhaarImage && request.aadhaarImage) user.aadhaarImage = request.aadhaarImage;
-                if (!user.aadhaarBackImage && request.aadhaarBackImage) user.aadhaarBackImage = request.aadhaarBackImage;
-                if (!user.panImage && request.panImage) user.panImage = request.panImage;
+                // Transfer request data
+                user.officeLocation = request.officeLocation || user.officeLocation;
+                user.hubName = request.hubName || user.hubName;
+                user.bankAccount = request.bankAccount || user.bankAccount;
+                user.accountName = request.accountName || user.accountName;
+                user.accountNumber = request.accountNumber || user.accountNumber;
+                user.ifscCode = request.ifscCode || user.ifscCode;
+                user.profileId = request.profileId || user.profileId;
+
+                // Securely transfer identity docs
+                if (request.aadhaar) user.aadhaar = encrypt(request.aadhaar);
+                if (request.pan) user.pan = encrypt(request.pan);
+                if (request.photoUrl) user.photoUrl = request.photoUrl;
+                if (request.aadhaarImage) user.aadhaarImage = request.aadhaarImage;
+                if (request.aadhaarBackImage) user.aadhaarBackImage = request.aadhaarBackImage;
+                if (request.panImage) user.panImage = request.panImage;
 
                 await user.save();
+                console.log(`User saved successfully. DB FHRID: ${user.fhrId}`);
             }
         }
 
         if (!user) {
-            // Create new user
+            console.log(`Creating new user for request: ${request.fullName}`);
+            // Create new user if no userId exists in request
             user = await User.create({
                 fullName: request.fullName,
-                employeeId,
+                fhrId: fhrId,
+                employeeId: fhrId,
                 mobile: request.mobile,
                 email: request.email,
                 password: finalPassword,
@@ -122,6 +132,7 @@ router.put('/:id/approve', authenticate, authorizeAdmin, async (req, res) => {
                 isSelfRegistered: false,
                 joiningDate: new Date()
             });
+            console.log(`New user created with FHRID: ${user.fhrId}`);
         }
 
         request.status = 'Approved';
@@ -136,11 +147,12 @@ router.put('/:id/approve', authenticate, authorizeAdmin, async (req, res) => {
                 id: request._id,
                 status: 'Approved',
                 fullName: request.fullName,
+                fhrId: user.fhrId,
                 employeeId: user.employeeId
             });
         } catch (sErr) { console.error('Socket broadcast failed:', sErr); }
 
-        console.log(`User approved: ${user.fullName} (${user.employeeId})`);
+        console.log(`User approved: ${user.fullName} (FHRID: ${user.fhrId})`);
 
         // Send Email if requested (Default to true if undefined, but explicit false checks)
         if (shouldSendEmail !== false) {
@@ -153,7 +165,7 @@ router.put('/:id/approve', authenticate, authorizeAdmin, async (req, res) => {
                         <h2 style="color: #059669;">Welcome to Angle Courier!</h2>
                         <p>Your account has been approved and activated.</p>
                         <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                            <p><strong>Employee ID:</strong> ${user.employeeId}</p>
+                            <p><strong>Employee FHRID:</strong> ${user.fhrId}</p>
                             <p><strong>Password:</strong> ${passwordDisplay}</p>
                         </div>
                         <p>Please login and complete your profile immediately:</p>
@@ -177,6 +189,8 @@ router.put('/:id/approve', authenticate, authorizeAdmin, async (req, res) => {
         res.json({
             message: 'Joining request approved. Employee activated.',
             employee: user.toJSON(),
+            fhrId: user.fhrId,
+            employeeId: user.employeeId,
             tempPassword: (user.isSelfRegistered && !customPassword) ? null : finalPassword,
         });
     } catch (error) {

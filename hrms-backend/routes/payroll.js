@@ -167,6 +167,19 @@ router.post('/payout-upload', authenticate, authorizeAdmin, upload.single('file'
             try {
                 // ordered: false allows continuing on duplicate key errors
                 await PayoutReport.insertMany(payoutsToInsert, { ordered: false });
+
+                // Notify all successful users
+                const { sendNotification } = require('../services/notificationService');
+                for (const payout of payoutsToInsert) {
+                    const targetUser = await User.findOne({ fhrId: payout.fhrid });
+                    if (targetUser) {
+                        await sendNotification(
+                            targetUser._id,
+                            'Payout Ledger Updated',
+                            `Your payout record for ${queryMonth}/${queryYear} has been updated.`
+                        );
+                    }
+                }
             } catch (err) {
                 console.warn('Partial error in payout insertMany (duplicates):', err.message);
             }
@@ -211,7 +224,7 @@ router.post('/salary-slip-upload', authenticate, authorizeAdmin, upload.single('
             if (!fhrid) {
                 console.warn(`Row ${index + 1} skipped: Missing FHRID column or value.`);
                 results.failed++;
-                results.skipped_fhrids.push(`Row ${index + 1}: Missing FHRID`);
+                results.skippedFhrids.push(`Row ${index + 1}: Missing FHRID`);
                 continue;
             }
 
@@ -219,7 +232,7 @@ router.post('/salary-slip-upload', authenticate, authorizeAdmin, upload.single('
             if (!user) {
                 console.warn(`Row ${index + 1} skipped: FHRID ${fhrid} not found in database.`);
                 results.failed++;
-                results.skipped_fhrids.push(`${fhrid} (Not Found)`);
+                results.skippedFhrids.push(`${fhrid} (Not Found)`);
                 continue;
             }
 
@@ -266,11 +279,19 @@ router.post('/salary-slip-upload', authenticate, authorizeAdmin, upload.single('
                     { upsert: true, new: true }
                 );
 
+                // Create Notification for Employee (Real-time)
+                const { sendNotification } = require('../services/notificationService');
+                await sendNotification(
+                    user._id,
+                    'Salary Slip Generated',
+                    `Your salary slip for ${payslipData.month}/${payslipData.year} is now available for download.`
+                );
+
                 results.success++;
             } catch (err) {
                 console.error(`Error generating slip for ${fhrid}:`, err);
                 results.failed++;
-                results.skipped_fhrids.push(`${fhrid}: ${err.code === 11000 ? 'Duplicate Entry' : 'Generation Error'}`);
+                results.skippedFhrids.push(`${fhrid}: ${err.code === 11000 ? 'Duplicate Entry' : 'Generation Error'}`);
             }
         }
 

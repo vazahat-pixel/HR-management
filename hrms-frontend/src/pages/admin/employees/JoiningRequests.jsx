@@ -143,12 +143,12 @@ const RequestDetailsModal = ({ request, onClose, onApprove, onReject }) => {
                             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Onboarding Configuration</h4>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                                 <div>
-                                    <label className="text-[9px] font-black text-slate-400 uppercase mb-1.5 block">Custom Employee ID</label>
-                                    <input type="text" id="customEmployeeId" placeholder="Auto-Generate" className="w-full h-[42px] bg-[#F5F5F5] border border-[#DCDCDC] rounded-xl px-4 text-[11px] font-bold text-slate-900 focus:outline-none focus:border-[#C46A2D] uppercase tracking-wider" />
+                                    <label className="text-[9px] font-black text-slate-400 uppercase mb-1.5 block">Custom FHRID</label>
+                                    <input type="text" id="customEmployeeId" placeholder="Auto-Generate" autoComplete="new-password" className="w-full h-[42px] bg-[#F5F5F5] border border-[#DCDCDC] rounded-xl px-4 text-[11px] font-bold text-slate-900 focus:outline-none focus:border-[#C46A2D] uppercase tracking-wider" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase mb-1.5 block">Custom Password</label>
-                                    <input type="text" id="customPassword" placeholder="Auto-Generate" className="w-full h-[42px] bg-[#F5F5F5] border border-[#DCDCDC] rounded-xl px-4 text-[11px] font-bold text-slate-900 focus:outline-none focus:border-[#C46A2D]" />
+                                    <input type="text" id="customPassword" placeholder="Auto-Generate" autoComplete="new-password" className="w-full h-[42px] bg-[#F5F5F5] border border-[#DCDCDC] rounded-xl px-4 text-[11px] font-bold text-slate-900 focus:outline-none focus:border-[#C46A2D]" />
                                 </div>
                                 <div className="flex items-end pb-2">
                                     <label className="flex items-center gap-3 cursor-pointer group">
@@ -162,9 +162,10 @@ const RequestDetailsModal = ({ request, onClose, onApprove, onReject }) => {
                         <div className="flex justify-end gap-3">
                             <button
                                 onClick={() => onReject(request._id)}
-                                className="px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest text-[#B23A48] bg-white border border-[#B23A48]/20 hover:bg-[#B23A48]/5 transition-all"
+                                disabled={isSubmitting}
+                                className="px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest text-[#B23A48] bg-white border border-[#B23A48]/20 hover:bg-[#B23A48]/5 transition-all disabled:opacity-50"
                             >
-                                Deny Access
+                                {isSubmitting ? 'Processing...' : 'Deny Access'}
                             </button>
                             <button
                                 onClick={() => {
@@ -173,9 +174,15 @@ const RequestDetailsModal = ({ request, onClose, onApprove, onReject }) => {
                                     const sendMail = document.getElementById('sendEmail').checked;
                                     onApprove(request._id, { customEmployeeId: customId, customPassword: customPass, sendEmail: sendMail });
                                 }}
-                                className="px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest text-white bg-gradient-to-r from-[#C46A2D] to-[#A55522] shadow-lg shadow-[#C46A2D]/20 transition-all flex items-center gap-3 active:scale-95"
+                                disabled={isSubmitting}
+                                className="px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest text-white bg-gradient-to-r from-[#C46A2D] to-[#A55522] shadow-lg shadow-[#C46A2D]/20 transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50"
                             >
-                                <HiOutlineCheck className="w-5 h-5" /> Confirm Onboarding
+                                {isSubmitting ? (
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                    <HiOutlineCheck className="w-5 h-5" />
+                                )}
+                                {isSubmitting ? 'Submitting...' : 'Confirm Onboarding'}
                             </button>
                         </div>
                     </div>
@@ -193,6 +200,7 @@ const JoiningRequests = () => {
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [approvalData, setApprovalData] = useState(null); // { employeeId, password, fullName, email }
     const [emailSending, setEmailSending] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         fetchRequests();
@@ -211,6 +219,7 @@ const JoiningRequests = () => {
 
     const handleApprove = async (id, config) => {
         if (!window.confirm('Are you sure you want to approve this user? This will create an employee account.')) return;
+        setIsSubmitting(true);
         try {
             const res = await joiningAPI.approve(id, config);
             toast.success('User Approved Successfully!');
@@ -220,13 +229,18 @@ const JoiningRequests = () => {
             setApprovalData({
                 fullName: res.data.employee.fullName,
                 employeeId: res.data.employee.employeeId,
+                fhrId: res.data.employee.fhrId,
                 password: res.data.tempPassword,
                 email: res.data.employee.email
             });
 
             fetchRequests();
         } catch (error) {
-            toast.error('Approval failed');
+            const errMsg = error.response?.data?.error || 'Approval failed';
+            toast.error(errMsg);
+            console.error('Approve Error:', error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -254,6 +268,7 @@ const JoiningRequests = () => {
 
     const handleReject = async (id) => {
         if (!window.confirm('Reject this joining request?')) return;
+        setIsSubmitting(true);
         try {
             await joiningAPI.reject(id);
             toast.success('Request Rejected');
@@ -261,6 +276,8 @@ const JoiningRequests = () => {
             fetchRequests();
         } catch (error) {
             toast.error('Action failed');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -436,8 +453,8 @@ const JoiningRequests = () => {
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200/50">
                                         <div>
-                                            <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mb-1">EMPLOYEE ID</p>
-                                            <p className="text-emerald-600 font-black text-xl tracking-widest">{approvalData.employeeId}</p>
+                                            <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mb-1">OFFICIAL FHR-ID</p>
+                                            <p className="text-emerald-600 font-black text-xl tracking-widest">{approvalData.fhrId || approvalData.employeeId}</p>
                                         </div>
                                         <div>
                                             <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em] mb-1">PASSWORD</p>

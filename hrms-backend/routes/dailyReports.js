@@ -101,12 +101,13 @@ router.post('/upload', authenticate, authorizeAdmin, upload.single('file'), asyn
                     { upsert: true, new: true }
                 );
 
-                // Create Notification for Employee
-                await Notification.create({
-                    userId: user._id,
-                    title: 'New Daily Performance Report',
-                    message: `Your performance report for ${formattedDate} has been uploaded. DEL: ${del}, OFD: ${ofd}.`,
-                });
+                // Create Notification for Employee (Real-time)
+                const { sendNotification } = require('../services/notificationService');
+                await sendNotification(
+                    user._id,
+                    'New Daily Performance Report',
+                    `Your performance report for ${formattedDate} has been uploaded. DEL: ${del}, OFD: ${ofd}.`
+                );
 
                 results.success++;
             } catch (err) {

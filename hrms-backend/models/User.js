@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-    employeeId: { type: String, unique: true, sparse: true }, // Auto-generated
+    employeeId: { type: String, unique: true, sparse: true }, // Internal Backup/Legacy
+    fhrId: { type: String, unique: true, sparse: true, trim: true }, // Main Employee ID for Login & Reports
     ehrId: { type: String, unique: true, sparse: true },      // Manual CasperEHRID
 
     // Personal Details
@@ -50,7 +51,6 @@ const userSchema = new mongoose.Schema({
     accountNumber: { type: String, trim: true },
     ifscCode: { type: String, trim: true },
     baseRate: { type: Number, default: 0 },
-    fhrId: { type: String, trim: true },
     profileId: { type: String, trim: true },
     conveyance: { type: Number, default: 0 },
     fcmToken: { type: String, trim: true },
