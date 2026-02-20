@@ -13,11 +13,28 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
-export const storage = getStorage(app);
-export const db = getFirestore(app);
+let app;
+let auth;
+let googleProvider;
+let storage;
+let db;
+
+try {
+    if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "undefined") {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        googleProvider = new GoogleAuthProvider();
+        storage = getStorage(app);
+        db = getFirestore(app);
+        console.log("Firebase initialized successfully");
+    } else {
+        console.warn("Firebase API Key is missing. Firebase features will be disabled.");
+    }
+} catch (error) {
+    console.error("Firebase initialization failed:", error);
+}
+
+export { auth, googleProvider, storage, db };
 
 // Messaging is only supported in secure contexts (HTTPS) or localhost
 let messaging = null;
