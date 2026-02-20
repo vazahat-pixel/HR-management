@@ -68,16 +68,15 @@ router.get('/employee', authenticate, async (req, res) => {
         // Complaints
         const openComplaints = await Complaint.countDocuments({ userId, status: { $in: ['Open', 'In Progress'] } });
 
-        // Today's report
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayReport = await DailyReport.findOne({ employeeId: userId, reportDate: { $gte: today } });
+        // Latest report (not necessarily today, but the most recent one)
+        const latestDailyReport = await DailyReport.findOne({ fhrid: req.user.fhrId })
+            .sort({ reportDate: -1 });
 
         // This month's working days
         const now = new Date();
         const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
         const monthReports = await DailyReport.countDocuments({
-            employeeId: userId,
+            fhrid: req.user.fhrId,
             reportDate: { $gte: monthStart, $lte: now }
         });
 
@@ -93,7 +92,7 @@ router.get('/employee', authenticate, async (req, res) => {
             pendingAdvances,
             approvedAdvances,
             openComplaints,
-            todayReport: !!todayReport,
+            todayReport: latestDailyReport, // Passing the full object now
             monthWorkingDays: monthReports,
             recentNotifications,
             unreadNotifications: unreadCount,

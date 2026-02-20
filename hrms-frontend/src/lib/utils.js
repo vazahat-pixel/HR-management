@@ -10,5 +10,5 @@ export function getFileUrl(path) {
     if (path.startsWith('http')) return path;
     // Normalize path separators for Windows local uploads if any remain
     const normalizedPath = path.replace(/\\/g, '/');
-    return `http://localhost:5000/${normalizedPath}`;
+    return `${import.meta.env.VITE_API_URL}/${normalizedPath}`;
 }

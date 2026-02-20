@@ -55,17 +55,10 @@ router.put('/:id/approve', authenticate, authorizeAdmin, async (req, res) => {
             user = await User.findById(request.userId);
             if (user) {
                 // If user self-registered, they might already have an ID or password
-                if (!user.employeeId) user.employeeId = employeeId;
-
-                // If Admin provided a custom password, override it.
-                // If not, and user self-registered, keep theirs.
-                // If not self-registered and no custom password, generate new.
-                if (customPassword && customPassword.trim()) {
-                    user.password = finalPassword;
-                    user.isSelfRegistered = false; // Admin took control
-                } else if (!user.isSelfRegistered) {
-                    user.password = finalPassword;
-                }
+                // Always update ID and password with what was determined at approval time
+                user.employeeId = employeeId;
+                user.password = finalPassword;
+                user.isSelfRegistered = false; // Transitioned to managed account
                 // If user IS self-registered and admin didn't provide password, we keep user's existing password.
                 // So finalPassword variable might be misleading here if we don't update it to match user's actual password for the email.
                 // But we can't retrieve user's hashed password. 
@@ -135,6 +128,18 @@ router.put('/:id/approve', authenticate, authorizeAdmin, async (req, res) => {
         request.adminRemarks = req.body.remarks || 'Approved';
         await request.save();
 
+        // 🟢 REAL-TIME SYNC: Broadcast to other admins
+        const { getIO } = require('../socket');
+        try {
+            const io = getIO();
+            io.emit('joining_request_updated', {
+                id: request._id,
+                status: 'Approved',
+                fullName: request.fullName,
+                employeeId: user.employeeId
+            });
+        } catch (sErr) { console.error('Socket broadcast failed:', sErr); }
+
         console.log(`User approved: ${user.fullName} (${user.employeeId})`);
 
         // Send Email if requested (Default to true if undefined, but explicit false checks)
@@ -180,6 +185,60 @@ router.put('/:id/approve', authenticate, authorizeAdmin, async (req, res) => {
     }
 });
 
+// POST /api/joining-requests/send-credentials — Send credentials via email
+router.post('/send-credentials', authenticate, authorizeAdmin, async (req, res) => {
+    try {
+        const { email, employeeId, password, fullName } = req.body;
+        if (!email || !employeeId || !password) {
+            return res.status(400).json({ error: 'Incomplete credential data.' });
+        }
+
+        const loginUrl = process.env.FRONTEND_URL || 'http://localhost:5173/auth/login';
+
+        const emailHtml = `
+            <div style="font-family: Arial, sans-serif; padding: 30px; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 10px;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h1 style="color: #C46A2D; margin: 0;">Angle Courier</h1>
+                    <p style="color: #666; font-size: 14px; margin-top: 5px;">HR Management System</p>
+                </div>
+                <h2 style="color: #1e293b; font-size: 20px;">Welcome to the Team, ${fullName}!</h2>
+                <p>Your official account has been successfully created and activated. You can now access the HRMS portal using the credentials below:</p>
+                
+                <div style="background: #f8fafc; padding: 25px; border-radius: 12px; margin: 25px 0; border: 1px solid #e2e8f0;">
+                    <p style="margin: 0 0 10px 0; font-size: 14px; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Login Credentials</p>
+                    <p style="margin: 0 0 5px 0; font-size: 16px;"><strong>Employee ID:</strong> <span style="color: #C46A2D; font-family: monospace;">${employeeId}</span></p>
+                    <p style="margin: 0; font-size: 16px;"><strong>Password:</strong> <span style="color: #C46A2D; font-family: monospace;">${password}</span></p>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="${loginUrl}" style="display: inline-block; background: #1e293b; color: white; padding: 14px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">Access Employee Portal</a>
+                </div>
+
+                <hr style="margin: 40px 0 20px 0; border: 0; border-top: 1px solid #eee;" />
+                <p style="font-size: 12px; color: #94a3b8; text-align: center;">
+                    This is an automated message. Please do not reply to this email.<br/>
+                    For technical support, contact the IT department.
+                </p>
+            </div>
+        `;
+
+        await sendEmail({
+            to: email,
+            subject: 'Official Login Credentials - Angle Courier',
+            html: emailHtml
+        });
+
+        res.json({ message: 'Credentials sent successfully to ' + email });
+    } catch (error) {
+        console.error('Send credentials error:', error);
+        res.status(500).json({
+            error: 'Failed to send email.',
+            details: error.message,
+            code: error.code // To identify if it is EAUTH, ESOCKET, etc.
+        });
+    }
+});
+
 // PUT /api/joining-requests/:id/reject — Reject request
 router.put('/:id/reject', authenticate, authorizeAdmin, async (req, res) => {
     try {
@@ -190,6 +249,17 @@ router.put('/:id/reject', authenticate, authorizeAdmin, async (req, res) => {
         request.status = 'Rejected';
         request.adminRemarks = req.body.remarks || 'Rejected';
         await request.save();
+
+        // 🔴 REAL-TIME SYNC: Broadcast to other admins
+        const { getIO } = require('../socket');
+        try {
+            const io = getIO();
+            io.emit('joining_request_updated', {
+                id: request._id,
+                status: 'Rejected',
+                fullName: request.fullName
+            });
+        } catch (sErr) { console.error('Socket broadcast failed:', sErr); }
 
         res.json({ message: 'Joining request rejected.', request });
     } catch (error) {

@@ -176,10 +176,10 @@ router.post('/new-joining', uploadCloud.fields([
             profileId,
             aadhaar: (aadhaar && aadhaar.trim()) ? encrypt(aadhaar) : undefined,
             pan: (pan && pan.trim()) ? encrypt(pan) : undefined,
-            photoUrl: req.files['photo']?.[0]?.path,
-            aadhaarImage: req.files['aadhaarImage']?.[0]?.path,
-            aadhaarBackImage: req.files['aadhaarBackImage']?.[0]?.path,
-            panImage: req.files['panImage']?.[0]?.path,
+            photoUrl: req.files?.['photo']?.[0]?.path,
+            aadhaarImage: req.files?.['aadhaarImage']?.[0]?.path,
+            aadhaarBackImage: req.files?.['aadhaarBackImage']?.[0]?.path,
+            panImage: req.files?.['panImage']?.[0]?.path,
             password: 'Pending123',
             role: 'pending',
             isApproved: false,
@@ -188,8 +188,7 @@ router.post('/new-joining', uploadCloud.fields([
             status: 'Pending'
         });
 
-        // Create Joining Request Record (for HR tracking)
-        await JoiningRequest.create({
+        const joiningRequest = await JoiningRequest.create({
             userId: newUser._id,
             fullName,
             mobile,
@@ -211,6 +210,13 @@ router.post('/new-joining', uploadCloud.fields([
             address: address || '',
             status: 'Pending'
         });
+
+        // 🔵 REAL-TIME SYNC: Notify all Admins of New Request
+        const { getIO } = require('../socket');
+        try {
+            const io = getIO();
+            io.emit('new_joining_request', joiningRequest);
+        } catch (sErr) { console.error('Socket broadcast failed:', sErr); }
 
         res.status(201).json({ message: 'Joining request submitted. Please wait for HR approval.' });
 

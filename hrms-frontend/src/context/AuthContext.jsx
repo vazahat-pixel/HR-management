@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '../services/api';
 
 import { initSocket, disconnectSocket } from '../services/socket';
+import { requestNotificationPermission } from '../services/notificationService';
 
 const AuthContext = createContext(null);
 
@@ -33,6 +34,7 @@ export const AuthProvider = ({ children }) => {
                     setUser(res.data.user);
                     localStorage.setItem('hrms_user', JSON.stringify(res.data.user));
                     initSocket(res.data.user._id);
+                    requestNotificationPermission(); // Register FCM Backgroundly
                 })
                 .catch(err => {
                     console.error("Session validation failed:", err);
@@ -54,6 +56,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('hrms_user', JSON.stringify(userData));
         setUser(userData);
         initSocket(userData._id);
+        requestNotificationPermission(); // Register FCM
         return userData;
     };
 

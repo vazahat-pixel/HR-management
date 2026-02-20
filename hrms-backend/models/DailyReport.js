@@ -1,17 +1,16 @@
 const mongoose = require('mongoose');
 
 const dailyReportSchema = new mongoose.Schema({
-    employeeId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
-    ehrId: {
+    fhrid: {
         type: String,
         required: true,
         trim: true
     },
-    hubName: {
+    full_name: {
+        type: String,
+        trim: true
+    },
+    hub_name: {
         type: String,
         trim: true
     },
@@ -34,14 +33,10 @@ const dailyReportSchema = new mongoose.Schema({
     reportDate: {
         type: Date,
         required: true
-    },
-    uploadedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
     }
 }, { timestamps: true });
 
-// Unique index for employeeId + reportDate to prevent duplicate entries for same day
-dailyReportSchema.index({ employeeId: 1, reportDate: 1 }, { unique: true });
+// Unique index for fhrid + reportDate to prevent duplicate entries for same day
+dailyReportSchema.index({ fhrid: 1, reportDate: 1 }, { unique: true });
 
 module.exports = mongoose.model('DailyReport', dailyReportSchema);

@@ -86,7 +86,7 @@ const EmployeeLayout = () => {
     const navItems = [
         { path: '/employee/dashboard', icon: HiOutlineHome, label: 'Home' },
         { path: '/employee/performance', icon: HiOutlineClipboardCheck, label: 'Reports' },
-        { path: '/employee/salary', icon: HiOutlineDocumentText, label: 'Salary' },
+        { path: '/employee/salary', icon: HiOutlineDocumentText, label: 'Salary Slips' },
         { path: '/employee/advance', icon: HiOutlineCash, label: 'Advance' },
         { path: '/employee/feedback', icon: HiOutlineChatAlt2, label: 'Support' },
         { path: '/employee/offers', icon: HiOutlineTicket, label: 'Offers' },
@@ -94,12 +94,17 @@ const EmployeeLayout = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased selection:bg-emerald-500/20 flex flex-col lg:flex-row overflow-hidden relative">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
+            className="min-h-screen bg-background text-slate-900 font-sans antialiased selection:bg-[#C46A2D]/20 flex flex-col lg:flex-row overflow-hidden relative"
+        >
 
             {/* Background Texture Effects */}
             <div className="fixed inset-0 pointer-events-none z-0">
-                <div className="absolute top-[20%] right-[-5%] w-[30%] h-[30%] bg-emerald-500/5 rounded-full blur-[100px]" />
-                <div className="absolute bottom-[20%] left-[-5%] w-[30%] h-[30%] bg-teal-500/5 rounded-full blur-[100px]" />
+                <div className="absolute top-[20%] right-[-5%] w-[30%] h-[30%] bg-[#C46A2D]/5 rounded-full blur-[100px]" />
+                <div className="absolute bottom-[20%] left-[-5%] w-[30%] h-[30%] bg-[#A55522]/5 rounded-full blur-[100px]" />
             </div>
 
             {/* Desktop Sidebar (Visible on LG+) */}
@@ -114,7 +119,7 @@ const EmployeeLayout = () => {
                         </div>
                         <div className="flex flex-col">
                             <span className="font-black text-[13px] text-slate-900 tracking-tight leading-none uppercase italic">Employee Portal</span>
-                            <span className="text-[10px] text-emerald-600 font-black uppercase tracking-widest mt-1.5">User Workspace</span>
+                            <span className="text-[10px] text-[#C46A2D] font-black uppercase tracking-widest mt-1.5">User Workspace</span>
                         </div>
                     </div>
                 </div>
@@ -126,15 +131,15 @@ const EmployeeLayout = () => {
                             key={item.path}
                             to={item.path}
                             className={({ isActive }) => cn(
-                                "flex items-center gap-4 px-4 py-3 rounded-[20px] text-[13px] font-bold transition-all duration-300 group relative overflow-hidden",
+                                "flex items-center gap-4 px-4 py-2.5 rounded-[12px] text-[13px] font-bold transition-all duration-300 group relative overflow-hidden",
                                 isActive
-                                    ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 translate-x-1"
-                                    : "text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 hover:translate-x-1"
+                                    ? "bg-gradient-to-r from-[#C46A2D] to-[#A55522] text-white shadow-lg shadow-[#C46A2D]/20 translate-x-1"
+                                    : "text-slate-500 hover:text-[#C46A2D] hover:bg-[#F9EBE0] hover:translate-x-1"
                             )}
                         >
                             {({ isActive }) => (
                                 <>
-                                    <item.icon className={cn("w-5 h-5 transition-transform duration-300 group-hover:scale-110", isActive ? "text-white" : "text-slate-400 group-hover:text-emerald-600")} />
+                                    <item.icon className={cn("w-5 h-5 transition-transform duration-300 group-hover:scale-110", isActive ? "text-white" : "text-slate-400 group-hover:text-[#C46A2D]")} />
                                     <span>{item.label}</span>
                                     {isActive && (
                                         <motion.div
@@ -150,15 +155,15 @@ const EmployeeLayout = () => {
                 </nav>
 
                 <div className="p-6 border-t border-dashed border-slate-100 bg-slate-50/30">
-                    <div className="flex items-center gap-4 p-3 rounded-2xl bg-white border border-slate-200 shadow-sm group hover:border-emerald-500/30 transition-all cursor-pointer">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-sm font-black text-emerald-700 border border-emerald-200">
+                    <div className="flex items-center gap-4 p-3 rounded-2xl bg-white border border-slate-200 shadow-sm group hover:border-[#C46A2D]/30 transition-all cursor-pointer">
+                        <div className="w-10 h-10 rounded-xl bg-[#F9EBE0] flex items-center justify-center text-sm font-black text-[#A55522] border border-[#DCDCDC]">
                             {user?.fullName?.[0] || 'U'}
                         </div>
                         <div className="flex flex-col flex-1 overflow-hidden">
                             <span className="text-xs font-black text-slate-900 truncate tracking-tight">{user?.fullName || 'User'}</span>
                             <span className="text-[10px] text-slate-400 font-bold truncate uppercase tracking-tighter mt-0.5">Senior Associate</span>
                         </div>
-                        <button onClick={logout} className="p-2 text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
+                        <button onClick={logout} className="p-2 text-slate-300 hover:text-[#C46A2D] hover:bg-[#F9EBE0] rounded-xl transition-all">
                             <HiOutlineLogout className="w-5 h-5" />
                         </button>
                     </div>
@@ -188,16 +193,16 @@ const EmployeeLayout = () => {
                 </header>
 
                 {/* Content Area */}
-                <main className="flex-1 overflow-y-auto scrollbar-hide p-4 pb-28 lg:p-10 relative bg-transparent">
-                    <div className="max-w-2xl mx-auto space-y-6">
+                <main className="flex-1 overflow-y-auto scrollbar-hide p-4 pb-28 lg:p-10 relative bg-background">
+                    <div className="max-w-2xl mx-auto space-y-5">
                         {isProfileIncomplete && location.pathname !== '/employee/profile' && (
                             <motion.div
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="bg-amber-50 border border-amber-100 p-4 rounded-2xl mb-4 flex items-center gap-3"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="bg-[#FFFFFF] border border-[#B23A48] p-4 rounded-xl mb-4 flex items-center gap-3 shadow-sm"
                             >
                                 <span className="text-xl">⚠️</span>
-                                <p className="text-xs font-bold text-amber-800">Action Required: Format your profile to unlock features.</p>
+                                <p className="text-xs font-bold text-[#B23A48]">Action Required: Format your profile to unlock features.</p>
                             </motion.div>
                         )}
 
@@ -205,37 +210,36 @@ const EmployeeLayout = () => {
                     </div>
                 </main>
 
-                {/* Compact Floating Mobile Bottom Nav */}
+                {/* FIXED MOBILE BOTTOM NAV - ENSURING NO DISTORTION */}
                 <nav className={cn(
-                    "lg:hidden fixed bottom-4 left-4 right-4 z-50 rounded-2xl shadow-2xl shadow-slate-900/20 transition-all duration-500",
+                    "lg:hidden fixed bottom-6 left-4 right-4 z-50 transition-all duration-700",
                     isProfileIncomplete ? "translate-y-32 opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
                 )}>
                     {/* Glassmorphism Background */}
-                    <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-xl rounded-2xl border border-white/10" />
+                    <div className="absolute inset-0 bg-slate-900/95 backdrop-blur-2xl rounded-[32px] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.4)]" />
 
-                    <div className="relative z-10 flex items-center justify-between px-4 py-2">
+                    <div className="relative z-10 flex items-center justify-between p-2">
                         {navItems.map((item) => (
                             <NavLink
                                 key={item.path}
                                 to={item.path}
                                 className={({ isActive }) => cn(
                                     "flex items-center justify-center transition-all duration-500",
-                                    isActive ? "flex-1" : "flex-none w-10"
+                                    isActive ? "flex-[2.5]" : "flex-1 min-w-[40px]"
                                 )}
                             >
                                 {({ isActive }) => (
                                     <div className={cn(
-                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all duration-500",
+                                        "flex items-center gap-2 px-3 py-2.5 rounded-[20px] transition-all duration-300",
                                         isActive
-                                            ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 w-full justify-center"
-                                            : "text-slate-400 hover:text-white"
+                                            ? "bg-gradient-to-r from-[#C46A2D] to-[#A55522] text-white shadow-lg shadow-[#C46A2D]/40 w-full justify-center"
+                                            : "text-slate-500 hover:text-white"
                                     )}>
-                                        <item.icon className={cn("w-5 h-5", isActive && "animate-pulse")} />
+                                        <item.icon className={cn("w-5 h-5 shrink-0", isActive && "scale-110")} />
                                         {isActive && (
                                             <motion.span
                                                 initial={{ opacity: 0, width: 0 }}
                                                 animate={{ opacity: 1, width: 'auto' }}
-                                                exit={{ opacity: 0, width: 0 }}
                                                 className="text-[9px] font-black uppercase tracking-widest whitespace-nowrap overflow-hidden"
                                             >
                                                 {item.label}
@@ -267,7 +271,7 @@ const EmployeeLayout = () => {
                     )}
                 </AnimatePresence>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

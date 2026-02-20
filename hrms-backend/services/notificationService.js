@@ -33,22 +33,24 @@ const sendNotification = async (userId, title, message, data = {}) => {
     }
 };
 
+const admin = require('../config/firebase');
+
 /**
  * FCM Push Notification Implementation
  */
 const sendPushNotification = async (fcmToken, title, body, data = {}) => {
     try {
-        // In production, use 'firebase-admin'
-        // const message = {
-        //     notification: { title, body },
-        //     data: data,
-        //     token: fcmToken
-        // };
-        // await admin.messaging().send(message);
+        const message = {
+            notification: { title, body },
+            data: {
+                ...data,
+                click_action: 'FLUTTER_NOTIFICATION_CLICK', // For mobile if needed
+            },
+            token: fcmToken
+        };
 
-        if (process.env.NODE_ENV !== 'production') {
-            console.log(`[FCM Simulation] To: ${fcmToken} | Title: ${title} | Body: ${body}`);
-        }
+        const response = await admin.messaging().send(message);
+        console.log('Successfully sent FCM message:', response);
         return true;
     } catch (error) {
         console.error('FCM Send Error:', error);

@@ -25,20 +25,20 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-lg' }) => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] transition-opacity"
+                        className="fixed inset-0 bg-[#BBBBBB]/60 backdrop-blur-md z-[100] transition-opacity"
                     />
                     <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                            className={`bg-white border border-slate-200 rounded-2xl shadow-2xl w-full ${maxWidth} pointer-events-auto flex flex-col max-h-[90vh]`}
+                            className={`bg-white border border-[#DCDCDC] rounded-[28px] shadow-2xl w-full ${maxWidth} pointer-events-auto flex flex-col max-h-[90vh] overflow-hidden`}
                         >
-                            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50 rounded-t-2xl">
-                                <h3 className="text-lg font-bold text-slate-900 tracking-tight">{title}</h3>
+                            <div className="flex items-center justify-between px-6 py-5 border-b border-[#DCDCDC]/40 bg-[#F5F5F5] rounded-t-[28px]">
+                                <h3 className="text-lg font-black text-slate-900 tracking-tighter uppercase">{title}</h3>
                                 <button
                                     onClick={onClose}
-                                    className="p-2 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
+                                    className="p-2 rounded-xl hover:bg-[#F9EBE0] text-slate-400 hover:text-[#C46A2D] transition-all cursor-pointer border border-transparent hover:border-[#F9EBE0]"
                                 >
                                     <HiX className="w-5 h-5" />
                                 </button>

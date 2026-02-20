@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     HiOutlineLockClosed,
     HiOutlineIdentification,
-    HiOutlineShieldCheck,
     HiOutlineChevronRight,
     HiOutlineKey
 } from 'react-icons/hi';
@@ -12,16 +11,75 @@ import { useAuth } from '../../context/AuthContext';
 import { authAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 import { cn } from '../../lib/utils';
-
 import logo from '../../assets/logo.png';
 
+// --- SUB-COMPONENTS ---
+const PremiumInput = ({ label, icon: Icon, value, onChange, type = "text", placeholder }) => {
+    const [isFocused, setIsFocused] = useState(false);
+
+    return (
+        <div className="relative group/input w-full mt-4 first:mt-0">
+            <label className={cn(
+                "absolute left-0 -top-8 text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-300",
+                isFocused ? "text-indigo-600" : "text-slate-400"
+            )}>
+                {label}
+            </label>
+            <div className="relative flex items-center">
+                <Icon className={cn(
+                    "absolute left-0 w-7 h-7 transition-colors duration-300",
+                    isFocused ? "text-indigo-600" : "text-slate-200"
+                )} />
+                <input
+                    type={type}
+                    value={value}
+                    onChange={e => onChange(e.target.value)}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    className="w-full bg-transparent border-b-2 border-slate-50 pt-6 pb-4 pl-12 text-[17px] font-bold text-slate-900 placeholder:text-slate-100 outline-none hover:border-slate-100 transition-all duration-300"
+                    placeholder={placeholder}
+                    required
+                />
+                <motion.div
+                    initial={false}
+                    animate={{ width: isFocused ? '100%' : '0%' }}
+                    className="absolute bottom-0 left-0 h-[3px] bg-indigo-600 shadow-lg shadow-indigo-100"
+                />
+            </div>
+        </div>
+    );
+};
+
+const RegularInput = ({ label, value, onChange, type = "text", required }) => (
+    <div className="space-y-2 mb-4 last:mb-0">
+        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">{label}</label>
+        <input
+            type={type}
+            value={value}
+            onChange={e => onChange(e.target.value)}
+            required={required}
+            className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-[13px] font-bold text-slate-900 focus:bg-white focus:border-indigo-400/50 outline-none transition-all placeholder:text-slate-200"
+            placeholder={label}
+        />
+    </div>
+);
+
+// --- MAIN COMPONENT ---
 const AdminLogin = () => {
+    console.log("AdminLogin Rendering...");
     const [mode, setMode] = useState('login'); // 'login' | 'register'
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, user } = useAuth();
+
+    // Redirect if already logged in as admin
+    useEffect(() => {
+        if (user && user.role === 'admin') {
+            navigate('/admin/dashboard');
+        }
+    }, [user, navigate]);
 
     // Login State
     const [loginData, setLoginData] = useState({ employeeId: '', password: '' });
@@ -36,9 +94,11 @@ const AdminLogin = () => {
         setError('');
         setIsLoading(true);
         try {
-            const user = await login(loginData.employeeId, loginData.password);
-            if (user.role !== 'admin') {
+            const loggedInUser = await login(loginData.employeeId, loginData.password);
+            if (loggedInUser.role !== 'admin') {
                 setError('ACCESS DENIED: Insufficient Clearance Level.');
+                toast.error('ACCESS DENIED: Insufficient Clearance Level.');
+                setIsLoading(false);
                 return;
             }
             toast.success('Admin Session Established.');
@@ -57,7 +117,7 @@ const AdminLogin = () => {
         setIsLoading(true);
         try {
             const res = await authAPI.adminRegister(registerData);
-            const msg = `Admin Induction Success. Unit ID: ${res.data.employeeId}. Proceed to Login.`;
+            const msg = `Admin Induction Success. ID: ${res.data.employeeId}. Proceed to Login.`;
             setSuccessMsg(msg);
             toast.success(msg);
             setMode('login');
@@ -70,46 +130,77 @@ const AdminLogin = () => {
         setIsLoading(false);
     };
 
-    const inputClasses = "w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all duration-300 text-sm font-medium hover:border-emerald-300";
-    const labelClasses = "text-xs font-semibold text-slate-500 ml-1 mb-1.5 block";
-
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100"
-            >
-                {/* Header */}
-                <div className="bg-gradient-to-br from-emerald-600 to-teal-600 p-8 text-center relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
-                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-xl" />
+        <div className="min-h-screen w-full relative overflow-hidden flex flex-col items-center justify-center p-6 bg-white">
+            {/* PREMIUM AURA MESH BACKGROUND */}
+            <div className="absolute inset-0 z-0 overflow-hidden">
+                <div className="absolute inset-0 bg-[#F9FAFF]" />
 
-                    <motion.div
-                        className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/30 shadow-lg p-3"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 300, delay: 0.1 }}
-                    >
-                        <img src={logo} alt="Angle Courier Logo" className="w-full h-full object-contain" />
-                    </motion.div>
-                    <h1 className="text-2xl font-bold text-white tracking-tight mb-1">
-                        Angle Courier
+                {/* Aura 1 - Indigo Mesh */}
+                <motion.div
+                    animate={{
+                        x: [0, 50, 0],
+                        y: [0, 40, 0],
+                        scale: [1, 1.25, 1]
+                    }}
+                    transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute top-[-15%] right-[-10%] w-[80%] h-[80%] bg-indigo-100/40 rounded-full blur-[110px]"
+                />
+
+                {/* Aura 2 - Violet Mesh */}
+                <motion.div
+                    animate={{
+                        x: [0, -40, 0],
+                        y: [0, -30, 0],
+                        scale: [1, 1.15, 1]
+                    }}
+                    transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute bottom-[-10%] left-[-10%] w-[70%] h-[70%] bg-violet-100/30 rounded-full blur-[130px]"
+                />
+            </div>
+
+            {/* CONTENT CONTAINER */}
+            <div className="relative z-10 w-full max-w-[420px] flex flex-col items-center">
+                {/* LOGO TREATMENT */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mb-8"
+                >
+                    <div className="relative w-[140px] h-[140px] flex items-center justify-center rounded-[48px] bg-white shadow-xl border border-white p-7 transition-all duration-500">
+                        <img src={logo} alt="Logo" className="w-full h-full object-contain relative z-10" />
+                        <motion.div
+                            animate={{ x: ['-200%', '200%'] }}
+                            transition={{ duration: 4, repeat: Infinity, repeatDelay: 1 }}
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-50/50 to-transparent skew-x-[-25deg]"
+                        />
+                    </div>
+                </motion.div>
+
+                {/* BRANDING */}
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-black text-slate-800 tracking-[-0.04em] leading-none mb-1 uppercase text-center block w-full">
+                        ANGLE <span className="text-indigo-600">ADMIN</span>
                     </h1>
-                    <p className="text-emerald-100 text-xs font-medium tracking-wide uppercase opacity-90">Administration Portal</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.45em]">Security & Governance</p>
                 </div>
 
-                <div className="p-8">
-                    {/* Mode Switcher */}
-                    <div className="flex bg-slate-100 p-1 rounded-xl mb-8">
+                {/* LOGIN CARD */}
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-full bg-white/95 backdrop-blur-2xl rounded-[44px] shadow-2xl border border-white p-8 pt-10 relative"
+                >
+                    {/* Header Tabs */}
+                    <div className="flex bg-slate-50/80 p-1.5 rounded-[22px] mb-10 border border-slate-100">
                         {['login', 'register'].map((m) => (
                             <button
                                 key={m}
                                 onClick={() => setMode(m)}
                                 className={cn(
-                                    "flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all duration-300",
-                                    mode === m ? "bg-white text-emerald-600 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                                    "flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-[18px] transition-all duration-500 border-none cursor-pointer",
+                                    mode === m ? "bg-white text-indigo-700 shadow-xl" : "text-slate-400 hover:text-slate-600 outline-none"
                                 )}
                             >
                                 {m}
@@ -118,109 +209,97 @@ const AdminLogin = () => {
                     </div>
 
                     <AnimatePresence mode="wait">
-                        {successMsg && (
-                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-6 p-4 bg-teal-50 border border-teal-100 rounded-xl text-teal-700 text-xs font-bold text-center">
-                                {successMsg}
-                            </motion.div>
-                        )}
-                        {error && (
-                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-xs font-bold text-center">
-                                {error}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    <AnimatePresence mode="wait">
-                        {mode === 'login' && (
-                            <motion.form key="login" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} onSubmit={handleLogin} className="space-y-5">
-                                <div>
-                                    <label className={labelClasses}>Administrator Identifier</label>
-                                    <div className="relative group">
-                                        <HiOutlineIdentification className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
-                                        <input type="text" value={loginData.employeeId} onChange={e => setLoginData({ ...loginData, employeeId: e.target.value })} placeholder="EX: ADMIN-001" className={`${inputClasses} pl-11`} required />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className={labelClasses}>Secure Access Key</label>
-                                    <div className="relative group">
-                                        <HiOutlineLockClosed className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
-                                        <input type="password" value={loginData.password} onChange={e => setLoginData({ ...loginData, password: e.target.value })} placeholder="••••••••" className={`${inputClasses} pl-11`} required />
-                                    </div>
+                        {mode === 'login' ? (
+                            <motion.form
+                                key="login"
+                                initial={{ opacity: 0, x: -15 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 15 }}
+                                onSubmit={handleLogin}
+                                className="space-y-10"
+                            >
+                                <div className="space-y-12">
+                                    <PremiumInput
+                                        label="Admin Identifier"
+                                        icon={HiOutlineIdentification}
+                                        value={loginData.employeeId}
+                                        onChange={v => setLoginData({ ...loginData, employeeId: v })}
+                                        placeholder="EX: ADMIN-01"
+                                    />
+                                    <PremiumInput
+                                        label="Secure Key"
+                                        icon={HiOutlineLockClosed}
+                                        type="password"
+                                        value={loginData.password}
+                                        onChange={v => setLoginData({ ...loginData, password: v })}
+                                        placeholder="••••••••"
+                                    />
                                 </div>
 
                                 <motion.button
-                                    whileTap={{ scale: 0.98 }}
-                                    type="submit"
+                                    whileTap={{ scale: 0.96 }}
+                                    className="w-full relative group/btn h-[68px] bg-slate-900 rounded-[24px] shadow-xl transition-all duration-300 flex items-center justify-center border-none cursor-pointer overflow-hidden mt-6"
                                     disabled={isLoading}
-                                    className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 mt-4"
                                 >
-                                    {isLoading ? 'Decrypting...' : 'Secure Admin Login'}
-                                    {!isLoading && <HiOutlineChevronRight className="w-4 h-4 text-white" />}
+                                    <div className="absolute inset-0 bg-indigo-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
+                                    <span className="relative z-10 text-[13px] font-black text-white uppercase tracking-[0.25em] block w-full text-center">{isLoading ? 'Authorizing...' : 'Secure Admin Login'}</span>
                                 </motion.button>
 
-                                <div className="text-center pt-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => navigate('/auth/login')}
-                                        className="text-xs font-semibold text-slate-400 hover:text-emerald-600 transition-colors"
-                                    >
-                                        Return to Employee Portal
-                                    </button>
-                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/auth/login')}
+                                    className="w-full text-center text-[10px] font-black text-slate-300 hover:text-indigo-500 transition-colors uppercase tracking-[0.3em] bg-transparent border-none cursor-pointer mt-4"
+                                >
+                                    Personnel Portal
+                                </button>
                             </motion.form>
-                        )}
-
-                        {mode === 'register' && (
+                        ) : (
                             <motion.form
                                 key="register"
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 10 }}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
                                 onSubmit={handleRegister}
-                                className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar"
+                                className="space-y-6 max-h-[450px] overflow-y-auto pr-1 custom-scrollbar"
                             >
-                                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-4">
-                                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">Admin Induction</h3>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className={labelClasses}>Full Legal Name</label>
-                                            <input type="text" placeholder="John Doe" value={registerData.fullName} onChange={e => setRegisterData({ ...registerData, fullName: e.target.value })} className={inputClasses} required />
-                                        </div>
-                                        <div>
-                                            <label className={labelClasses}>Mobile Number</label>
-                                            <input type="tel" placeholder="+91 99999 00000" value={registerData.mobile} onChange={e => setRegisterData({ ...registerData, mobile: e.target.value })} className={inputClasses} required />
-                                        </div>
-                                        <div>
-                                            <label className={labelClasses}>Email Address</label>
-                                            <input type="email" placeholder="admin@example.com" value={registerData.email} onChange={e => setRegisterData({ ...registerData, email: e.target.value })} className={inputClasses} required />
-                                        </div>
-                                        <div>
-                                            <label className={labelClasses}>Password</label>
-                                            <input type="password" placeholder="Min 8 chars" value={registerData.password} onChange={e => setRegisterData({ ...registerData, password: e.target.value })} className={inputClasses} required />
-                                        </div>
-                                        <div>
-                                            <label className={`${labelClasses} text-emerald-600`}>Master Secret Key</label>
-                                            <div className="relative group">
-                                                <HiOutlineKey className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
-                                                <input type="password" placeholder="••••••••" value={registerData.adminSecret} onChange={e => setRegisterData({ ...registerData, adminSecret: e.target.value })} className={`${inputClasses} pl-10 border-emerald-200 bg-emerald-50/50 focus:border-emerald-500`} required />
-                                            </div>
-                                        </div>
+                                <div className="space-y-6">
+                                    <RegularInput label="Induction Name" value={registerData.fullName} onChange={v => setRegisterData({ ...registerData, fullName: v })} required />
+                                    <RegularInput label="Gov Mobile" type="tel" value={registerData.mobile} onChange={v => setRegisterData({ ...registerData, mobile: v })} required />
+                                    <RegularInput label="Admin Email" type="email" value={registerData.email} onChange={v => setRegisterData({ ...registerData, email: v })} required />
+                                    <RegularInput label="Secure Pass" type="password" value={registerData.password} onChange={v => setRegisterData({ ...registerData, password: v })} required />
+
+                                    <div className="pt-8 border-t border-slate-50 space-y-3">
+                                        <label className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] pl-1 flex items-center gap-2">
+                                            <HiOutlineKey className="w-4 h-4" />
+                                            Master Secret protocol
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={registerData.adminSecret}
+                                            onChange={e => setRegisterData({ ...registerData, adminSecret: e.target.value })}
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-[24px] px-6 py-4.5 text-sm font-bold text-slate-900 focus:bg-white focus:border-indigo-400 outline-none transition-all placeholder:text-slate-200"
+                                            placeholder="Secret Required"
+                                            required
+                                        />
                                     </div>
                                 </div>
 
                                 <motion.button
-                                    whileTap={{ scale: 0.98 }}
-                                    type="submit"
+                                    whileTap={{ scale: 0.96 }}
+                                    className="w-full h-16 bg-indigo-600 text-white rounded-[24px] text-xs font-black uppercase tracking-widest shadow-xl border-none cursor-pointer mt-6"
                                     disabled={isLoading}
-                                    className="w-full py-3 bg-emerald-600 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/20 mt-2"
                                 >
-                                    {isLoading ? 'Processing...' : 'Authorize Induction'}
+                                    {isLoading ? 'Authorizing...' : 'Establish Admin Unit'}
                                 </motion.button>
                             </motion.form>
                         )}
                     </AnimatePresence>
-                </div>
-            </motion.div>
+                </motion.div>
+
+                <p className="mt-12 text-[10px] font-black text-slate-200 uppercase tracking-[0.5em] opacity-80">
+                    Governance Node • Authorized Personnel Only
+                </p>
+            </div>
         </div>
     );
 };

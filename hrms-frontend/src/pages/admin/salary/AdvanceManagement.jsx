@@ -35,128 +35,129 @@ const AdvanceManagement = () => {
         finally { setActionLoading(false); }
     };
 
-    const statusColor = (status) => {
-        if (status === 'Approved') return 'text-emerald-700 bg-emerald-50 border-emerald-100';
-        if (status === 'Rejected') return 'text-rose-700 bg-rose-50 border-rose-100';
-        return 'text-amber-700 bg-amber-50 border-amber-100';
+    const statusStyle = (status) => {
+        if (status === 'Approved') return 'text-[#3F7D58] bg-[#3F7D58]/5 border-[#3F7D58]/20';
+        if (status === 'Rejected') return 'text-[#B23A48] bg-[#B23A48]/5 border-[#B23A48]/20';
+        return 'text-[#C46A2D] bg-[#F9EBE0] border-[#F9EBE0]';
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div>
-                <h1 className="text-3xl font-black text-slate-900 tracking-tighter uppercase leading-none">Advance Requests</h1>
-                <p className="text-slate-500 text-[10px] mt-2 font-black uppercase tracking-[0.3em] flex items-center gap-2 italic">
-                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-                    Manage employee advance requests
-                </p>
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 p-2 md:p-0">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h1 className="text-[32px] font-black text-slate-900 tracking-tighter uppercase leading-tight">Advance Requests</h1>
+                    <p className="text-slate-500 text-[10px] mt-1 font-black uppercase tracking-[0.3em] flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-[#C46A2D] rounded-full shadow-lg shadow-[#C46A2D]/20" />
+                        Manage Salary Advances
+                    </p>
+                </div>
             </div>
 
             {loading ? (
-                <div className="bg-white border border-slate-100 rounded-[40px] py-32 text-center shadow-lg">
-                    <div className="w-12 h-12 border-[3px] border-slate-100 border-t-emerald-600 rounded-full animate-spin mx-auto" />
-                    <p className="mt-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Loading Ledger...</p>
+                <div className="bg-white border border-[#DCDCDC] rounded-[32px] py-32 text-center shadow-sm">
+                    <div className="w-10 h-10 border-[3px] border-[#F5F5F5] border-t-[#C46A2D] rounded-full animate-spin mx-auto" />
+                    <p className="mt-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Loading Requests...</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {requests.map((r) => (
-                        <motion.div key={r._id} whileHover={{ translateY: -4 }}
-                            className="bg-white border border-slate-200 rounded-[32px] p-6 space-y-5 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)] hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] transition-all group">
-                            <div className="flex justify-between items-start">
+                        <div key={r._id}
+                            className="bg-white border border-[#DCDCDC]/60 rounded-[32px] p-7 space-y-6 hover:shadow-2xl hover:shadow-[#C46A2D]/10 transition-all group relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#F9EBE0]/20 to-transparent -mr-16 -mt-16 rounded-full" />
+
+                            <div className="flex justify-between items-start relative z-10">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 border border-slate-100 shadow-inner group-hover:scale-110 transition-transform">
-                                        <HiOutlineCash className="w-6 h-6 group-hover:text-emerald-500 transition-colors" />
+                                    <div className="w-12 h-12 bg-[#F5F5F5] rounded-2xl flex items-center justify-center text-[#C46A2D] border border-[#DCDCDC]/40 shadow-inner group-hover:rotate-6 transition-transform">
+                                        <HiOutlineCash className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h4 className="text-lg font-black text-slate-900 tracking-tight">₹{r.amount?.toLocaleString()}</h4>
-                                        <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest">{r.userId?.fullName || 'UNKNOWN'}</p>
+                                        <h4 className="text-xl font-black text-slate-900 tracking-tighter">₹{r.amount?.toLocaleString()}</h4>
+                                        <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest mt-0.5">{r.userId?.fullName || 'N/A'}</p>
                                     </div>
                                 </div>
-                                <span className={`text-[9px] font-black px-3 py-1 rounded-full border uppercase tracking-widest ${statusColor(r.status)}`}>{r.status}</span>
+                                <span className={`text-[8px] font-black px-3 py-1.5 rounded-full border uppercase tracking-widest ${statusStyle(r.status)}`}>{r.status}</span>
                             </div>
-                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100 min-h-[70px] flex items-center">
-                                <p className="text-[11px] text-slate-500 font-bold leading-relaxed italic">" {r.reason} "</p>
+
+                            <div className="bg-[#F5F5F5]/50 rounded-2xl p-5 border border-[#DCDCDC]/30 min-h-[80px] flex items-center relative z-10">
+                                <p className="text-[12px] text-slate-600 font-bold leading-relaxed tracking-tight italic">"{r.reason}"</p>
                             </div>
-                            <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                                <div className="space-y-0.5">
-                                    <p className="text-[8px] font-black text-slate-300 uppercase tracking-[0.2em]">Request Date</p>
-                                    <span className="text-[10px] text-slate-500 font-black">{new Date(r.createdAt).toLocaleDateString()}</span>
+
+                            <div className="flex items-center justify-between pt-6 border-t border-[#DCDCDC]/40 relative z-10">
+                                <div className="space-y-1">
+                                    <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Date</p>
+                                    <span className="text-[11px] text-slate-900 font-black uppercase">{new Date(r.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                 </div>
                                 {r.status === 'Pending' && (
                                     <button onClick={() => { setSelectedRequest(r); setShowModal(true); }}
-                                        className="text-[9px] font-black text-white bg-slate-900 hover:bg-emerald-600 px-5 py-2.5 rounded-xl transition-all uppercase tracking-widest shadow-xl shadow-slate-200 cursor-pointer">
-                                        Review Request
+                                        className="text-[10px] font-black text-white bg-gradient-to-r from-[#C46A2D] to-[#A55522] px-6 py-3 rounded-xl transition-all uppercase tracking-widest shadow-lg hover:shadow-[#C46A2D]/20 active:scale-95 cursor-pointer">
+                                        Review
                                     </button>
                                 )}
                             </div>
-                        </motion.div>
+                        </div>
                     ))}
                     {requests.length === 0 && (
-                        <div className="col-span-full bg-white border-2 border-dashed border-slate-100 rounded-[48px] py-32 text-center shadow-inner italic text-slate-300 font-black uppercase tracking-widest">
-                            No active requests found.
+                        <div className="col-span-full bg-white border-2 border-dashed border-[#DCDCDC] rounded-[48px] py-40 text-center shadow-inner">
+                            <p className="text-slate-300 font-black uppercase tracking-[0.4em] text-xs italic">NO_ACTIVE_TELEMETRY</p>
                         </div>
                     )}
                 </div>
             )}
 
-            <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Review Advance Request" maxWidth="max-w-xl">
+            <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Audit Advance Matrix" maxWidth="max-w-xl">
                 {selectedRequest && (
-                    <div className="space-y-8 py-2">
+                    <div className="space-y-8 p-8">
                         {/* Summary Header */}
-                        <div className="flex items-center gap-6 p-6 bg-slate-50 rounded-[32px] border border-slate-100 shadow-inner">
-                            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-300 text-2xl font-black border border-slate-100">
+                        <div className="flex items-center gap-6 p-6 bg-[#F5F5F5] rounded-[28px] border border-[#DCDCDC]/60 shadow-inner">
+                            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-[#C46A2D] text-2xl font-black border border-[#DCDCDC]/40 shadow-sm">
                                 {selectedRequest.userId?.fullName?.[0]}
                             </div>
                             <div className="flex-1">
-                                <h4 className="text-xl font-black text-slate-900 tracking-tight leading-none">{selectedRequest.userId?.fullName}</h4>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">{selectedRequest.userId?.employeeId} • {selectedRequest.hubName || 'N/A'}</p>
+                                <h4 className="text-xl font-black text-slate-900 tracking-tighter leading-none uppercase">{selectedRequest.userId?.fullName}</h4>
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">{selectedRequest.userId?.employeeId} • <span className="text-[#C46A2D]">{selectedRequest.hubName || 'GLOBAL'}</span></p>
                             </div>
                             <div className="text-right">
                                 <p className="text-2xl font-black text-slate-900 tracking-tighter">₹{selectedRequest.amount?.toLocaleString()}</p>
-                                <p className="text-[9px] text-emerald-600 uppercase font-black tracking-widest mt-1">Request Amount</p>
+                                <p className="text-[9px] text-[#C46A2D] uppercase font-black tracking-widest mt-1">Delta Value</p>
                             </div>
                         </div>
 
-                        {/* Details Summary */}
+                        {/* Details Grid */}
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="p-5 bg-white border border-slate-100 rounded-3xl space-y-1 shadow-sm">
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Required By</p>
-                                <p className="text-sm font-black text-slate-900">{selectedRequest.dateRequired ? new Date(selectedRequest.dateRequired).toLocaleDateString(undefined, { dateStyle: 'long' }) : 'NOT_SPECIFIED'}</p>
-                            </div>
-                            <div className="p-5 bg-white border border-slate-100 rounded-3xl space-y-1 shadow-sm">
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Current Salary</p>
-                                <p className="text-sm font-black text-slate-900">₹{selectedRequest.currentSalary?.toLocaleString() || '0'}</p>
-                            </div>
-                            <div className="p-5 bg-white border border-slate-100 rounded-3xl space-y-1 shadow-sm">
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Pending Liability</p>
-                                <p className="text-sm font-black text-rose-600">₹{selectedRequest.pendingAdvance?.toLocaleString() || '0'}</p>
-                            </div>
-                            <div className="p-5 bg-white border border-slate-100 rounded-3xl space-y-1 shadow-sm">
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Hub Name</p>
-                                <p className="text-sm font-black text-slate-900">{selectedRequest.hubName || 'N/A'}</p>
-                            </div>
+                            {[
+                                ['REQUIRED BY', selectedRequest.dateRequired ? new Date(selectedRequest.dateRequired).toLocaleDateString(undefined, { dateStyle: 'medium' }) : 'ASAP', 'text-slate-900'],
+                                ['FISCAL_BASE', `₹${selectedRequest.currentSalary?.toLocaleString() || '0'}`, 'text-slate-900'],
+                                ['LIABILITY', `₹${selectedRequest.pendingAdvance?.toLocaleString() || '0'}`, 'text-[#B23A48]'],
+                                ['ORIGIN_HUB', selectedRequest.hubName || 'N/A', 'text-slate-900'],
+                            ].map(([label, value, color]) => (
+                                <div key={label} className="p-5 bg-white border border-[#DCDCDC] rounded-2xl space-y-1.5 shadow-sm">
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
+                                    <p className={`text-[13px] font-black uppercase tracking-tight ${color}`}>{value}</p>
+                                </div>
+                            ))}
                         </div>
 
                         {/* Justification & Verification */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div className="space-y-3">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Employee's Reason</label>
-                                <div className="p-6 bg-slate-50 rounded-[28px] border border-slate-100 text-sm text-slate-600 italic font-medium leading-relaxed shadow-inner">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Employee Rationale</label>
+                                <div className="p-6 bg-[#F5F5F5] rounded-2xl border border-[#DCDCDC]/40 text-[13px] text-slate-700 italic font-bold leading-relaxed shadow-inner">
                                     "{selectedRequest.reason}"
                                 </div>
                             </div>
                             <div className="space-y-3">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Payment Proof (QR Code)</label>
-                                <div className="aspect-square bg-slate-50 rounded-[28px] border border-slate-200 overflow-hidden flex items-center justify-center p-1 shadow-inner group relative">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Identity QR Proof</label>
+                                <div className="aspect-square bg-[#F5F5F5] rounded-2xl border border-[#DCDCDC] overflow-hidden flex items-center justify-center p-1 shadow-inner group relative">
                                     {selectedRequest.qrCodeUrl ? (
                                         <>
-                                            <img src={getFileUrl(selectedRequest.qrCodeUrl)} alt="QR Code" className="w-full h-full object-cover rounded-2xl group-hover:scale-110 transition-transform duration-500" />
+                                            <img src={getFileUrl(selectedRequest.qrCodeUrl)} alt="QR Code" className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500" />
                                             <button onClick={() => window.open(getFileUrl(selectedRequest.qrCodeUrl), '_blank')}
-                                                className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px] rounded-2xl">
-                                                <span className="text-[8px] font-black text-white bg-white/20 px-4 py-1.5 rounded-full border border-white/30 uppercase tracking-[0.2em]">View Proof</span>
+                                                className="absolute inset-0 bg-slate-900/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px] rounded-xl cursor-pointer">
+                                                <span className="text-[9px] font-black text-white bg-white/20 px-5 py-2 rounded-full border border-white/30 uppercase tracking-[0.2em]">Full Manifest</span>
                                             </button>
                                         </>
                                     ) : (
-                                        <span className="text-[10px] font-black text-slate-300 italic">No QR Code Uploaded</span>
+                                        <span className="text-[9px] font-black text-slate-300 italic uppercase">NULL_MANIFEST</span>
                                     )}
                                 </div>
                             </div>
@@ -165,23 +166,21 @@ const AdvanceManagement = () => {
                         {/* Decision Console */}
                         <div className="space-y-6 pt-2">
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Admin Remarks (Optional)</label>
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Admin Audit Remarks</label>
                                 <textarea value={remarks} onChange={(e) => setRemarks(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-[24px] px-6 py-4 text-sm text-slate-900 font-bold resize-none outline-none h-24 focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 placeholder:text-slate-200"
-                                    placeholder="Enter remarks for the employee..." />
+                                    className="w-full bg-[#F5F5F5] border border-[#DCDCDC] rounded-2xl px-6 py-4 text-xs text-slate-900 font-bold resize-none outline-none h-24 focus:bg-white focus:border-[#C46A2D] transition-all placeholder:text-slate-300"
+                                    placeholder="Log technical remarks here..." />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-6">
-                                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                                    onClick={() => handleAction('Rejected')} disabled={actionLoading}
-                                    className="py-5 bg-rose-50 text-rose-600 border border-rose-100 rounded-[24px] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-rose-600 hover:text-white transition-all cursor-pointer shadow-sm">
-                                    Deny Request
-                                </motion.button>
-                                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                                    onClick={() => handleAction('Approved')} disabled={actionLoading}
-                                    className="py-5 bg-slate-900 text-white rounded-[24px] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-emerald-600 transition-all cursor-pointer shadow-2xl shadow-slate-200">
-                                    Approve Advance
-                                </motion.button>
+                            <div className="grid grid-cols-2 gap-4">
+                                <button onClick={() => handleAction('Rejected')} disabled={actionLoading}
+                                    className="py-4 bg-white text-slate-400 hover:text-[#B23A48] border border-[#DCDCDC] rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all cursor-pointer active:scale-95">
+                                    Deny Entry
+                                </button>
+                                <button onClick={() => handleAction('Approved')} disabled={actionLoading}
+                                    className="py-4 bg-gradient-to-r from-[#C46A2D] to-[#A55522] text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg hover:shadow-[#C46A2D]/20 transition-all cursor-pointer active:scale-95">
+                                    Authorize Flow
+                                </button>
                             </div>
                         </div>
                     </div>

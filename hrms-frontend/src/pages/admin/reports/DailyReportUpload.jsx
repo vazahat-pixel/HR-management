@@ -44,68 +44,59 @@ const DailyReportUpload = () => {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <h2 className="text-2xl font-black text-slate-800 tracking-tight">Daily Performance Intake</h2>
-                    <p className="text-sm font-bold text-slate-500 mt-1 uppercase tracking-widest">Excel Telemetry Bulk Processing</p>
+                    <h2 className="text-[32px] font-black text-slate-900 tracking-tighter uppercase leading-tight">Bulk File Upload</h2>
+                    <p className="text-slate-500 text-[10px] mt-1 font-black uppercase tracking-[0.3em] flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-[#C46A2D] rounded-full shadow-lg shadow-[#C46A2D]/20" />
+                        Excel Report Upload
+                    </p>
                 </div>
-                <div className="flex items-center gap-3 bg-white p-2.5 rounded-2xl border border-slate-100 shadow-sm">
-                    <HiOutlineInformationCircle className="text-emerald-500 w-5 h-5" />
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Columns Required: CasperEHRID, Full_Name, HubName, OFD, OFP, DEL, PICK</span>
+                <div className="hidden xl:flex items-center gap-4 bg-white px-6 py-3 rounded-2xl border border-[#DCDCDC] shadow-sm">
+                    <HiOutlineInformationCircle className="text-[#C46A2D] w-5 h-5" />
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Protocol: CasperFHRID, Full_Name, HubName, OFD, DEL, PICK</span>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 {/* Upload Form */}
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-lg"
-                >
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-md">
-                            <HiOutlineUpload className="w-5 h-5" />
+                <div className="bg-white border border-[#DCDCDC]/60 rounded-[40px] p-10 shadow-sm relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#F9EBE0]/20 to-transparent -mr-16 -mt-16 rounded-full" />
+
+                    <div className="flex items-center gap-4 mb-10 relative z-10">
+                        <div className="w-12 h-12 rounded-2xl bg-[#F5F5F5] flex items-center justify-center text-[#C46A2D] border border-[#DCDCDC]/40 shadow-inner group-hover:rotate-6 transition-transform">
+                            <HiOutlineUpload className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-black text-slate-900 tracking-tight">Upload Daily Reports</h3>
-                            <p className="text-xs text-slate-500 font-bold">Bulk process employee performance data</p>
+                            <h3 className="text-xl font-black text-slate-900 tracking-tighter uppercase">Daily Bulk Ingestion</h3>
+                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Upload Casper Performance Ledger</p>
                         </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4 mb-6">
-                        <div className="flex items-start gap-3">
-                            <HiOutlineInformationCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                            <div>
-                                <p className="text-xs font-black text-blue-900 uppercase tracking-wide mb-1">Required Columns</p>
-                                <p className="text-xs text-blue-700 font-medium">CasperEHRID, Full_Name, HubName, OFD, OFP, DEL, PICK</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <form onSubmit={handleUpload} className="space-y-6">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Logistics Date</label>
+                    <form onSubmit={handleUpload} className="space-y-8 relative z-10">
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Report Target Date</label>
                             <input
                                 type="date"
                                 value={reportDate}
                                 onChange={(e) => setReportDate(e.target.value)}
-                                className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-900 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all"
+                                className="w-full bg-[#F5F5F5] border border-[#DCDCDC] rounded-2xl px-6 py-4 text-[13px] font-black text-slate-900 uppercase tracking-tight outline-none focus:bg-white focus:border-[#C46A2D] transition-all placeholder:text-slate-300"
                                 required
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Performance File (.xlsx, .csv)</label>
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Select Casper Ledger [.XLSX, .CSV]</label>
                             <label className={`
-                            relative flex flex-col items-center justify-center 
-                            border-2 border-dashed rounded-2xl p-8 cursor-pointer
-                            transition-all duration-300
-                            ${file
-                                    ? 'border-emerald-500 bg-gradient-to-br from-emerald-50 to-teal-50'
-                                    : 'border-slate-300 bg-slate-50 hover:border-emerald-400 hover:bg-emerald-50/30'
+                                relative flex flex-col items-center justify-center 
+                                border-2 border-dashed rounded-[32px] p-12 cursor-pointer
+                                transition-all duration-500
+                                ${file
+                                    ? 'border-[#C46A2D] bg-[#F9EBE0]/20'
+                                    : 'border-[#DCDCDC] bg-[#F5F5F5] hover:border-[#C46A2D] hover:bg-white'
                                 }
-                        `}>
+                            `}>
                                 <input
                                     type="file"
                                     accept=".xlsx,.csv"
@@ -113,20 +104,20 @@ const DailyReportUpload = () => {
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                 />
                                 {file ? (
-                                    <div className="text-center">
-                                        <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg">
-                                            <HiOutlineDocumentText className="w-8 h-8" />
+                                    <div className="text-center animate-in zoom-in-95 duration-300">
+                                        <div className="w-20 h-20 mx-auto mb-4 rounded-3xl bg-white flex items-center justify-center text-[#C46A2D] shadow-xl border border-[#F9EBE0]">
+                                            <HiOutlineDocumentText className="w-10 h-10" />
                                         </div>
-                                        <p className="text-sm font-black text-emerald-700">{file.name}</p>
-                                        <p className="text-xs text-emerald-600 mt-1">{(file.size / 1024).toFixed(2)} KB</p>
+                                        <p className="text-[14px] font-black text-slate-900 uppercase tracking-tight">{file.name}</p>
+                                        <p className="text-[10px] text-[#C46A2D] font-black uppercase tracking-widest mt-1">Payload: {(file.size / 1024).toFixed(2)} KB</p>
                                     </div>
                                 ) : (
-                                    <div className="text-center">
-                                        <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-slate-200 flex items-center justify-center">
-                                            <HiOutlineUpload className="w-8 h-8 text-slate-400" />
+                                    <div className="text-center group-hover:scale-105 transition-transform duration-500">
+                                        <div className="w-20 h-20 mx-auto mb-4 rounded-3xl bg-white border border-[#DCDCDC]/40 flex items-center justify-center text-slate-300 shadow-inner">
+                                            <HiOutlineCloudUpload className="w-10 h-10" />
                                         </div>
-                                        <p className="text-sm font-black text-slate-600">Click to Browse Files</p>
-                                        <p className="text-xs text-slate-400 mt-1">or drag and drop here</p>
+                                        <p className="text-[11px] font-black text-slate-600 uppercase tracking-widest">Mount Casper File</p>
+                                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-2 px-6 py-1.5 bg-white rounded-full border border-[#DCDCDC]/40">Tap to Search Index</p>
                                     </div>
                                 )}
                             </label>
@@ -135,84 +126,84 @@ const DailyReportUpload = () => {
                         <button
                             type="submit"
                             disabled={isLoading || !file}
-                            className="w-full bg-gradient-to-r from-slate-900 to-slate-700 hover:from-emerald-600 hover:to-teal-600 text-white px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-xl hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="w-full bg-slate-900 hover:bg-[#C46A2D] text-white px-8 py-5 rounded-[24px] text-[11px] font-black uppercase tracking-[0.3em] transition-all shadow-xl active:scale-95 disabled:opacity-30 disabled:grayscale flex items-center justify-center gap-3"
                         >
                             {isLoading ? (
                                 <>
-                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    Processing...
+                                    <div className="w-4 h-4 border-[2px] border-white border-t-transparent rounded-full animate-spin" />
+                                    Parsing Data Nodes...
                                 </>
                             ) : (
                                 <>
                                     <HiOutlineCloudUpload className="w-5 h-5" />
-                                    Execute Bulk Upload
+                                    Broadcast Reports
                                 </>
                             )}
                         </button>
                     </form>
-                </motion.div>
+                </div>
 
                 {/* Upload Report */}
-                <div className="space-y-6">
-                    <AnimatePresence>
-                        {result && (
+                <div className="h-full">
+                    <AnimatePresence mode="wait">
+                        {result ? (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm flex flex-col h-full"
+                                key="result"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-white border border-[#DCDCDC]/60 rounded-[40px] p-10 shadow-sm h-full flex flex-col"
                             >
-                                <div className="flex items-center gap-4 border-b border-slate-100 pb-6 mb-6">
-                                    <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600">
-                                        <HiOutlineDocumentReport className="w-6 h-6" />
+                                <div className="flex items-center gap-5 border-b border-[#DCDCDC]/40 pb-8 mb-8">
+                                    <div className="w-14 h-14 bg-[#F9EBE0] rounded-2xl flex items-center justify-center text-[#C46A2D] shadow-inner">
+                                        <HiOutlineDocumentReport className="w-7 h-7" />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-black text-slate-900 tracking-tight leading-none text-uppercase">Ingestion Analysis</h3>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Status: Processed Successfully</p>
+                                        <h3 className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">Transmission Analysis</h3>
+                                        <p className="text-[10px] font-black text-[#3F7D58] uppercase tracking-widest mt-2 flex items-center gap-1.5">
+                                            <span className="w-2 h-2 bg-[#3F7D58] rounded-full animate-pulse" />
+                                            Data Synchronized
+                                        </p>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-emerald-50/50 border border-emerald-100 p-6 rounded-[28px] text-center">
-                                        <div className="text-3xl font-black text-emerald-700">{result.results.success}</div>
-                                        <div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-1">Success Rows</div>
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="bg-[#F5F5F5] border border-[#DCDCDC]/40 p-8 rounded-[32px] text-center shadow-inner">
+                                        <div className="text-[36px] font-black text-slate-900 tracking-tighter leading-none">{result.summary.success}</div>
+                                        <div className="text-[9px] font-black text-[#3F7D58] uppercase tracking-[0.2em] mt-3 bg-white px-3 py-1 rounded-full border border-[#DCDCDC]/40 inline-block shadow-sm">Reports Pushed</div>
                                     </div>
-                                    <div className="bg-rose-50/50 border border-rose-100 p-6 rounded-[28px] text-center">
-                                        <div className="text-3xl font-black text-rose-700">{result.results.failed}</div>
-                                        <div className="text-[10px] font-black text-rose-600 uppercase tracking-widest mt-1">Failed Rows</div>
+                                    <div className="bg-[#F5F5F5] border border-[#DCDCDC]/40 p-8 rounded-[32px] text-center shadow-inner">
+                                        <div className="text-[36px] font-black text-slate-900 tracking-tighter leading-none">{result.summary.failed}</div>
+                                        <div className="text-[9px] font-black text-[#B23A48] uppercase tracking-[0.2em] mt-3 bg-white px-3 py-1 rounded-full border border-[#DCDCDC]/40 inline-block shadow-sm">Sync Faults</div>
                                     </div>
                                 </div>
 
-                                {result.results.details.length > 0 && (
-                                    <div className="mt-8 flex-1">
-                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-l-4 border-rose-500 pl-3 mb-4">Error Log Telemetry</h4>
-                                        <div className="max-h-[200px] overflow-y-auto pr-2 custom-scrollbar space-y-2">
-                                            {result.results.details.map((detail, idx) => (
-                                                <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex justify-between items-center gap-4 shadow-inner">
-                                                    <span className="text-[10px] font-black text-slate-900 uppercase">ID: {detail.ehrId || 'Unknown'}</span>
-                                                    <span className="text-[9px] font-bold text-rose-600 uppercase bg-white border border-rose-100 px-2.5 py-1 rounded-full">{detail.reason}</span>
+                                {result.summary.skippedFhrids.length > 0 && (
+                                    <div className="mt-10 flex-1 flex flex-col min-h-0">
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-l-[3px] border-[#B23A48] pl-4 mb-5">Unmapped FHRIDs</h4>
+                                        <div className="flex-1 overflow-y-auto pr-3 custom-scrollbar space-y-3">
+                                            {result.summary.skippedFhrids.map((id, idx) => (
+                                                <div key={idx} className="bg-white border border-[#DCDCDC] rounded-2xl p-4 flex justify-between items-center gap-6 shadow-sm hover:border-[#B23A48]/30 transition-colors">
+                                                    <span className="text-[11px] font-black text-slate-900 uppercase tracking-tight">ID: <span className="text-[#C46A2D]">{id}</span></span>
+                                                    <span className="text-[9px] font-black text-[#B23A48] uppercase bg-[#B23A48]/5 border border-[#B23A48]/10 px-3 py-1.5 rounded-xl">User Not Found</span>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                 )}
                             </motion.div>
-                        )}
-
-                        {!result && !isLoading && (
-                            <div className="h-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-[32px] flex flex-col items-center justify-center p-12 text-center opacity-60">
-                                <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center text-slate-300 shadow-sm mb-6">
-                                    <HiOutlineCheckCircle className="w-10 h-10" />
-                                </div>
-                                <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest">Awaiting Transmission</h3>
-                                <p className="text-xs text-slate-400 font-bold max-w-[200px] mt-2">The upload report will appear here once the automation executes.</p>
+                        ) : isLoading ? (
+                            <div className="h-full min-h-[500px] bg-white border border-[#DCDCDC]/60 rounded-[40px] flex flex-col items-center justify-center p-12 text-center shadow-sm">
+                                <div className="w-16 h-16 border-[3px] border-[#F5F5F5] border-t-[#C46A2D] rounded-full animate-spin mb-8" />
+                                <h3 className="text-[14px] font-black text-slate-900 uppercase tracking-[0.3em]">Processing Frame</h3>
+                                <p className="text-[11px] text-slate-400 font-bold mt-3 leading-relaxed max-w-[240px]">Mapping employee nodes and calculating performance deltas...</p>
                             </div>
-                        )}
-
-                        {isLoading && (
-                            <div className="h-full bg-white border border-slate-200 rounded-[32px] flex flex-col items-center justify-center p-12 text-center shadow-sm">
-                                <div className="loading-spinner mb-6 h-12 w-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                                <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Processing Node</h3>
-                                <p className="text-xs text-slate-400 font-bold mt-2">Mapping CasperEHRIDs and calculating deltas...</p>
+                        ) : (
+                            <div className="h-full min-h-[500px] bg-[#F5F5F5] border border-dashed border-[#DCDCDC] rounded-[40px] flex flex-col items-center justify-center p-12 text-center">
+                                <div className="w-24 h-24 bg-white rounded-[32px] flex items-center justify-center text-slate-200 shadow-sm mb-8 border border-[#DCDCDC]/40 group-hover:scale-110 transition-transform">
+                                    <HiOutlineCloudUpload className="w-12 h-12" />
+                                </div>
+                                <h3 className="text-[14px] font-black text-slate-400 uppercase tracking-[0.2em]">Awaiting Uplink</h3>
+                                <p className="text-[10px] text-slate-300 font-bold max-w-[200px] mt-4 leading-relaxed uppercase tracking-wider">Operational reports will manifest here post-execution.</p>
                             </div>
                         )}
                     </AnimatePresence>

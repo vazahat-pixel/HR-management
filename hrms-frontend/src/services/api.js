@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -65,6 +65,7 @@ export const joiningAPI = {
     getAll: (params) => api.get('/joining-requests', { params }),
     approve: (id, config) => api.put(`/joining-requests/${id}/approve`, config),
     reject: (id, remarks) => api.put(`/joining-requests/${id}/reject`, { remarks }),
+    sendCredentials: (data) => api.post('/joining-requests/send-credentials', data),
     exportExcel: () => api.get('/joining-requests/export/excel', { responseType: 'blob' }),
 };
 
@@ -111,15 +112,25 @@ export const notificationsAPI = {
 
 // ========== PAYROLL ==========
 export const payrollAPI = {
-    generatePayslip: (userId, data) => api.post(`/payroll/generate/${userId}`, data),
-    generateBulk: (data) => api.post('/payroll/generate-bulk', data),
     getSalaryStructure: (userId) => api.get(`/payroll/salary-structure/${userId}`),
     updateSalaryStructure: (userId, data) => api.post(`/payroll/salary-structure/${userId}`, data),
-    getPayslips: (params) => api.get('/payroll/payslips', { params }),
-    downloadPayslipPDF: (id) => api.get(`/payroll/payslips/${id}/pdf`, { responseType: 'blob' }),
+    downloadPayslipPDF: (id) => api.get(`/payroll/salary-slips/${id}/pdf`, { responseType: 'blob' }),
     getPayoutReport: (params) => api.get('/payroll/payout', { params }),
     downloadPayoutPDF: (params) => api.get('/payroll/payout/pdf', { params, responseType: 'blob' }),
     downloadPayoutExcel: (params) => api.get('/payroll/payout/excel', { params, responseType: 'blob' }),
+    uploadPayout: (formData, params) => api.post('/payroll/payout-upload', formData, {
+        params,
+        headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+    getEmployeePayouts: () => api.get('/payroll/payout/employee'),
+
+    // New Salary Slips
+    uploadSalarySlips: (formData, params) => api.post('/payroll/salary-slip-upload', formData, {
+        params,
+        headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+    getSalarySlips: (params) => api.get('/payroll/salary-slips', { params }),
+    getEmployeeSalarySlips: () => api.get('/payroll/salary-slips/employee'),
 };
 
 // ========== DASHBOARD ==========
@@ -133,8 +144,9 @@ export const dailyReportsAPI = {
     upload: (formData) => api.post('/daily-reports/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
     }),
+    getEmployeeReports: (params) => api.get('/daily-reports/employee', { params }),
     getSummary: (params) => api.get('/daily-reports/summary', { params }),
-    getEmployeeReports: (params) => api.get('/daily-reports/employee', { params })
+    downloadReceipt: (id) => api.get(`/daily-reports/${id}/download`, { responseType: 'blob' }),
 };
 
 export default api;

@@ -4,16 +4,16 @@ import {
     HiOutlineUserCircle, HiOutlineMail, HiOutlinePhone,
     HiOutlineLocationMarker, HiPencil,
     HiOutlineBriefcase, HiOutlineLibrary, HiOutlineIdentification,
-    HiOutlineUserGroup, HiCheckCircle, HiExclamationCircle
+    HiOutlineUserGroup, HiCheckCircle, HiExclamationCircle,
+    HiOutlineDocumentText, HiOutlineCash, HiOutlineCalendar, HiOutlineBell,
+    HiChevronRight
 } from 'react-icons/hi';
 import { useAuth } from '../../../context/AuthContext';
 import { authAPI } from '../../../services/api';
-// Ensure Modal is imported correctly. If it was working before, keep it. 
-// If not, we might need to fix the path or the component itself.
-// Assuming Modal is at ../../../components/common/Modal
 import Modal from '../../../components/common/Modal';
 import { toast } from 'react-hot-toast';
-import { cn } from '../../../lib/utils'; // Use utility for class merging
+import { cn } from '../../../lib/utils';
+import { Link } from 'react-router-dom';
 
 const Profile = () => {
     const { user } = useAuth();
@@ -56,7 +56,6 @@ const Profile = () => {
             await authAPI.updateProfile(profile);
             toast.success('Profile updated successfully!');
             setIsEditModalOpen(false);
-            // Reload to sync context - simple and effective for now
             window.location.reload();
         } catch (err) {
             toast.error(err.response?.data?.error || 'Failed to update profile');
@@ -68,187 +67,256 @@ const Profile = () => {
     const isComplete = (field) => !!user?.[field];
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24 px-2 sm:px-4">
-            {/* Profile Header */}
-            <div className="relative group mt-4">
-                <div className="h-40 w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 rounded-3xl overflow-hidden shadow-xl shadow-emerald-500/20 relative">
-                    <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
-                </div>
-                <div className="absolute -bottom-12 left-6 flex items-end">
-                    <div className="w-28 h-28 rounded-3xl border-4 border-white bg-slate-50 flex items-center justify-center text-slate-300 shadow-2xl relative group/avatar overflow-hidden">
-                        {user?.photoUrl ? (
-                            <img src={user.photoUrl} alt="Avatar" className="w-full h-full object-cover" />
-                        ) : (
-                            <HiOutlineUserCircle className="w-20 h-20" />
-                        )}
-                    </div>
-                    <div className="mb-3 ml-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                                {user?.fullName || 'User'}
+        <div className="max-w-2xl mx-auto space-y-6 pb-12">
+            {/* HERO SECTION - Premium Gradient */}
+            <div className="relative h-72 rounded-[40px] overflow-hidden shadow-2xl">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#1E293B] via-[#0F172A] to-[#C46A2D]/80" />
+
+                {/* Decorative Pattern Overlay */}
+                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:12px_12px]" />
+
+                <div className="relative h-full flex flex-col justify-center px-8 z-10">
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-2">
+                            <h1 className="text-3xl font-black text-white tracking-tighter drop-shadow-md">
+                                {user?.fullName || 'User Name'}
                             </h1>
+                            <div className="inline-flex items-center px-4 py-1.5 bg-orange-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-orange-500/20">
+                                {user?.designation || 'Delivery Associate'}
+                            </div>
+                            <p className="text-white/60 text-[10px] font-bold uppercase tracking-[0.2em] mt-3">
+                                FHRID: {user?.empId || '54823901'}
+                            </p>
+                        </div>
+
+                        {/* Avatar with Glow */}
+                        <div className="relative">
+                            <motion.div
+                                animate={{ boxShadow: ['0 0 20px rgba(255,255,255,0.2)', '0 0 40px rgba(255,255,255,0.4)', '0 0 20px rgba(255,255,255,0.2)'] }}
+                                transition={{ repeat: Infinity, duration: 3 }}
+                                className="w-28 h-28 rounded-full border-4 border-white/30 backdrop-blur-md overflow-hidden relative shadow-2xl"
+                            >
+                                {user?.photoUrl ? (
+                                    <img src={user.photoUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full bg-slate-800 flex items-center justify-center text-white/20">
+                                        <HiOutlineUserCircle className="w-20 h-20" />
+                                    </div>
+                                )}
+                            </motion.div>
                             <button
                                 onClick={() => setIsEditModalOpen(true)}
-                                className="w-8 h-8 flex items-center justify-center bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-emerald-600 hover:shadow-md transition-all"
+                                className="absolute bottom-1 -right-1 w-8 h-8 bg-white text-orange-500 rounded-full flex items-center justify-center shadow-xl border-2 border-slate-900 group/edit transition-transform active:scale-90"
                             >
-                                <HiPencil className="w-4 h-4" />
+                                <HiPencil className="w-4 h-4 group-hover/edit:rotate-12 transition-transform" />
                             </button>
                         </div>
-                        <p className="text-emerald-600 font-black uppercase tracking-widest text-[10px] bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 mt-1 inline-block">
-                            {user?.role === 'admin' ? 'Administrator' : 'Employee Node'}
-                        </p>
                     </div>
                 </div>
             </div>
 
-            <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                {/* Personal & Contact */}
-                <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="p-6 bg-white border border-slate-200/60 rounded-3xl space-y-5 shadow-sm"
-                >
-                    <div className="flex items-center justify-between border-b border-dashed border-slate-100 pb-3">
-                        <h3 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            Identity & Contact
-                        </h3>
-                        <HiOutlineMail className="w-5 h-5 text-slate-300" />
-                    </div>
-                    <div className="space-y-3">
-                        <ProfileItem icon={HiOutlineMail} label="Email" value={user?.email} isComplete={isComplete('email')} />
-                        <ProfileItem icon={HiOutlinePhone} label="Phone" value={user?.mobile} isComplete={isComplete('mobile')} />
-                        <ProfileItem icon={HiOutlineUserGroup} label="Partner" value={user?.partnerName} isComplete={isComplete('partnerName')} />
-                        <ProfileItem icon={HiOutlineLibrary} label="Hub Name" value={user?.hubName} isComplete={isComplete('hubName')} />
-                    </div>
-                </motion.div>
+            {/* CORE DATA - GLASSMORPHISM CARD */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative -mt-16 mx-4 z-20 group"
+            >
+                <div className="absolute inset-0 bg-white/40 backdrop-blur-3xl rounded-[32px] border border-white/40 shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all duration-500 group-hover:shadow-[0_30px_60px_rgba(0,0,0,0.15)] group-hover:-translate-y-1" />
 
-                {/* Professional & Governance */}
-                <motion.div
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="p-6 bg-white border border-slate-200/60 rounded-3xl space-y-5 shadow-sm"
-                >
-                    <div className="flex items-center justify-between border-b border-dashed border-slate-100 pb-3">
-                        <h3 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
-                            Banking & KYC
-                        </h3>
-                        <HiOutlineIdentification className="w-5 h-5 text-slate-300" />
+                <div className="relative p-6 space-y-6">
+                    <div className="flex items-center justify-between pb-4 border-b border-black/5">
+                        <div>
+                            <h3 className="text-lg font-black text-slate-900 tracking-tight">Active Node</h3>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">HUB: {user?.hubName || 'Base Station'}</p>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-600 rounded-full border border-emerald-500/20">
+                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Active</span>
+                            <HiChevronRight className="w-3 h-3 ml-1" />
+                        </div>
                     </div>
-                    <div className="space-y-3">
-                        <ProfileItem icon={HiOutlineBriefcase} label="Bank Account" value={user?.bankAccount} isComplete={isComplete('bankAccount')} />
-                        <ProfileItem icon={HiOutlineLibrary} label="IFSC Code" value={user?.ifscCode} isComplete={isComplete('ifscCode')} />
-                        <ProfileItem icon={HiOutlineIdentification} label="Aadhaar" value={user?.aadhaar} isComplete={isComplete('aadhaar')} />
-                        <ProfileItem icon={HiOutlineIdentification} label="PAN Card" value={user?.pan} isComplete={isComplete('pan')} />
-                    </div>
-                </motion.div>
 
-                {/* Location */}
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-6 bg-white border border-slate-200/60 rounded-3xl space-y-3 shadow-sm md:col-span-2"
-                >
-                    <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 border border-emerald-100 shrink-0">
-                            <HiOutlineLocationMarker className="w-5 h-5" />
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 border border-slate-200 shadow-sm shrink-0">
+                                <HiOutlinePhone className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Phone</p>
+                                <p className="text-xs font-bold text-slate-900 truncate">{user?.mobile || 'Connect Number'}</p>
+                            </div>
                         </div>
-                        <div className="flex-1">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Base Address</p>
-                            <p className="text-slate-800 font-bold text-sm leading-relaxed">{user?.address || 'Address Not Provided'}</p>
+                        <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 border border-slate-200 shadow-sm shrink-0">
+                                <HiOutlineMail className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Email</p>
+                                <p className="text-xs font-bold text-slate-900 truncate">{user?.email || 'N/A'}</p>
+                            </div>
                         </div>
-                        {!isComplete('address') && (
-                            <span className="shrink-0 text-rose-500 font-black text-[9px] uppercase tracking-widest bg-rose-50 px-2 py-1 rounded-lg border border-rose-100">
-                                Missing
-                            </span>
-                        )}
+                        <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 border border-slate-200 shadow-sm shrink-0">
+                                <HiOutlineBriefcase className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Joined</p>
+                                <p className="text-xs font-bold text-slate-900">05 Jan, 2024</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 border border-slate-200 shadow-sm shrink-0">
+                                <HiOutlineUserGroup className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Partner</p>
+                                <p className="text-xs font-bold text-slate-900">{user?.partnerName || 'Required'}</p>
+                            </div>
+                        </div>
                     </div>
-                </motion.div>
+                </div>
+            </motion.div>
+
+            {/* IDENTITY & CONTACT MODULE */}
+            <div className="mx-4 p-8 bg-white border border-slate-100 rounded-[32px] shadow-xl shadow-slate-200/50 space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                    <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em] flex items-center gap-2">
+                        <span className="w-3 h-3 bg-orange-500 rounded-full border-2 border-white shadow-sm" />
+                        Identity & Contact
+                    </h3>
+                    <HiOutlineMail className="w-5 h-5 text-slate-200" />
+                </div>
+
+                <div className="space-y-4">
+                    <ProfileItem
+                        icon={HiOutlineMail}
+                        label="Email Address"
+                        value={user?.email}
+                        isComplete={isComplete('email')}
+                        color="bg-slate-50"
+                    />
+                    <ProfileItem
+                        icon={HiOutlinePhone}
+                        label="Mobile Network"
+                        value={user?.mobile}
+                        isComplete={isComplete('mobile')}
+                    />
+                    <ProfileItem
+                        icon={HiOutlineLocationMarker}
+                        label="Base Address"
+                        value={user?.address}
+                        isComplete={isComplete('address')}
+                    />
+                </div>
             </div>
 
-            {/* Edit Profile Modal */}
+            {/* QUICK ACTIONS - GRID */}
+            <div className="mx-4 space-y-6 pb-20">
+                <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em] pl-4 flex items-center gap-2">
+                    <span className="w-3 h-3 bg-orange-500 rounded-full border-2 border-white shadow-sm" />
+                    Quick Actions
+                </h3>
+
+                <div className="grid grid-cols-4 gap-4 px-2">
+                    <ActionCard icon={HiOutlineDocumentText} label="Payslip" to="/employee/salary" delay={0.1} />
+                    <ActionCard icon={HiOutlineCash} label="Payouts" to="/employee/salary" delay={0.2} />
+                    <ActionCard icon={HiOutlineCalendar} label="Attendance" to="/employee/dashboard" delay={0.3} />
+                    <ActionCard icon={HiOutlineBell} label="Notices" to="/employee/dashboard" delay={0.4} />
+                </div>
+            </div>
+
+            {/* Edit Modal (Preserved Context) */}
             <Modal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
-                title="Update Profile"
+                title="Update Profile Node"
             >
-                <div className="p-1">
-                    <form onSubmit={handleSaveProfile} className="space-y-5">
-                        <div className="grid grid-cols-1 gap-4">
-                            <InputGroup label="Full Name" value={profile.fullName} onChange={(val) => setProfile({ ...profile, fullName: val })} required />
-                            <InputGroup label="Email ID" value={profile.email} onChange={(val) => setProfile({ ...profile, email: val })} type="email" required />
-                            <div className="grid grid-cols-2 gap-4">
-                                <InputGroup label="Mobile" value={profile.mobile} onChange={(val) => setProfile({ ...profile, mobile: val })} required />
-                                <InputGroup label="Partner Name" value={profile.partnerName} onChange={(val) => setProfile({ ...profile, partnerName: val })} required />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <InputGroup label="Hub Name" value={profile.hubName} onChange={(val) => setProfile({ ...profile, hubName: val })} required />
-                                <InputGroup label="IFSC Code" value={profile.ifscCode} onChange={(val) => setProfile({ ...profile, ifscCode: val })} required />
-                            </div>
-                            <InputGroup label="Bank Account" value={profile.bankAccount} onChange={(val) => setProfile({ ...profile, bankAccount: val })} required />
-                            <div className="grid grid-cols-2 gap-4">
-                                <InputGroup label="Aadhaar Number" value={profile.aadhaar} onChange={(val) => setProfile({ ...profile, aadhaar: val })} required />
-                                <InputGroup label="PAN Number" value={profile.pan} onChange={(val) => setProfile({ ...profile, pan: val })} required />
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Address</label>
-                                <textarea
-                                    value={profile.address}
-                                    onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-                                    required
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-semibold resize-none h-20 placeholder:text-slate-300"
-                                    placeholder="Enter full address"
-                                />
-                            </div>
+                <form onSubmit={handleSaveProfile} className="space-y-5 p-2">
+                    <div className="grid grid-cols-1 gap-4">
+                        <InputGroup label="Full Name" value={profile.fullName} onChange={(val) => setProfile({ ...profile, fullName: val })} required />
+                        <InputGroup label="Email ID" value={profile.email} onChange={(val) => setProfile({ ...profile, email: val })} type="email" required />
+                        <div className="grid grid-cols-2 gap-4">
+                            <InputGroup label="Mobile" value={profile.mobile} onChange={(val) => setProfile({ ...profile, mobile: val })} required />
+                            <InputGroup label="Partner Name" value={profile.partnerName} onChange={(val) => setProfile({ ...profile, partnerName: val })} required />
                         </div>
-
-                        <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
-                            <button
-                                type="button"
-                                onClick={() => setIsEditModalOpen(false)}
-                                className="px-5 py-2.5 rounded-xl text-[11px] font-black text-slate-500 hover:text-slate-700 hover:bg-slate-100 uppercase tracking-widest transition-all"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="px-6 py-2.5 rounded-xl text-[11px] font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 transition-all transform hover:scale-[1.02] uppercase tracking-widest disabled:opacity-70 disabled:cursor-not-allowed"
-                            >
-                                {loading ? 'Saving...' : 'Save Changes'}
-                            </button>
+                        <div className="grid grid-cols-2 gap-4">
+                            <InputGroup label="Hub Name" value={profile.hubName} onChange={(val) => setProfile({ ...profile, hubName: val })} required />
+                            <InputGroup label="IFSC Code" value={profile.ifscCode} onChange={(val) => setProfile({ ...profile, ifscCode: val })} required />
                         </div>
-                    </form>
-                </div>
+                        <InputGroup label="Bank Account" value={profile.bankAccount} onChange={(val) => setProfile({ ...profile, bankAccount: val })} required />
+                        <div className="grid grid-cols-2 gap-4">
+                            <InputGroup label="Aadhaar" value={profile.aadhaar} onChange={(val) => setProfile({ ...profile, aadhaar: val })} required />
+                            <InputGroup label="PAN" value={profile.pan} onChange={(val) => setProfile({ ...profile, pan: val })} required />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Base Address</label>
+                            <textarea
+                                value={profile.address}
+                                onChange={(e) => setProfile({ ...profile, address: e.target.value })}
+                                required
+                                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-semibold resize-none h-24"
+                                placeholder="Full residential address"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
+                        <button type="button" onClick={() => setIsEditModalOpen(false)} className="px-5 py-2.5 text-[11px] font-black text-slate-500 uppercase tracking-widest">Cancel</button>
+                        <button type="submit" disabled={loading} className="px-8 py-3 bg-orange-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-orange-600/20 hover:bg-orange-700 transition-all">{loading ? 'Syncing...' : 'Save Changes'}</button>
+                    </div>
+                </form>
             </Modal>
         </div>
     );
 };
 
 const ProfileItem = ({ icon: Icon, label, value, isComplete }) => (
-    <div className="flex items-center gap-3.5 group p-2 hover:bg-slate-50 rounded-xl transition-colors -mx-2">
+    <div className="flex items-center gap-4 group p-4 bg-slate-50/50 hover:bg-white hover:shadow-xl hover:shadow-slate-200/40 rounded-3xl border border-transparent hover:border-slate-100 transition-all duration-300">
         <div className={cn(
-            "w-9 h-9 rounded-lg flex items-center justify-center transition-all border shadow-sm shrink-0",
-            isComplete ? "bg-white text-emerald-600 border-emerald-100/50" : "bg-slate-50 text-slate-300 border-slate-100"
+            "w-11 h-11 rounded-2xl flex items-center justify-center transition-all border shadow-sm",
+            isComplete ? "bg-white text-orange-500 border-orange-100" : "bg-white text-slate-300 border-slate-100"
         )}>
-            <Icon className="w-4 h-4" />
+            <Icon className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{label}</p>
             <p className={cn("text-xs font-bold tracking-tight truncate", !value && "text-slate-300 italic")}>
-                {value || 'Required'}
+                {value || 'Missing Required Information'}
             </p>
         </div>
-        <div className="shrink-0">
+        <div className="shrink-0 flex items-center gap-3">
             {isComplete ? (
-                <HiCheckCircle className="w-5 h-5 text-emerald-500/80" />
+                <div className="w-6 h-6 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center border border-emerald-100 shadow-sm">
+                    <HiCheckCircle className="w-4 h-4" />
+                </div>
             ) : (
-                <HiExclamationCircle className="w-5 h-5 text-rose-400/80 animate-pulse" />
+                <div className="w-6 h-6 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center border border-rose-100 shadow-sm animate-pulse">
+                    <HiExclamationCircle className="w-4 h-4" />
+                </div>
             )}
+            <div className="p-2 bg-slate-100/50 rounded-xl text-slate-300">
+                <HiChevronRight className="w-4 h-4" />
+            </div>
         </div>
     </div>
+);
+
+const ActionCard = ({ icon: Icon, label, to, delay = 0 }) => (
+    <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay }}
+    >
+        <Link
+            to={to}
+            className="flex flex-col items-center justify-center gap-3 p-4 bg-white border border-slate-100 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_15px_45px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 active:scale-95 touch-manipulation group"
+        >
+            <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-orange-50 group-hover:text-orange-500 transition-colors">
+                <Icon className="w-6 h-6" />
+            </div>
+            <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest leading-none">{label}</span>
+        </Link>
+    </motion.div>
 );
 
 const InputGroup = ({ label, value, onChange, type = "text", required = false }) => (
@@ -259,7 +327,7 @@ const InputGroup = ({ label, value, onChange, type = "text", required = false })
             value={value}
             onChange={(e) => onChange(e.target.value)}
             required={required}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-semibold placeholder:text-slate-300"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-semibold placeholder:text-slate-300"
             placeholder={label}
         />
     </div>

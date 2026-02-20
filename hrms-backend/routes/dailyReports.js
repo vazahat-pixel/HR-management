@@ -24,10 +24,12 @@ const upload = multer({
     }
 });
 
-// POST /api/hr/daily-report/upload - HR Only
+const Notification = require('../models/Notification');
+
+// POST /api/hr/daily-report/upload - HR Only (Bulk Excel)
 router.post('/upload', authenticate, authorizeAdmin, upload.single('file'), async (req, res) => {
     try {
-        if (!req.file) return res.status(400).json({ error: 'Please upload an Excel/CSV file' });
+        if (!req.file) return res.status(400).json({ error: 'Please upload an Excel file' });
         const { reportDate } = req.body;
         if (!reportDate) return res.status(400).json({ error: 'Report date is required' });
 
@@ -35,219 +37,150 @@ router.post('/upload', authenticate, authorizeAdmin, upload.single('file'), asyn
         const sheetName = workbook.SheetNames[0];
         const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-        // Helper for case-insensitive key lookup (Robustness Fix)
-        const getRowValue = (row, candidates) => {
-            const keys = Object.keys(row);
-            for (const candidate of candidates) {
-                const foundKey = keys.find(k => k.toLowerCase() === candidate.toLowerCase());
-                if (foundKey) return row[foundKey];
-            }
-            return undefined;
-        };
-
         const results = {
+            total: data.length,
             success: 0,
             failed: 0,
-            details: []
+            skippedFhrids: []
         };
 
         const reportsToInsert = [];
         const dateObj = new Date(reportDate);
         dateObj.setHours(0, 0, 0, 0);
 
-        if (data.length > 0) {
-            console.log('Upload Headers Found:', Object.keys(data[0]));
-        }
+        // Utility to find case-insensitive keys
+        const getVal = (row, candidates) => {
+            const keys = Object.keys(row);
+            for (const cand of candidates) {
+                const key = keys.find(k => k.toLowerCase().replace(/[\s_]/g, '') === cand.toLowerCase().replace(/[\s_]/g, ''));
+                if (key) return row[key];
+            }
+            return undefined;
+        };
+
+        const formattedDate = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
         for (const row of data) {
-            // Robust Field Mapping
-            const ehrId = getRowValue(row, ['CasperEHRID', 'EHR-ID', 'EHRID', 'Casper ID', 'Casper'])?.toString().trim();
-            const fullName = getRowValue(row, ['Full_Name', 'FullName', 'Name', 'Employee Name', 'Employee'])?.toString().trim();
-            const mobile = getRowValue(row, ['Mobile', 'Mobile No', 'Phone', 'Contact'])?.toString().trim();
-            const empCode = getRowValue(row, ['EmployeeID', 'EmpID', 'EmpCode', 'ID'])?.toString().trim();
+            // Mapping Casper Ledger Headers
+            const fhrid = getVal(row, ['CasperFHRID', 'FHRID', 'fhrid'])?.toString().trim();
+            const fullName = getVal(row, ['Full_Name', 'FullName', 'Name'])?.toString().trim();
+            const hubName = getVal(row, ['HubName', 'Hub Name', 'Hub'])?.toString().trim();
+            const ofd = Number(getVal(row, ['OFD'])) || 0;
+            const ofp = Number(getVal(row, ['OFP'])) || 0;
+            const del = Number(getVal(row, ['DEL', 'Delivered'])) || 0;
+            const pick = Number(getVal(row, ['PICK', 'Picked'])) || 0;
 
-            const hubName = getRowValue(row, ['HubName', 'Hub'])?.toString().trim();
-            const ofd = Number(getRowValue(row, ['OFD', 'OutForDelivery'])) || 0;
-            const ofp = Number(getRowValue(row, ['OFP', 'OutForPickup'])) || 0;
-            const del = Number(getRowValue(row, ['DEL', 'Delivered'])) || 0;
-            const pick = Number(getRowValue(row, ['PICK', 'Picked'])) || 0;
-
-            if (!ehrId && !fullName && !mobile && !empCode) {
-                continue;
-            }
-
-            // Find employee by various means
-            let employee;
-            if (ehrId) employee = await User.findOne({ ehrId });
-
-            if (!employee && mobile) {
-                employee = await User.findOne({ mobile });
-            }
-
-            if (!employee && empCode) {
-                employee = await User.findOne({ employeeId: empCode });
-            }
-
-            if (!employee && fullName) {
-                // FALLBACK: Try exact name match (Case Insensitive)
-                employee = await User.findOne({ fullName: { $regex: new RegExp(`^${fullName}$`, 'i') } });
-            }
-
-            if (!employee) {
+            if (!fhrid) {
                 results.failed++;
-                results.details.push({ ehrId, name: fullName, mobile, reason: 'Employee not found (checked ID, Mobile, Name)' });
                 continue;
             }
 
-            // AUTO-LINK: If user found but missing ehrId, save it for future
-            if (!employee.ehrId && ehrId) {
-                employee.ehrId = ehrId;
-                await employee.save();
-                console.log(`Auto-linked CasperID ${ehrId} to ${employee.fullName}`);
-            }
-
-            // Check for duplicate for this date and employee
-            const existing = await DailyReport.findOne({ employeeId: employee._id, reportDate: dateObj });
-            if (existing) {
+            const user = await User.findOne({ fhrId: { $regex: new RegExp(`^${fhrid}$`, 'i') } });
+            if (!user) {
                 results.failed++;
-                results.details.push({ ehrId, name: employee.fullName, reason: `Report already exists for date ${reportDate}` });
+                results.skippedFhrids.push(fhrid);
                 continue;
             }
 
-            reportsToInsert.push({
-                employeeId: employee._id,
-                ehrId: ehrId || employee.ehrId || 'MANUAL-UPLOAD',
-                hubName: hubName || employee.hubName,
+            // Prepare record
+            const reportData = {
+                fhrid,
+                full_name: fullName || user.fullName,
+                hub_name: hubName,
                 ofd, ofp,
                 delivered: del,
                 picked: pick,
-                reportDate: dateObj,
-                uploadedBy: req.user._id
-            });
-            results.success++;
-        }
-
-        if (reportsToInsert.length > 0) {
-            await DailyReport.insertMany(reportsToInsert);
-
-            // Create Notifications for employees (Bulk)
-            const Notification = require('../models/Notification');
-            const notifications = reportsToInsert.map(report => ({
-                userId: report.employeeId,
-                title: 'Daily Performance Update',
-                message: `Your report for ${new Date(report.reportDate).toLocaleDateString()} is available.`,
-                isRead: false
-            }));
+                reportDate: dateObj
+            };
 
             try {
-                await Notification.insertMany(notifications);
-            } catch (notifErr) {
-                console.error('Failed to create notifications for daily reports:', notifErr);
+                // Upsert to handle existing reports for same date
+                await DailyReport.findOneAndUpdate(
+                    { fhrid, reportDate: dateObj },
+                    reportData,
+                    { upsert: true, new: true }
+                );
+
+                // Create Notification for Employee
+                await Notification.create({
+                    userId: user._id,
+                    title: 'New Daily Performance Report',
+                    message: `Your performance report for ${formattedDate} has been uploaded. DEL: ${del}, OFD: ${ofd}.`,
+                });
+
+                results.success++;
+            } catch (err) {
+                console.error(`Error processing row for ${fhrid}:`, err);
+                results.failed++;
             }
         }
 
         res.json({
-            message: `Processed ${data.length} rows. ${results.success} succeeded, ${results.failed} failed.`,
-            results
+            message: `Processed ${data.length} rows.`,
+            summary: results
         });
 
     } catch (error) {
         console.error('Upload Error:', error);
-        res.status(500).json({ error: 'Failed to process report: ' + error.message });
+        res.status(500).json({ error: 'Failed' });
     }
 });
 
-// GET /api/employee/daily-report - Employee View Own (STRICT ISOLATION)
+// GET /api/employee/daily-report - Employee View Own (STRICT FHRID ISOLATION)
 const { authorizeEmployee } = require('../middleware/auth');
 
 router.get('/employee', authenticate, authorizeEmployee, async (req, res) => {
     try {
-        const { startDate, endDate, page = 1, limit = 10 } = req.query;
-        // STRICT FILTERING: employeeId MUST be req.user._id
-        const query = { employeeId: req.user._id };
-
-        if (startDate || endDate) {
-            query.reportDate = {};
-            if (startDate) query.reportDate.$gte = new Date(startDate);
-            if (endDate) query.reportDate.$lte = new Date(endDate);
+        if (!req.user.fhrId) {
+            return res.json({ reports: [], message: 'FHRID not assigned to your profile.' });
         }
 
-        const skip = (page - 1) * limit;
+        const reports = await DailyReport.find({ fhrid: req.user.fhrId })
+            .sort({ reportDate: -1 });
 
-        const reports = await DailyReport.find(query)
-            .sort({ reportDate: -1 })
-            .skip(skip)
-            .limit(Number(limit));
-
-        const total = await DailyReport.countDocuments(query);
-
-        res.json({
-            reports,
-            pagination: {
-                total,
-                page: Number(page),
-                pages: Math.ceil(total / limit)
-            }
-        });
+        res.json({ reports });
     } catch (error) {
         console.error('Employee report fetch error:', error);
-        res.status(500).json({ error: 'Failed to fetch your reports.' });
+        res.status(500).json({ error: 'Failed' });
     }
 });
 
-// GET /api/hr/daily-report/summary - Admin/HR Summary View
+// GET /api/hr/daily-report/summary - Admin View
 router.get('/summary', authenticate, authorizeAdmin, async (req, res) => {
     try {
-        const { date, hub, page = 1, limit = 50 } = req.query;
+        const { date } = req.query;
         const query = {};
-
         if (date) {
             const dateObj = new Date(date);
             dateObj.setHours(0, 0, 0, 0);
             query.reportDate = dateObj;
         }
 
-        if (hub) query.hubName = hub;
-
-        const skip = (page - 1) * limit;
-        const reports = await DailyReport.find(query)
-            .populate('employeeId', 'fullName mobile')
-            .sort({ reportDate: -1 })
-            .skip(skip)
-            .limit(Number(limit));
-
-        const totalCount = await DailyReport.countDocuments(query);
-
-        const agg = await DailyReport.aggregate([
-            { $match: query },
-            {
-                $group: {
-                    _id: null,
-                    totalOFD: { $sum: '$ofd' },
-                    totalDEL: { $sum: '$delivered' },
-                    totalPICK: { $sum: '$picked' },
-                    totalOFP: { $sum: '$ofp' }
-                }
-            }
-        ]);
-
-        const totals = agg[0] || { totalOFD: 0, totalDEL: 0, totalPICK: 0, totalOFP: 0 };
-        const deliverySuccess = totals.totalOFD > 0 ? (totals.totalDEL / totals.totalOFD * 100).toFixed(2) : 0;
-
-        res.json({
-            reports,
-            summary: {
-                ...totals,
-                deliverySuccess: `${deliverySuccess}%`
-            },
-            pagination: {
-                total: totalCount,
-                page: Number(page),
-                pages: Math.ceil(totalCount / limit)
-            }
-        });
+        const reports = await DailyReport.find(query).sort({ reportDate: -1 });
+        res.json({ reports });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch summary.' });
+        res.status(500).json({ error: 'Failed' });
+    }
+});
+
+const pdfService = require('../services/pdfService');
+
+// GET /api/employee/daily-report/:id/download - Employee Download Receipt
+router.get('/:id/download', authenticate, authorizeEmployee, async (req, res) => {
+    try {
+        const report = await DailyReport.findById(req.params.id);
+        if (!report) return res.status(404).json({ error: 'Report not found' });
+
+        // Security check: Only the owner can download
+        if (report.fhrid !== req.user.fhrId) {
+            return res.status(403).json({ error: 'Unauthorized access' });
+        }
+
+        const pdfPath = await pdfService.generateDailyReportReceipt(report, req.user);
+        res.download(pdfPath);
+    } catch (error) {
+        console.error('Download error:', error);
+        res.status(500).json({ error: 'Failed to generate receipt' });
     }
 });
 

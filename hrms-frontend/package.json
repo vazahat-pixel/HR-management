@@ -17,6 +17,7 @@
     "clsx": "^2.1.1",
     "countup.js": "^2.9.0",
     "file-saver": "^2.0.5",
+    "firebase": "^12.9.0",
     "framer-motion": "^12.34.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.1.0",

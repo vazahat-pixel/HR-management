@@ -7,6 +7,7 @@ import AdminDashboard from '../pages/admin/dashboard/Dashboard';
 import AdminJoiningRequests from '../pages/admin/employees/JoiningRequests';
 import AdminEmployeeList from '../pages/admin/employees/EmployeeList';
 import AdminSalary from '../pages/admin/salary/SalaryManagement';
+import AdminSalarySlips from '../pages/admin/salary/SalarySlips';
 import AdminReports from '../pages/admin/reports/Reports';
 import DailyReportUpload from '../pages/admin/reports/DailyReportUpload';
 import AdminFeedback from '../pages/admin/feedback/Feedback';
@@ -114,6 +115,7 @@ const AppRoutes = () => {
                     <Route path="joining-requests" element={<AdminJoiningRequests />} />
                     <Route path="employees" element={<AdminEmployeeList />} />
                     <Route path="salary" element={<AdminSalary />} />
+                    <Route path="salary-slips" element={<AdminSalarySlips />} />
                     <Route path="advances" element={<AdminAdvances />} />
                     <Route path="reports" element={<AdminReports />} />
                     <Route path="reports/upload" element={<DailyReportUpload />} />

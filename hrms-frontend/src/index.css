@@ -1,6 +1,47 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Sora:wght@200..800&display=swap');
 
 @import "tailwindcss";
+
+@theme {
+    /* Burnt Orange Premium Palette */
+    --color-primary: #C46A2D;
+    --color-primary-dark: #A55522;
+    --color-primary-darker: #8C441A;
+    --color-primary-soft: #F9EBE0;
+    --color-primary-ultra-soft: #FCF5F1;
+
+    /* Semantic Aliases */
+    --color-emerald-50: var(--color-primary-ultra-soft);
+    --color-emerald-100: var(--color-primary-soft);
+    --color-emerald-500: var(--color-primary);
+    --color-emerald-600: var(--color-primary-dark);
+    --color-emerald-700: var(--color-primary-darker);
+
+    --color-teal-500: #7DAF9C;
+    --color-teal-600: #6B9484;
+    --color-teal-700: #5A7D6F;
+
+    --color-success: #3F7D58;
+    --color-error: #B23A48;
+    --color-section: #F7F3ED;
+
+    --color-border: #DCDCDC;
+    --color-background: #F8F7F4;
+    --color-surface: #FFFFFF;
+    --color-foreground: #0B1220;
+
+    /* Elevation Shadows */
+    --shadow-premium-hover: 0 20px 40px -12px rgba(196, 106, 45, 0.15);
+    --shadow-primary-glow: 0 0 30px -5px rgba(196, 106, 45, 0.25);
+
+    /* Professional Typography */
+    --font-heading: 'Sora', 'Manrope', sans-serif;
+    --font-body: 'Manrope', 'Sora', sans-serif;
+    --font-sans: var(--font-body);
+    --font-display: var(--font-heading);
+
+    --font-mono: 'SF Mono', 'Monaco', 'Cascadia Code', 'Courier New', monospace;
+}
 
 :root {
     /* Premium Emerald Corporate Palette */
@@ -17,39 +58,18 @@
     --color-gray-800: #1f2937;
     --color-gray-900: #111827;
 
-    --color-emerald-50: #ecfdf5;
-    --color-emerald-100: #d1fae5;
-    --color-emerald-500: #10b981;
-    --color-emerald-600: #059669;
-    --color-emerald-700: #047857;
-
-    --color-teal-500: #14b8a6;
-    --color-teal-600: #0d9488;
-    --color-teal-700: #0f766e;
-
     --color-orange-500: #f97316;
     --color-rose-500: #f43f5e;
     --color-amber-500: #f59e0b;
 
-    --color-border: #e2e8f0;
-    --color-background: #f8fafc;
-    --color-foreground: #0f172a;
-
-    /* Professional Typography */
-    --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    --font-mono: 'SF Mono', 'Monaco', 'Cascadia Code', 'Courier New', monospace;
-
     /* Elevation Shadows */
     --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    --shadow-glass: 0 32px 64px -16px rgba(5, 150, 105, 0.08);
-    --shadow-premium-hover: 0 20px 40px -12px rgba(5, 150, 105, 0.15);
-    --shadow-emerald-glow: 0 0 40px -10px rgba(16, 185, 129, 0.3);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 12px 24px -3px rgba(0, 0, 0, 0.1), 0 4px 8px -4px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 24px 48px -5px rgba(0, 0, 0, 0.1), 0 8px 16px -6px rgba(0, 0, 0, 0.05);
+    --shadow-2xl: 0 32px 64px -12px rgba(0, 0, 0, 0.15);
+    --shadow-glass: 0 16px 32px -8px rgba(0, 0, 0, 0.05);
 
     /* Advanced Animation Curves */
     --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
@@ -257,29 +277,35 @@ body {
     }
 
     .premium-card {
-        @apply bg-white border border-gray-200/60 rounded-[28px] shadow-sm transition-all duration-500 ease-out hover:-translate-y-1;
+        @apply bg-white border border-[#DCDCDC]/60 rounded-[16px] shadow-sm transition-all duration-300 ease-out;
         box-shadow: var(--shadow-sm);
     }
 
     .premium-card:hover {
-        box-shadow: var(--shadow-premium-hover);
+        @apply -translate-y-[6px];
+        box-shadow: var(--shadow-lg);
     }
 
     .emerald-btn {
-        @apply px-6 py-3 rounded-2xl bg-emerald-600 text-white font-bold text-sm tracking-tight transition-all duration-300 hover:bg-emerald-700 hover:shadow-lg active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed;
-        box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -2px rgba(16, 185, 129, 0.1);
+        @apply px-6 py-2.5 rounded-full bg-gradient-to-r from-[#C46A2D] to-[#A55522] text-white font-bold text-sm tracking-tight transition-all duration-300 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed border-none;
+        box-shadow: 0 4px 12px rgba(196, 106, 45, 0.2);
+    }
+
+    .emerald-btn:hover {
+        box-shadow: var(--shadow-primary-glow);
+        transform: translateY(-1px);
     }
 
     .teal-btn {
-        @apply px-6 py-3 rounded-2xl bg-teal-700 text-white font-bold text-sm tracking-tight transition-all duration-300 hover:bg-teal-800 hover:shadow-lg active:scale-[0.97] disabled:opacity-50;
+        @apply px-6 py-2.5 rounded-full bg-slate-800 text-white font-bold text-sm tracking-tight transition-all duration-300 hover:bg-slate-900 hover:shadow-lg active:scale-[0.97] disabled:opacity-50 border-none;
     }
 
     .subtle-input {
-        @apply h-11 px-4 w-full bg-gray-100/50 border border-gray-200 rounded-2xl text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/50 focus:bg-white transition-all duration-300;
+        @apply h-[46px] px-4 w-full bg-[#F5F5F5] border border-[#DCDCDC] rounded-[12px] text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:ring-[#C46A2D]/10 focus:border-[#C46A2D]/50 focus:bg-white transition-all duration-300;
     }
 
     .gradient-text {
-        @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 font-black;
+        @apply bg-clip-text text-transparent bg-gradient-to-r from-[#C46A2D] to-[#A55522] font-black;
     }
 
     .stat-badge {
