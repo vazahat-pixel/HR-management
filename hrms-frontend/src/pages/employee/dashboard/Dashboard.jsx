@@ -224,27 +224,30 @@ const Dashboard = () => {
                 )}
             </motion.div>
 
-            {/* Quick Stats Grid - Compact */}
-            <div className="grid grid-cols-2 gap-3">
+            {/* Premium Stats Grid - Mobile Optimized (2 cols) */}
+            <div className="grid grid-cols-2 gap-3.5">
                 {[
-                    { label: 'Working Days', value: dashData?.monthWorkingDays || 0, icon: HiOutlineCalendar, color: 'text-slate-600', bg: 'bg-[#F5F5F5]' },
-                    { label: 'Advance Due', value: `₹${dashData?.pendingAdvances || 0}`, icon: HiOutlineCurrencyDollar, color: 'text-[#B23A48]', bg: 'bg-[#B23A48]/5' },
-                    { label: 'Open Support', value: dashData?.openComplaints || 0, icon: HiOutlineChatAlt2, color: 'text-[#A55522]', bg: 'bg-[#F9EBE0]' },
-                    { label: 'Performance', value: '98%', icon: HiOutlineTrendingUp, color: 'text-[#3F7D58]', bg: 'bg-[#3F7D58]/5' },
+                    { label: 'Active Days', value: dashData?.monthWorkingDays || 0, icon: HiOutlineCalendar, color: 'text-indigo-600', bg: 'bg-indigo-50/50', border: 'border-indigo-100/50', delay: 0 },
+                    { label: 'Advance Due', value: `₹${dashData?.pendingAdvances || 0}`, icon: HiOutlineCurrencyDollar, color: 'text-rose-600', bg: 'bg-rose-50/50', border: 'border-rose-100/50', delay: 0.05 },
+                    { label: 'Intelligence', value: dashData?.openComplaints || 0, icon: HiOutlineChatAlt2, color: 'text-amber-600', bg: 'bg-amber-50/50', border: 'border-amber-100/50', delay: 0.1 },
+                    { label: 'Efficiency', value: '98%', icon: HiOutlineTrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50/50', border: 'border-emerald-100/50', delay: 0.15 },
                 ].map((stat, i) => (
                     <motion.div
                         key={i}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: i * 0.05 }}
-                        className="bg-white p-3.5 rounded-[16px] border border-[#DCDCDC]/50 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow"
+                        initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ duration: 0.4, delay: stat.delay, ease: [0.16, 1, 0.3, 1] }}
+                        className={cn(
+                            "bg-white p-4 rounded-[24px] border border-slate-200/60 shadow-sm flex flex-col items-start gap-4 hover:shadow-xl hover:shadow-slate-200/20 transition-all duration-300 group",
+                            stat.border
+                        )}
                     >
-                        <div>
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                            <p className="text-lg font-black text-slate-900 mt-1">{stat.value}</p>
+                        <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-500 group-hover:rotate-12", stat.bg)}>
+                            <stat.icon className={cn("w-5 h-5", stat.color)} />
                         </div>
-                        <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center border border-transparent transition-colors", stat.bg, stat.color)}>
-                            <stat.icon className="w-5 h-5" />
+                        <div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] leading-none mb-1.5">{stat.label}</p>
+                            <h3 className="text-xl font-black text-slate-900 tracking-tight leading-none italic uppercase">{stat.value}</h3>
                         </div>
                     </motion.div>
                 ))}

@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
     employeeId: { type: String, unique: true, sparse: true }, // Internal Backup/Legacy
-    fhrId: { type: String, unique: true, sparse: true, trim: true }, // Main Employee ID for Login & Reports
+    fhrId: { type: String, unique: true, sparse: true, index: true, trim: true }, // Main Employee ID for Login & Reports
     ehrId: { type: String, unique: true, sparse: true },      // Manual CasperEHRID
 
     // Personal Details

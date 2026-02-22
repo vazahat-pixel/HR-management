@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const loginWithOtp = async (mobile, otp) => {
-        const res = await authAPI.verifyOtp(mobile, otp);
+        const res = await authAPI.verifyOtp({ mobile, otp });
         const { token, user: userData } = res.data;
         localStorage.setItem('hrms_token', token);
         localStorage.setItem('hrms_user', JSON.stringify(userData));

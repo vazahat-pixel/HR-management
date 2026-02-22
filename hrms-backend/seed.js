@@ -7,30 +7,36 @@ async function seed() {
         await mongoose.connect(process.env.MONGODB_URI);
         console.log('Connected to MongoDB');
 
-        // Check if admin exists
-        const existingAdmin = await User.findOne({ employeeId: 'admin' });
-        if (existingAdmin) {
-            console.log('Admin already exists. Skipping seed.');
-            process.exit(0);
-        }
+        // CLEAR Existing test nodes to avoid conflicts and ensure fresh hash
+        await User.deleteMany({
+            $or: [
+                { employeeId: 'Admin' },
+                { employeeId: 'admin' },
+                { fhrId: 'FHR-001' },
+                { mobile: '9999999999' },
+                { mobile: '9876543210' }
+            ]
+        });
 
-        // Create admin user
-        const admin = await User.create({
+        // CREATE Admin Manager
+        const admin = new User({
             fullName: 'Admin Manager',
             employeeId: 'Admin',
             mobile: '9999999999',
             email: 'admin@anglecourier.com',
-            password: 'Admin123',
+            password: 'admin123',
             role: 'admin',
             status: 'Active',
+            isAccountActivated: true,
             designation: 'System Administrator',
             department: 'Administration',
             officeLocation: 'HQ',
         });
-        console.log('✅ Admin created:', admin.employeeId, '/ admin123');
+        await admin.save();
+        console.log('✅ Admin Re-Synchronized: Admin / admin123');
 
-        // Create test employee
-        const emp = await User.create({
+        // CREATE Test Employee
+        const emp = new User({
             fullName: 'Rahul Sharma',
             employeeId: 'EMP-001',
             mobile: '9876543210',
@@ -38,6 +44,7 @@ async function seed() {
             password: 'emp123',
             role: 'employee',
             status: 'Active',
+            isAccountActivated: true,
             designation: 'Delivery Associate',
             department: 'Operations',
             officeLocation: 'Delhi Hub',
@@ -47,7 +54,8 @@ async function seed() {
             fhrId: 'FHR-001',
             profileId: 'PRF-001',
         });
-        console.log('✅ Employee created:', emp.employeeId, '/ emp123');
+        await emp.save();
+        console.log('✅ Employee Re-Synchronized: FHR-001 / emp123');
 
         process.exit(0);
     } catch (error) {

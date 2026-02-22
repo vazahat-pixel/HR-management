@@ -5,7 +5,7 @@ import { joiningAPI } from '../../../services/api';
 import { toast } from 'react-hot-toast';
 import { cn, getFileUrl } from '../../../lib/utils';
 
-const RequestDetailsModal = ({ request, onClose, onApprove, onReject }) => {
+const RequestDetailsModal = ({ request, onClose, onApprove, onReject, isSubmitting }) => {
     if (!request) return null;
 
     return (
@@ -427,9 +427,10 @@ const JoiningRequests = () => {
                         onClose={() => setSelectedRequest(null)}
                         onApprove={handleApprove}
                         onReject={handleReject}
+                        isSubmitting={isSubmitting}
                     />
                 )}
-            </AnimatePresence>    {/* Approval Success Modal */}
+            </AnimatePresence>
             {/* Approval Success Modal */}
             <AnimatePresence>
                 {approvalData && (

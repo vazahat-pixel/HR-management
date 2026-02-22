@@ -21,15 +21,17 @@ api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            const token = localStorage.getItem('hrms_token');
-            const isLoginRequest = error.config?.url?.includes('/auth/login') ||
-                error.config?.url?.includes('/auth/verify-otp');
+            const isAuthEndpoint = error.config?.url?.includes('/auth/login') ||
+                error.config?.url?.includes('/auth/verify-otp') ||
+                error.config?.url?.includes('/auth/send-otp');
 
-            // Only logout if token exists and this isn't a login attempt
-            if (token && !isLoginRequest && window.location.pathname !== '/auth/login') {
+            if (!isAuthEndpoint) {
+                console.warn('Unauthorized access - redirecting to login');
                 localStorage.removeItem('hrms_token');
                 localStorage.removeItem('hrms_user');
-                window.location.href = '/auth/login';
+                if (window.location.pathname !== '/auth/login') {
+                    window.location.href = '/auth/login';
+                }
             }
         }
         return Promise.reject(error);
@@ -38,7 +40,7 @@ api.interceptors.response.use(
 
 // ========== AUTH ==========
 export const authAPI = {
-    login: (employeeId, password) => api.post('/auth/login', { employeeId, password }),
+    login: (id, password) => api.post('/auth/login', { fhrId: id, password }),
     sendOtp: (mobile) => api.post('/auth/send-otp', { mobile }),
     verifyOtp: (data) => api.post('/auth/verify-otp', data),
     newJoining: (data) => api.post('/auth/new-joining', data, {

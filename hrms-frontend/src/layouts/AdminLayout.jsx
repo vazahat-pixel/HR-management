@@ -23,15 +23,47 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 import NotificationDropdown from '../components/common/NotificationDropdown';
 import logo from '../assets/logo.png';
+import { getSocket } from '../services/socket';
+import { toast } from 'react-hot-toast';
 
 const AdminLayout = () => {
     const { user, logout } = useAuth();
     const location = useLocation();
     const [isSidebarOpen, setSidebarOpen] = useState(false);
+    const [joiningBadge, setJoiningBadge] = useState(0);
+
+    React.useEffect(() => {
+        const socket = getSocket();
+        if (socket) {
+            socket.on('new_joining_request', (data) => {
+                setJoiningBadge(prev => prev + 1);
+                toast.success(`New Joining Request from ${data.fullName}`, {
+                    duration: 5000,
+                    icon: '🚀',
+                    style: {
+                        borderRadius: '20px',
+                        background: '#1e293b',
+                        color: '#fff',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        border: '1px solid rgba(255,255,255,0.1)'
+                    }
+                });
+            });
+        }
+        return () => {
+            if (socket) socket.off('new_joining_request');
+        };
+    }, []);
 
     const navItems = [
         { path: '/admin/dashboard', icon: HiOutlineHome, label: 'Dashboard' },
-        { path: '/admin/joining-requests', icon: HiOutlineUserAdd, label: 'Joining Requests' },
+        {
+            path: '/admin/joining-requests',
+            icon: HiOutlineUserAdd,
+            label: 'Joining Requests',
+            badge: joiningBadge > 0 ? joiningBadge : null
+        },
         { path: '/admin/employees', icon: HiOutlineUsers, label: 'Employee List' },
         { path: '/admin/salary', icon: HiOutlineCash, label: 'Monthly Payout' },
         { path: '/admin/salary-slips', icon: HiOutlineDocumentText, label: 'Salary Slips' },
@@ -107,6 +139,11 @@ const AdminLayout = () => {
                                 <>
                                     <item.icon className={cn("w-5 h-5 transition-transform duration-300 group-hover:scale-110", isActive ? "text-white" : "text-slate-400 group-hover:text-[#C46A2D]")} />
                                     <span className="tracking-tight">{item.label}</span>
+                                    {item.badge && (
+                                        <span className="ml-auto bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg shadow-rose-500/30 animate-pulse">
+                                            {item.badge}
+                                        </span>
+                                    )}
                                     {isActive && (
                                         <motion.div
                                             layoutId="active-pill"

@@ -30,7 +30,7 @@ router.get('/admin', authenticate, async (req, res) => {
         // Today's reports
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const todayReports = await DailyReport.countDocuments({ date: { $gte: today } });
+        const todayReports = await DailyReport.countDocuments({ reportDate: { $gte: today } });
 
         // Recent activity
         const recentNotifications = await Notification.find({ userId: req.user._id })
@@ -59,7 +59,7 @@ router.get('/employee', authenticate, async (req, res) => {
         const userId = req.user._id;
 
         // Latest payslip
-        const latestPayslip = await Payslip.findOne({ userId }).sort({ year: -1, month: -1 });
+        const latestPayslip = await Payslip.findOne({ fhrid: req.user.fhrId }).sort({ year: -1, month: -1 });
 
         // Pending advance requests
         const pendingAdvances = await AdvanceRequest.countDocuments({ userId, status: 'Pending' });

@@ -29,17 +29,19 @@ const generatePassword = () => {
 router.post('/login', async (req, res) => {
     try {
         const { employeeId, password, fhrId } = req.body;
+        console.log(`🔐 Login Attempt: fhrId=${fhrId}, empId=${employeeId}, passLen=${password?.length}`);
+
         const loginIdentifier = fhrId || employeeId;
 
         if (!loginIdentifier || !password) {
             return res.status(400).json({ error: 'Employee ID (FHRID) and password are required.' });
         }
 
-        // Try to find user by fhrId first, then by employeeId
+        // Case-insensitive lookup for fhrId or employeeId
         const user = await User.findOne({
             $or: [
-                { fhrId: loginIdentifier },
-                { employeeId: loginIdentifier }
+                { fhrId: { $regex: new RegExp(`^${loginIdentifier}$`, 'i') } },
+                { employeeId: { $regex: new RegExp(`^${loginIdentifier}$`, 'i') } }
             ]
         });
 
@@ -325,8 +327,6 @@ router.post('/register', uploadCloud.fields([
             isApproved: false,
             isAccountActivated: false,
             isProfileCompleted: false,
-            isAccountActivated: false,
-            isProfileCompleted: false,
             isSelfRegistered: true, // User set their own password
             status: 'Pending'
         });
@@ -349,6 +349,21 @@ router.post('/register', uploadCloud.fields([
             panImage: user.panImage,
             status: 'Pending'
         });
+
+        // 🟢 REAL-TIME SYNC: Broadcast to admins
+        const { getIO } = require('../socket');
+        try {
+            const io = getIO();
+            io.emit('new_joining_request', {
+                fullName,
+                mobile,
+                hubName,
+                createdAt: new Date()
+            });
+            console.log('📡 Real-time notification emitted for new joining request');
+        } catch (sErr) {
+            console.error('Socket broadcast failed:', sErr);
+        }
 
         res.status(201).json({
             message: 'Registration successful! Your access is PENDING ADMIN APPROVAL.',

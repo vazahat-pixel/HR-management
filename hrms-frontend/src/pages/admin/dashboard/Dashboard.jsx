@@ -60,10 +60,10 @@ const Dashboard = () => {
     };
 
     const metrics = data ? [
-        { title: 'Total Employees', value: data.totalEmployees || 0, sub: `${data.activeEmployees || 0} active employees`, icon: HiOutlineUsers, color: 'text-[#C46A2D]', bg: 'bg-[#F9EBE0]', path: '/admin/employees' },
-        { title: 'Daily Reports', value: data.todayReports || 0, sub: 'reports submitted today', icon: HiOutlineClipboardCheck, color: 'text-[#3F7D58]', bg: 'bg-[#3F7D58]/5', path: '/admin/reports' },
-        { title: 'Monthly Payout', value: `₹${(data.payrollProcessed || 0).toLocaleString()}`, sub: 'total volume this month', icon: HiOutlineCash, color: 'text-[#C46A2D]', bg: 'bg-gradient-to-tr from-[#C46A2D]/10 to-transparent', path: '/admin/salary' },
-        { title: 'Active Offers', value: data.activeOffers || 0, sub: 'live announcements', icon: HiOutlineGift, color: 'text-[#A55522]', bg: 'bg-[#F9EBE0]', path: '/admin/offers' },
+        { title: 'Total Workforce', value: data.totalEmployees || 0, sub: `${data.activeEmployees || 0} active nodes`, icon: HiOutlineUsers, color: 'text-indigo-600', bg: 'bg-indigo-50 border-indigo-100', path: '/admin/employees' },
+        { title: 'Daily Reporting', value: data.todayReports || 0, sub: 'reports pushed today', icon: HiOutlineClipboardCheck, color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-100', path: '/admin/reports' },
+        { title: 'Liquidity Volume', value: `₹${(data.payrollProcessed || 0).toLocaleString()}`, sub: 'processed this cycle', icon: HiOutlineCash, color: 'text-[#C46A2D]', bg: 'bg-[#F9EBE0] border-[#F9EBE0]', path: '/admin/salary' },
+        { title: 'Active Offers', value: data.activeOffers || 0, sub: 'live announcements', icon: HiOutlineGift, color: 'text-rose-600', bg: 'bg-rose-50 border-rose-100', path: '/admin/offers' },
     ] : [];
 
     const stats = {
@@ -142,7 +142,12 @@ const Dashboard = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: i * 0.05 }}
                         onClick={() => navigate(metric.path)}
-                        className="bg-white border border-[#DCDCDC]/60 rounded-[20px] p-5 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1.5 group cursor-pointer hover:border-[#C46A2D]/30"
+                        className={cn(
+                            "bg-white border border-[#DCDCDC]/60 rounded-[32px] p-6 shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transition-all duration-500 hover:-translate-y-2 group cursor-pointer border-l-[6px]",
+                            metric.bg.includes('indigo') ? 'border-l-indigo-500' :
+                                metric.bg.includes('emerald') ? 'border-l-emerald-500' :
+                                    metric.bg.includes('rose') ? 'border-l-rose-500' : 'border-l-[#C46A2D]'
+                        )}
                     >
                         <div className="flex items-start justify-between">
                             <div>
