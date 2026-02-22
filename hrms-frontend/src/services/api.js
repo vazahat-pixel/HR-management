@@ -125,6 +125,7 @@ export const payrollAPI = {
         headers: { 'Content-Type': 'multipart/form-data' }
     }),
     getEmployeePayouts: () => api.get('/payroll/payout/employee'),
+    downloadPayoutPDFById: (id) => api.get(`/payroll/payout/${id}/pdf`, { responseType: 'blob' }),
 
     // New Salary Slips
     uploadSalarySlips: (formData, params) => api.post('/payroll/salary-slip-upload', formData, {

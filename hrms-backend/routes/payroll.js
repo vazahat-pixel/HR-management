@@ -208,19 +208,23 @@ router.post('/salary-slip-upload', authenticate, authorizeAdmin, upload.single('
         const queryMonth = Number(req.query.month) || new Date().getMonth() + 1;
         const queryYear = Number(req.query.year) || new Date().getFullYear();
 
-        const results = { total: data.length, success: 0, failed: 0, skippedFhrids: [] };
+        const results = { total: data.length, success: 0, failed: 0, registered: 0, skippedFhrids: [] };
 
         const getVal = (row, candidates) => {
             const keys = Object.keys(row);
             for (const cand of candidates) {
-                const key = keys.find(k => k.toLowerCase().replace(/\s/g, '_') === cand.toLowerCase().replace(/\s/g, '_'));
+                // Try exact match, then normalized match (lowercase, no spaces/underscores)
+                const normalizedCand = cand.toLowerCase().replace(/[\s_()\-]/g, '');
+                const key = keys.find(k => k.toLowerCase().replace(/[\s_()\-]/g, '') === normalizedCand);
                 if (key) return row[key];
             }
             return undefined;
         };
 
         for (const [index, row] of data.entries()) {
-            const fhrid = getVal(row, ['FHR_ID', 'FHRID'])?.toString().trim();
+            const fhrid = getVal(row, ['fhrid', 'FHR_ID', 'FHRID'])?.toString().trim();
+            const employeeName = getVal(row, ['employeeName', 'WM_Name', 'Name', 'WM Name', 'Employee Name', 'Full Name']);
+
             if (!fhrid) {
                 console.warn(`Row ${index + 1} skipped: Missing FHRID column or value.`);
                 results.failed++;
@@ -228,44 +232,66 @@ router.post('/salary-slip-upload', authenticate, authorizeAdmin, upload.single('
                 continue;
             }
 
-            const user = await User.findOne({ fhrId: { $regex: new RegExp(`^${fhrid}$`, 'i') } });
+            let user = await User.findOne({ fhrId: { $regex: new RegExp(`^${fhrid}$`, 'i') } });
+
+            // If user doesn't exist, register them (Case: User not in DB but in Excel)
             if (!user) {
-                console.warn(`Row ${index + 1} skipped: FHRID ${fhrid} not found in database.`);
-                results.failed++;
-                results.skippedFhrids.push(`${fhrid} (Not Found)`);
-                continue;
+                try {
+                    console.log(`Auto-registering user from Excel: ${employeeName} (${fhrid})`);
+                    user = await User.create({
+                        fullName: employeeName || 'New Employee',
+                        fhrId: fhrid,
+                        employeeId: fhrid,
+                        mobile: getVal(row, ['mobile', 'Phone', 'Contact']) || `MISSING-${fhrid}`, // Use FHRID to ensure uniqueness
+                        password: 'Password@123', // Default password
+                        role: 'employee',
+                        status: 'Active',
+                        isApproved: true,
+                        isAccountActivated: true,
+                        isSelfRegistered: false,
+                        designation: getVal(row, ['designation', 'Designation']),
+                        accountNumber: getVal(row, ['accountNumber', 'Account_Number', 'A/c No', 'Account Number']),
+                        ifscCode: getVal(row, ['ifscCode', 'IFSC', 'IFSC_Code', 'IFSC Code']),
+                    });
+                    results.registered++;
+                } catch (regErr) {
+                    console.error(`Failed to register user ${fhrid}:`, regErr.message);
+                    results.failed++;
+                    results.skippedFhrids.push(`${fhrid}: Registration Failed (${regErr.message})`);
+                    continue;
+                }
             }
 
-            // Map data exactly as provided in Excel
+            // Map data exactly as provided in Excel or fallback to User DB
             const payslipData = {
                 fhrid,
                 month: queryMonth,
                 year: queryYear,
-                employeeName: getVal(row, ['Employee_Name', 'WM_Name', 'Name', 'WM Name', 'Employee Name']) || user.fullName,
-                designation: getVal(row, ['Designation']) || 'Delivery Executive',
-                doj: getVal(row, ['DOJ', 'Date_of_Joining', 'Date of Joining']),
-                payDate: getVal(row, ['Pay_Date', 'Date', 'Pay Date']),
-                accountNumber: getVal(row, ['Ac_Number', 'Account_Number', 'A/c No', 'Account Number']),
-                ifscCode: getVal(row, ['IFSC_Coad', 'IFSC', 'IFSC_Code', 'IFSC Code']),
+                employeeName: employeeName || user.fullName,
+                designation: getVal(row, ['designation', 'Designation']) || user.designation || 'Delivery Executive',
+                doj: getVal(row, ['dateOfJoin', 'DOJ', 'Date_of_Joining', 'Date of Joining']),
+                payDate: getVal(row, ['payDate', 'Date', 'Pay Date', 'payDate (YYYY-MM-DD)']),
+                accountNumber: getVal(row, ['accountNumber', 'Account_Number', 'A/c No', 'Account Number']) || user.accountNumber,
+                ifscCode: getVal(row, ['ifscCode', 'IFSC', 'IFSC_Code', 'IFSC Code']) || user.ifscCode,
 
-                paidDays: getVal(row, ['Paid_Days', 'Paid Days', 'Days']),
-                lopDays: getVal(row, ['LOP_Days', 'LOP Days', 'LOP']),
+                paidDays: Number(getVal(row, ['paidDays', 'Paid_Days', 'Paid Days', 'Days'])) || 0,
+                lopDays: Number(getVal(row, ['lopDays', 'LOP_Days', 'LOP Days', 'LOP'])) || 0,
 
-                basic: Number(getVal(row, ['Basic', 'Final_Base_Pay_Amt.', 'Base_Salary'])) || 0,
-                conveyance: Number(getVal(row, ['Conveyance'])) || 0,
-                incentives: Number(getVal(row, ['Incentives'])) || 0,
-                otherAllowances: Number(getVal(row, ['Other_Allowances'])) || 0,
+                basic: Number(getVal(row, ['basic', 'Final_Base_Pay_Amt.', 'Base_Salary'])) || 0,
+                conveyance: Number(getVal(row, ['conveyance', 'Conveyance'])) || 0,
+                incentives: Number(getVal(row, ['incentives', 'Incentives'])) || 0,
+                otherAllowances: Number(getVal(row, ['otherAllowances', 'Other_Allowances'])) || 0,
 
-                tds: Number(getVal(row, ['TDS', 'Tds_1%'])) || 0,
-                advance: Number(getVal(row, ['Advance', 'Adavance', 'Advance_Amount'])) || 0,
-                otherDeductions: Number(getVal(row, ['Other_Deductions'])) || 0,
+                tds: Number(getVal(row, ['tds', 'TDS', 'Tds_1%'])) || 0,
+                advance: Number(getVal(row, ['advance', 'Adavance', 'Advance_Amount'])) || 0,
+                otherDeductions: Number(getVal(row, ['otherDeductions', 'Other_Deductions'])) || 0,
 
-                netPayable: Number(getVal(row, ['Net_Payable', 'Total_Pay_Amount', 'Net_Pay'])) || 0
+                netPayable: Number(getVal(row, ['netPayable', 'Total_Pay_Amount', 'Net_Pay'])) || 0
             };
 
             // Calculate derived fields exactly from input
-            payslipData.grossEarnings = Number(getVal(row, ['Gross_Earnings', 'Gross', 'Gross Earnings'])) || (payslipData.basic + payslipData.conveyance + payslipData.incentives + payslipData.otherAllowances);
-            payslipData.totalDeductions = Number(getVal(row, ['Total_Deductions', 'Deductions', 'Total Deductions'])) || (payslipData.tds + payslipData.advance + payslipData.otherDeductions);
+            payslipData.grossEarnings = Number(getVal(row, ['grossEarnings', 'Gross_Earnings', 'Gross', 'Gross Earnings'])) || (payslipData.basic + payslipData.conveyance + payslipData.incentives + payslipData.otherAllowances);
+            payslipData.totalDeductions = Number(getVal(row, ['totalDeductions', 'Total_Deductions', 'Deductions', 'Total Deductions'])) || (payslipData.tds + payslipData.advance + payslipData.otherDeductions);
 
             try {
                 // Generate PDF
@@ -299,6 +325,7 @@ router.post('/salary-slip-upload', authenticate, authorizeAdmin, upload.single('
             message: 'Processed',
             total_rows: results.total,
             success_count: results.success,
+            registered_count: results.registered,
             failed_count: results.failed,
             skipped_fhrids: results.skippedFhrids
         });
@@ -395,4 +422,127 @@ router.get('/salary-slips/:id/pdf', authenticate, async (req, res) => {
     }
 });
 
+// GET /api/payroll/payout/:id/pdf — Download Payout PDF (Secure + Isolated)
+router.get('/payout/:id/pdf', authenticate, async (req, res) => {
+    try {
+        const payout = await PayoutReport.findById(req.params.id);
+        if (!payout) return res.status(404).json({ error: 'Not found' });
+
+        // Security: If not admin, must be the owner
+        if (req.user.role !== 'admin' && req.user.role !== 'hr') {
+            if (!req.user.fhrId || payout.fhrid.toLowerCase() !== req.user.fhrId.toLowerCase()) {
+                return res.status(403).json({ error: 'Unauthorized' });
+            }
+        }
+
+        const PDFDocument = require('pdfkit');
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const formatCurr = (val) => `Rs. ${Number(val || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+
+        const doc = new PDFDocument({ size: 'A4', margin: 40 });
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=payout_${payout.fhrid}_${payout.month}_${payout.year}.pdf`);
+        doc.pipe(res);
+
+        // ─── HEADER ───────────────────────────────────────────────────────────
+        doc.rect(40, 40, 515, 3).fill('#C46A2D');
+        doc.fontSize(20).font('Helvetica-Bold').fillColor('#1e293b')
+            .text('ANGLE COURIER AND LOGISTICS', 40, 55, { align: 'center' });
+        doc.fontSize(10).font('Helvetica').fillColor('#64748b')
+            .text('ARAZI NO-372, PATANAVA BASANT NAGAR, VARANASI - 221110 | TEL: 9889122531', 40, 80, { align: 'center' });
+        doc.rect(40, 100, 515, 1).fill('#e2e8f0');
+
+        // Title ribbon
+        doc.rect(40, 108, 515, 28).fill('#1e293b');
+        doc.fontSize(12).font('Helvetica-Bold').fillColor('#ffffff')
+            .text(`Monthly Payout Statement — ${monthNames[(payout.month || 1) - 1]}, ${payout.year}`, 40, 116, { align: 'center' });
+
+        // ─── EMPLOYEE BOX ─────────────────────────────────────────────────────
+        const boxTop = 148;
+        doc.rect(40, boxTop, 250, 80).stroke('#e2e8f0');
+        doc.rect(305, boxTop, 250, 80).stroke('#e2e8f0');
+
+        const infoLabel = (text, x, y) => doc.fontSize(8).font('Helvetica').fillColor('#94a3b8').text(text, x, y);
+        const infoValue = (text, x, y) => doc.fontSize(10).font('Helvetica-Bold').fillColor('#0f172a').text(text || 'N/A', x, y);
+
+        infoLabel('Employee Name', 50, boxTop + 10); infoValue(payout.full_name, 50, boxTop + 22);
+        infoLabel('FHR ID', 50, boxTop + 45); infoValue(payout.fhrid, 50, boxTop + 57);
+        infoLabel('Hub', 180, boxTop + 10); infoValue(payout.hub_name, 180, boxTop + 22);
+
+        infoLabel('Pay Period', 315, boxTop + 10); infoValue(`${monthNames[(payout.month || 1) - 1]} ${payout.year}`, 315, boxTop + 22);
+        infoLabel('Account No.', 315, boxTop + 45); infoValue(payout.accountNumber, 315, boxTop + 57);
+        infoLabel('IFSC', 430, boxTop + 45); infoValue(payout.ifscCode, 430, boxTop + 57);
+
+        // ─── OPERATIONS TABLE ─────────────────────────────────────────────────
+        let y = boxTop + 100;
+        doc.rect(40, y, 515, 22).fill('#f8fafc').stroke('#e2e8f0');
+        doc.fontSize(9).font('Helvetica-Bold').fillColor('#475569').text('OPERATIONS SUMMARY', 50, y + 7);
+        y += 22;
+
+        const tableRow = (label, value, bg = '#ffffff', bold = false) => {
+            doc.rect(40, y, 515, 20).fill(bg).stroke('#e2e8f0');
+            doc.fontSize(9).font(bold ? 'Helvetica-Bold' : 'Helvetica').fillColor('#334155').text(label, 55, y + 6);
+            doc.font(bold ? 'Helvetica-Bold' : 'Helvetica').fillColor(bold ? '#0f172a' : '#475569').text(String(value || 0), 450, y + 6, { align: 'right', width: 90 });
+            y += 20;
+        };
+
+        tableRow('Working Days', payout.workingDays);
+        tableRow('Total Assigned Shipments', payout.totalAssigned, '#f8fafc');
+        tableRow('Total Normal Deliveries', payout.totalNormalDelivery);
+        tableRow('SOPSY Delivered', payout.sopsyDelivered, '#f8fafc');
+        tableRow('GTNL Delivered', payout.gtnlDelivered);
+        tableRow('U2S Shipments', payout.u2sShipment, '#f8fafc');
+        tableRow('Total Delivery Count', payout.totalDeliveryCount, '#ffffff', true);
+        tableRow('Conversion Rate', payout.conversion || 'N/A', '#f8fafc');
+
+        // ─── FINANCIALS ───────────────────────────────────────────────────────
+        y += 12;
+        doc.rect(40, y, 515, 22).fill('#1e293b').stroke('#1e293b');
+        doc.fontSize(9).font('Helvetica-Bold').fillColor('#ffffff').text('FINANCIAL BREAKDOWN', 50, y + 7);
+        doc.fillColor('#94a3b8').text('AMOUNT', 50, y + 7, { align: 'right', width: 495 });
+        y += 22;
+
+        const finRow = (label, value, color = '#334155', bg = '#ffffff') => {
+            doc.rect(40, y, 515, 22).fill(bg).stroke('#e2e8f0');
+            doc.fontSize(9).font('Helvetica').fillColor('#475569').text(label, 55, y + 7);
+            doc.font('Helvetica-Bold').fillColor(color).text(formatCurr(value), 50, y + 7, { align: 'right', width: 495 });
+            y += 22;
+        };
+
+        finRow('LMA Base Pay Amount', payout.lmaBasePayAmt, '#334155', '#f8fafc');
+        finRow('SOPSY Base Pay (18/P)', payout.sopsyBasePayAmt18P);
+        finRow('GTNL Base Pay (6/P)', payout.gtnlBasePayAmt6P, '#334155', '#f8fafc');
+        finRow('Final Base Pay Amount', payout.finalBasePayAmt, '#0f172a', '#ffffff');
+        finRow('TDS (1%)', payout.tds, '#dc2626', '#fff5f5');
+        finRow('Advance Adjustment', payout.advance, '#dc2626', '#fff5f5');
+
+        // Net Pay highlight row
+        y += 5;
+        doc.rect(40, y, 515, 36).fill('#C46A2D');
+        doc.fontSize(11).font('Helvetica-Bold').fillColor('#ffffff').text('TOTAL NET PAY', 55, y + 12);
+        doc.fontSize(14).font('Helvetica-Bold').fillColor('#ffffff')
+            .text(formatCurr(payout.totalPayAmount), 55, y + 10, { align: 'right', width: 490 });
+        y += 36;
+
+        // Remark
+        if (payout.remark) {
+            y += 10;
+            doc.rect(40, y, 515, 30).fill('#fefce8').stroke('#fde68a');
+            doc.fontSize(8).font('Helvetica-Bold').fillColor('#92400e').text('NOTE:', 55, y + 10);
+            doc.font('Helvetica').fillColor('#78350f').text(payout.remark, 90, y + 10, { width: 470 });
+        }
+
+        // Footer
+        doc.rect(40, 780, 515, 1).fill('#e2e8f0');
+        doc.fontSize(8).font('Helvetica-Oblique').fillColor('#94a3b8')
+            .text('This is a system-generated document. No signature required.', 40, 790, { align: 'center' });
+
+        doc.end();
+    } catch (error) {
+        console.error('Payout PDF error:', error);
+        if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
+    }
+});
+
 module.exports = router;
+

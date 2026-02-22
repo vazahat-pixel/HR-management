@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import logo from '../../../assets/logo.png';
 import {
     HiOutlineCurrencyDollar,
@@ -15,7 +15,8 @@ import {
     HiOutlineClock,
     HiOutlineDownload,
     HiOutlineExclamationCircle,
-    HiOutlineTicket
+    HiOutlineTicket,
+    HiArrowRight
 } from 'react-icons/hi';
 import { useAuth } from '../../../context/AuthContext';
 import { dashboardAPI, notificationsAPI } from '../../../services/api';
@@ -24,16 +25,19 @@ import { cn } from '../../../lib/utils';
 import toast from 'react-hot-toast';
 import { dailyReportsAPI } from '../../../services/api';
 
+// Profile completeness checker — fields that must be filled
+const isProfileComplete = (u) => !!(u?.email && u?.mobile && !u.mobile.startsWith('MISSING-') && u?.address);
+
 const Dashboard = () => {
     const { user } = useAuth();
-    const navigate = useNavigate(); // ADDED: Using useNavigate
+    const navigate = useNavigate();
     const [dashData, setDashData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [showReportDetails, setShowReportDetails] = useState(false);
     const [notifications, setNotifications] = useState([]);
-
     const [showNewReportPopup, setShowNewReportPopup] = useState(false);
+    const profileComplete = isProfileComplete(user);
 
     useEffect(() => {
         loadDashboard();
@@ -112,6 +116,40 @@ const Dashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4 pb-24 max-w-lg mx-auto"
         >
+            {/* ─── Profile Completion Banner ─────────────────────────────── */}
+            <AnimatePresence>
+                {!profileComplete && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="relative overflow-hidden rounded-[20px] bg-gradient-to-br from-slate-900 via-slate-800 to-[#7B3A1A] p-5 shadow-xl"
+                    >
+                        {/* Decorative dot grid */}
+                        <div className="absolute inset-0 opacity-5 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:10px_10px]" />
+                        {/* Glow */}
+                        <div className="absolute -right-8 -top-8 w-32 h-32 bg-[#C46A2D]/30 rounded-full blur-2xl" />
+                        <div className="relative z-10 flex items-start justify-between gap-4">
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+                                    <p className="text-[9px] font-black text-amber-400 uppercase tracking-[0.25em]">Action Required</p>
+                                </div>
+                                <h2 className="text-lg font-black text-white leading-tight">
+                                    Welcome, {user?.fullName?.split(' ')[0]}! 👋
+                                </h2>
+                                <p className="text-[11px] text-slate-300 font-medium leading-relaxed">
+                                    Complete your profile to unlock salary slips, payouts, advance requests & more.
+                                </p>
+                            </div>
+                        </div>
+                        <Link to="/employee/profile"
+                            className="relative z-10 mt-4 flex items-center justify-center gap-2 w-full py-3 bg-[#C46A2D] hover:bg-[#A55522] text-white rounded-xl text-[11px] font-black uppercase tracking-widest transition-colors">
+                            Complete Profile <HiArrowRight className="w-4 h-4" />
+                        </Link>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             {/* Header with Maximum Visual Impact Background */}
             <div className="relative overflow-hidden pt-12 pb-10 px-1">
                 {/* Visual Background - High-Impact Colorful Animated Logo */}
