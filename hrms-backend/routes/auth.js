@@ -415,4 +415,60 @@ router.put('/me/profile', authenticate, async (req, res) => {
     }
 });
 
+// POST /api/auth/forgot-password — Request OTP for password reset
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { mobile } = req.body;
+        if (!mobile) return res.status(400).json({ error: 'Mobile number is required.' });
+
+        const user = await User.findOne({ mobile });
+        if (!user) return res.status(404).json({ error: 'No account found with this mobile number.' });
+
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Store OTP temporarily for password reset
+        global._resetOtpStore = global._resetOtpStore || {};
+        global._resetOtpStore[mobile] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
+
+        // Send via SMS service
+        await sendOTP(mobile, otp);
+
+        res.json({ message: 'Password reset OTP sent successfully.' });
+    } catch (error) {
+        console.error('Forgot Password error:', error);
+        res.status(500).json({ error: 'Failed to send OTP.' });
+    }
+});
+
+// POST /api/auth/reset-password — Confirm OTP and reset password
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { mobile, otp, newPassword } = req.body;
+        if (!mobile || !otp || !newPassword) {
+            return res.status(400).json({ error: 'Mobile, OTP and new password are required.' });
+        }
+
+        const stored = global._resetOtpStore?.[mobile];
+        if (!stored || stored.otp !== otp || Date.now() > stored.expiresAt) {
+            return res.status(401).json({ error: 'Invalid or expired OTP.' });
+        }
+
+        const user = await User.findOne({ mobile });
+        if (!user) return res.status(404).json({ error: 'User not found.' });
+
+        // Update password (User model handles hashing)
+        user.password = newPassword;
+        await user.save();
+
+        // Clear used OTP
+        delete global._resetOtpStore[mobile];
+
+        res.json({ message: 'Password reset successfully. You can now login with your new password.' });
+    } catch (error) {
+        console.error('Reset Password error:', error);
+        res.status(500).json({ error: 'Failed to reset password.' });
+    }
+});
+
 module.exports = router;

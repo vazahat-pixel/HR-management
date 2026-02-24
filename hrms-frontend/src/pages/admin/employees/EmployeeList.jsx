@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { HiOutlineSearch, HiOutlinePlus, HiOutlineTrash, HiOutlineEye, HiOutlineCheck, HiOutlineX, HiOutlineCash, HiOutlineDownload } from 'react-icons/hi';
 import { employeesAPI, joiningAPI, payrollAPI, authAPI } from '../../../services/api';
+import toast from 'react-hot-toast';
 import Modal from '../../../components/common/Modal';
 import Skeleton, { ListSkeleton } from '../../../components/ui/Skeleton';
 import { cn, getFileUrl } from '../../../lib/utils';
@@ -25,7 +26,10 @@ const EmployeeList = () => {
     const [salaryLoading, setSalaryLoading] = useState(false);
     const [addLoading, setAddLoading] = useState(false);
     const [addResult, setAddResult] = useState(null);
-    const [selectedRequest, setSelectedRequest] = useState(null); // For detailed joining view
+    const [selectedRequest, setSelectedRequest] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editForm, setEditForm] = useState({});
+    const [updateLoading, setUpdateLoading] = useState(false);
 
     const handleSalaryConfig = async (emp) => {
         setSelectedEmployee(emp);
@@ -64,14 +68,35 @@ const EmployeeList = () => {
 
     const handleSearch = (e) => { e.preventDefault(); loadData(); };
 
-    const handleView = (emp) => { setSelectedEmployee(emp); setShowViewModal(true); };
+    const handleView = (emp) => {
+        setSelectedEmployee(emp);
+        setEditForm(emp);
+        setIsEditing(false);
+        setShowViewModal(true);
+    };
+
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        setUpdateLoading(true);
+        try {
+            await employeesAPI.update(selectedEmployee._id, editForm);
+            toast.success('Identity Synchronized');
+            setShowViewModal(false);
+            loadData();
+        } catch (err) {
+            toast.error(err.response?.data?.error || 'Sync failed');
+        } finally {
+            setUpdateLoading(false);
+        }
+    };
 
     const handleDelete = async (id) => {
-        if (!confirm('Are you sure you want to delete this employee?')) return;
+        if (!confirm('PERMANENT DELETION: Are you sure you want to remove this identity from the database? This action is irreversible.')) return;
         try {
             await employeesAPI.delete(id);
             setEmployees(prev => prev.filter(e => e._id !== id));
-        } catch (err) { alert(err.response?.data?.error || 'Failed to delete'); }
+            toast.success('Identity Purged');
+        } catch (err) { toast.error(err.response?.data?.error || 'Failed to purge'); }
     };
 
     const handleAdd = async (e) => {
@@ -238,57 +263,184 @@ const EmployeeList = () => {
                 </div>
             )}
 
-            {/* View Employee Modal */}
-            <Modal isOpen={showViewModal} onClose={() => setShowViewModal(false)} title="Operational Profile" maxWidth="max-w-2xl">
+            {/* Employee Management Modal */}
+            <Modal
+                isOpen={showViewModal}
+                onClose={() => setShowViewModal(false)}
+                title={isEditing ? "Update Personnel Data" : "Operational Profile"}
+                maxWidth="max-w-3xl"
+            >
                 {selectedEmployee && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-0 divide-x divide-[#DCDCDC]/40">
-                        <div className="space-y-6 p-8">
-                            <h3 className="text-[10px] font-black text-[#C46A2D] uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
-                                <span className="w-2 h-2 bg-[#C46A2D] rounded-full shadow-lg shadow-[#C46A2D]/20" />
-                                Personal Schema
-                            </h3>
-                            <div className="space-y-5">
-                                {[
-                                    ['Full Name', selectedEmployee.fullName],
-                                    ['Internal ID', selectedEmployee.employeeId],
-                                    ['Mobile Link', selectedEmployee.mobile],
-                                    ['Email Node', selectedEmployee.email || 'N/A'],
-                                    ['Designation', selectedEmployee.designation || 'N/A'],
-                                    ['Sector', selectedEmployee.department || 'N/A'],
-                                    ['Hub Origin', selectedEmployee.hubName || 'N/A'],
-                                    ['Sync Date', new Date(selectedEmployee.createdAt).toLocaleDateString(undefined, { dateStyle: 'long' })],
-                                ].map(([label, value]) => (
-                                    <div key={label} className="group">
-                                        <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">{label}</p>
-                                        <p className="text-[13px] text-slate-900 font-bold group-hover:text-[#C46A2D] transition-colors uppercase tracking-tight">{value}</p>
-                                    </div>
-                                ))}
+                    <form onSubmit={handleUpdate} className="overflow-hidden">
+                        <div className="flex bg-[#F5F5F5] border-b border-[#DCDCDC]/40 p-6 items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-xl font-black text-[#C46A2D] shadow-sm border border-[#DCDCDC]/40">
+                                    {selectedEmployee.fullName?.[0]}
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-black text-slate-900 leading-none uppercase">{selectedEmployee.fullName}</h3>
+                                    <p className="text-[10px] font-bold text-[#C46A2D] uppercase tracking-[0.3em] mt-1.5">{selectedEmployee.employeeId}</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                {!isEditing ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsEditing(true)}
+                                        className="px-6 py-2.5 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-emerald-600 transition-all shadow-lg active:scale-95"
+                                    >
+                                        Edit Profile
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsEditing(false)}
+                                        className="px-6 py-2.5 bg-white text-slate-400 border border-[#DCDCDC] text-[10px] font-black uppercase tracking-widest rounded-full hover:text-slate-600 transition-all active:scale-95"
+                                    >
+                                        Read Mode
+                                    </button>
+                                )}
                             </div>
                         </div>
-                        <div className="space-y-6 p-8 bg-[#F5F5F5]/30">
-                            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
-                                <span className="w-2 h-2 bg-slate-300 rounded-full" />
-                                Compliance & Fiscal
-                            </h3>
-                            <div className="space-y-5">
-                                {[
-                                    ['Aadhaar Ref', selectedEmployee.aadhaar ? selectedEmployee.aadhaar : 'PENDING', !!selectedEmployee.aadhaar],
-                                    ['PAN Handle', selectedEmployee.pan ? selectedEmployee.pan : 'PENDING', !!selectedEmployee.pan],
-                                    ['Profile Hash', selectedEmployee.profileId || 'N/A'],
-                                    ['Bank Account', selectedEmployee.bankAccount ? selectedEmployee.bankAccount : 'PENDING', !!selectedEmployee.bankAccount],
-                                    ['IFSC Code', selectedEmployee.ifscCode || 'N/A'],
-                                    ['Base Ledger', `₹${selectedEmployee.baseRate || 0}`],
-                                    ['Allowance', `₹${selectedEmployee.conveyance || 0}`],
-                                    ['Node Status', selectedEmployee.status],
-                                ].map(([label, value, exists]) => (
-                                    <div key={label} className="group">
-                                        <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">{label}</p>
-                                        <p className={`text-[13px] font-bold ${exists === false ? 'text-[#B23A48] italic' : 'text-slate-900 group-hover:text-[#A55522] transition-colors uppercase tracking-tight'}`}>{value}</p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-0 divide-x divide-[#DCDCDC]/40">
+                            {/* Left Pane: Personal & Operational */}
+                            <div className="p-8 space-y-6">
+                                <h4 className="text-[10px] font-black text-[#C46A2D] uppercase tracking-[0.2em] mb-4 flex items-center gap-3">
+                                    <span className="w-2 h-2 bg-[#C46A2D] rounded-full" />
+                                    Identity & Sector
+                                </h4>
+
+                                <div className="space-y-4">
+                                    {[
+                                        { key: 'fullName', label: 'Legal Name', type: 'text' },
+                                        { key: 'fhrId', label: 'FHR ID (Main)', type: 'text' },
+                                        { key: 'employeeId', label: 'Legacy ID / Backup', type: 'text' },
+                                        { key: 'mobile', label: 'Primary Link', type: 'tel' },
+                                        { key: 'email', label: 'Email Node', type: 'email' },
+                                        { key: 'designation', label: 'Designation', type: 'text' },
+                                        { key: 'department', label: 'Sector / Dept', type: 'text' },
+                                        { key: 'fatherName', label: 'Paternal Name', type: 'text' },
+                                        { key: 'partnerName', label: 'Partner Name', type: 'text' },
+                                    ].map(field => (
+                                        <div key={field.key} className="space-y-1">
+                                            <label className="text-[9px] text-slate-400 font-black uppercase tracking-widest ml-1">{field.label}</label>
+                                            {isEditing ? (
+                                                <input
+                                                    type={field.type}
+                                                    value={editForm[field.key] || ''}
+                                                    onChange={e => setEditForm({ ...editForm, [field.key]: e.target.value })}
+                                                    className="w-full h-10 bg-[#F5F5F5] border border-[#DCDCDC] rounded-xl px-4 text-xs font-bold text-slate-900 focus:bg-white focus:border-[#C46A2D] outline-none transition-all"
+                                                />
+                                            ) : (
+                                                <p className="text-[13px] font-bold text-slate-900 border-b border-transparent px-1 uppercase tracking-tight">
+                                                    {selectedEmployee[field.key] || '—'}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] text-slate-400 font-black uppercase tracking-widest ml-1">Gender</label>
+                                        {isEditing ? (
+                                            <select
+                                                value={editForm.gender || 'Male'}
+                                                onChange={e => setEditForm({ ...editForm, gender: e.target.value })}
+                                                className="w-full h-10 bg-[#F5F5F5] border border-[#DCDCDC] rounded-xl px-3 text-xs font-bold text-slate-900 outline-none"
+                                            >
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        ) : (
+                                            <p className="text-[13px] font-bold text-slate-900 px-1 uppercase">{selectedEmployee.gender || '—'}</p>
+                                        )}
                                     </div>
-                                ))}
+                                </div>
+                            </div>
+
+                            {/* Right Pane: Compliance & Status */}
+                            <div className="p-8 space-y-6">
+                                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-3">
+                                    <span className="w-2 h-2 bg-slate-300 rounded-full" />
+                                    Security & Physical
+                                </h4>
+
+                                <div className="space-y-4">
+                                    {[
+                                        { key: 'hubName', label: 'Hub Origin', type: 'text' },
+                                        { key: 'officeLocation', label: 'Base Location', type: 'text' },
+                                        { key: 'address', label: 'Residence / Address', type: 'text' },
+                                        { key: 'aadhaar', label: 'Aadhaar Ref', type: 'text' },
+                                        { key: 'pan', label: 'PAN Handle', type: 'text' },
+                                        { key: 'bankAccount', label: 'Bank Account', type: 'text' },
+                                        { key: 'ifscCode', label: 'IFSC Node', type: 'text' },
+                                        { key: 'profileId', label: 'Profile Hash', type: 'text' },
+                                        { key: 'ehrId', label: 'EHR Reference', type: 'text' },
+                                    ].map(field => (
+                                        <div key={field.key} className="space-y-1">
+                                            <label className="text-[9px] text-slate-400 font-black uppercase tracking-widest ml-1">{field.label}</label>
+                                            {isEditing ? (
+                                                <input
+                                                    type={field.type}
+                                                    value={editForm[field.key] || ''}
+                                                    onChange={e => setEditForm({ ...editForm, [field.key]: e.target.value })}
+                                                    className="w-full h-10 bg-[#F5F5F5] border border-[#DCDCDC] rounded-xl px-4 text-xs font-bold text-slate-900 focus:bg-white focus:border-[#C46A2D] outline-none transition-all"
+                                                />
+                                            ) : (
+                                                <p className="text-[13px] font-bold text-slate-900 border-b border-transparent px-1 uppercase tracking-tight">
+                                                    {selectedEmployee[field.key] || '—'}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] text-slate-400 font-black uppercase tracking-widest ml-1">Lifecycle Status</label>
+                                        {isEditing ? (
+                                            <select
+                                                value={editForm.status || 'Active'}
+                                                onChange={e => setEditForm({ ...editForm, status: e.target.value })}
+                                                className="w-full h-10 bg-[#F5F5F5] border border-[#DCDCDC] rounded-xl px-3 text-xs font-bold text-slate-900 outline-none"
+                                            >
+                                                <option value="Active">Active</option>
+                                                <option value="Inactive">Inactive</option>
+                                                <option value="Suspended">Suspended</option>
+                                            </select>
+                                        ) : (
+                                            <span className={cn(
+                                                "inline-block text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-widest border mt-1",
+                                                selectedEmployee.status === 'Active' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-slate-400 bg-slate-50 border-slate-100'
+                                            )}>
+                                                {selectedEmployee.status}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+
+                        {/* Footer Actions */}
+                        <div className="bg-[#F5F5F5] p-6 flex justify-between items-center gap-4">
+                            <button
+                                type="button"
+                                onClick={() => handleDelete(selectedEmployee._id)}
+                                className="flex items-center gap-2 text-[10px] font-black text-rose-500 hover:text-rose-700 uppercase tracking-widest transition-all"
+                            >
+                                <HiOutlineTrash className="w-4 h-4" />
+                                Purge Identity
+                            </button>
+
+                            {isEditing && (
+                                <button
+                                    type="submit"
+                                    disabled={updateLoading}
+                                    className="px-10 py-4 bg-[#1B2B44] text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-xl shadow-xl hover:bg-emerald-600 transition-all disabled:opacity-50 active:scale-95"
+                                >
+                                    {updateLoading ? 'Synchronizing...' : 'Save Operations Data'}
+                                </button>
+                            )}
+                        </div>
+                    </form>
                 )}
             </Modal>
 

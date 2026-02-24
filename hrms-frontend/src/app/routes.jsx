@@ -96,7 +96,6 @@ const AppRoutes = () => {
                 <Route path="/auth" element={<AuthLayout />}>
                     <Route path="login" element={<Login />} />
                     <Route path="forgot-password" element={<ForgotPassword />} />
-                    <Route path="reset-password" element={<Placeholder title="Reset Password" icon={HiOutlineLockClosed} />} />
                 </Route>
 
                 {/* HR Admin Portal */}

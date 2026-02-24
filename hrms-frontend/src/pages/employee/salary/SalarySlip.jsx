@@ -9,6 +9,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { payrollAPI } from '../../../services/api';
 import Modal from '../../../components/common/Modal';
 import toast from 'react-hot-toast';
+import logo from '../../../assets/logo.png';
 
 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'];
@@ -167,8 +168,8 @@ const SalarySlip = () => {
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
                         className={`flex items-center justify-center gap-2 py-2.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all ${activeTab === tab.key
-                                ? 'bg-white text-slate-900 shadow-sm ring-1 ring-black/5'
-                                : 'text-slate-400 hover:text-slate-600'
+                            ? 'bg-white text-slate-900 shadow-sm ring-1 ring-black/5'
+                            : 'text-slate-400 hover:text-slate-600'
                             }`}
                     >
                         <tab.icon className="w-4 h-4" /> {tab.label}
@@ -271,10 +272,15 @@ const SalarySlip = () => {
                 {selectedPayout && (
                     <div className="p-1 space-y-4">
                         {/* Header card */}
-                        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-5 text-white">
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{selectedPayout.hub_name || 'Hub'}</p>
-                            <h3 className="text-xl font-black mt-1">{selectedPayout.full_name || user?.fullName}</h3>
-                            <p className="text-[9px] text-slate-400 font-bold mt-0.5">{selectedPayout.fhrid}</p>
+                        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-5 text-white relative overflow-hidden">
+                            <div className="flex justify-between items-start relative z-10">
+                                <div>
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{selectedPayout.hub_name || 'Hub'}</p>
+                                    <h3 className="text-xl font-black mt-1">{selectedPayout.full_name || user?.fullName}</h3>
+                                    <p className="text-[9px] text-slate-400 font-bold mt-0.5">{selectedPayout.fhrid}</p>
+                                </div>
+                                <img src={logo} alt="Logo" className="w-16 h-auto brightness-0 invert opacity-80" />
+                            </div>
                             <div className="flex items-end justify-between mt-4">
                                 <div>
                                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Period</p>
@@ -331,10 +337,15 @@ const SalarySlip = () => {
                 {selectedPayslip && (
                     <div className="p-1 space-y-4">
                         {/* Header */}
-                        <div className="bg-gradient-to-br from-[#2d5e40] to-[#1a3d28] rounded-2xl p-5 text-white">
-                            <p className="text-[9px] font-black text-green-300 uppercase tracking-widest">Salary Slip</p>
-                            <h3 className="text-xl font-black mt-1">{selectedPayslip.employeeName || user?.fullName}</h3>
-                            <p className="text-[9px] text-green-300 font-bold mt-0.5">{selectedPayslip.fhrid} • {selectedPayslip.designation || 'N/A'}</p>
+                        <div className="bg-gradient-to-br from-[#2d5e40] to-[#1a3d28] rounded-2xl p-5 text-white relative overflow-hidden">
+                            <div className="flex justify-between items-start relative z-10">
+                                <div>
+                                    <p className="text-[9px] font-black text-green-300 uppercase tracking-widest">Salary Slip</p>
+                                    <h3 className="text-xl font-black mt-1">{selectedPayslip.employeeName || user?.fullName}</h3>
+                                    <p className="text-[9px] text-green-300 font-bold mt-0.5">{selectedPayslip.fhrid} • {selectedPayslip.designation || 'N/A'}</p>
+                                </div>
+                                <img src={logo} alt="Logo" className="w-16 h-auto brightness-0 invert opacity-80" />
+                            </div>
                             <div className="flex items-end justify-between mt-4">
                                 <div>
                                     <p className="text-[9px] font-black text-green-300 uppercase tracking-widest">Pay Period</p>

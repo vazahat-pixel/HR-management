@@ -48,6 +48,8 @@ export const authAPI = {
     }),
     register: (data) => api.post('/auth/register', data),
     adminRegister: (data) => api.post('/auth/admin/register', data),
+    requestPasswordReset: (mobile) => api.post('/auth/forgot-password', { mobile }),
+    resetPassword: (data) => api.post('/auth/reset-password', data),
     approveJoining: (id) => api.post(`/auth/approve-joining/${id}`),
     rejectJoining: (id) => api.post(`/auth/reject-joining/${id}`),
     getMe: () => api.get('/auth/me'),

@@ -4,83 +4,98 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     HiOutlineLockClosed,
     HiOutlineIdentification,
-    HiOutlineChevronRight,
-    HiOutlineKey
+    HiOutlineUserAdd,
+    HiOutlineEye,
+    HiOutlineEyeOff,
+    HiOutlineExclamation,
+    HiOutlineKey,
+    HiOutlineTerminal
 } from 'react-icons/hi';
 import { useAuth } from '../../context/AuthContext';
 import { authAPI } from '../../services/api';
 import toast from 'react-hot-toast';
-import { cn } from '../../lib/utils';
 import logo from '../../assets/logo.png';
 
-// --- SUB-COMPONENTS ---
-const PremiumInput = ({ label, icon: Icon, value, onChange, type = "text", placeholder }) => {
-    const [isFocused, setIsFocused] = useState(false);
+// ─── Floating Label Input (Premium Light) ─────────────────────────────────────────
+const FloatingInput = ({ label, icon: Icon, value, onChange, type = 'text', placeholder, rightEl, id }) => {
+    const [focused, setFocused] = useState(false);
+    const hasValue = value && value.length > 0;
+    const isFloating = focused || hasValue;
 
     return (
-        <div className="relative group/input w-full">
-            <label className="block text-[10px] font-black text-[#1B2B44] uppercase tracking-widest mb-2.5 ml-1">
-                {label}
-            </label>
-            <div className="relative flex items-center">
-                <div className={cn(
-                    "absolute left-4 w-5 h-5 transition-colors duration-300 z-10",
-                    isFocused ? "text-[#00D2FF]" : "text-[#1B2B44]/30"
-                )}>
-                    <Icon className="w-full h-full" />
+        <div className="relative w-full">
+            <div className="relative group">
+                <label
+                    htmlFor={id}
+                    className={`absolute left-11 transition-all duration-200 pointer-events-none z-10 ${isFloating
+                            ? 'top-2 text-[10px] font-bold text-[#C46A2D] uppercase tracking-wider'
+                            : 'top-1/2 -translate-y-1/2 text-[14px] font-medium text-slate-400'
+                        }`}
+                >
+                    {isFloating ? label : placeholder}
+                </label>
+
+                <div className={`absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none transition-colors duration-200 ${focused ? 'text-[#C46A2D]' : 'text-slate-400'
+                    }`}>
+                    <Icon className="w-5 h-5" />
                 </div>
+
                 <input
+                    id={id}
                     type={type}
                     value={value}
                     onChange={e => onChange(e.target.value)}
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                    className={cn(
-                        "w-full bg-[#F1F3F6] border rounded-[18px] py-4 pl-12 pr-4 text-[14px] font-bold text-[#1B2B44] placeholder:text-slate-400 outline-none transition-all duration-500",
-                        isFocused ? "border-[#00D2FF] bg-white shadow-[0_0_20px_rgba(0,210,255,0.08)]" : "border-slate-100"
-                    )}
-                    placeholder={placeholder}
-                    required
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
+                    className={`w-full h-14 bg-slate-50 border rounded-2xl pl-11 pr-11 pb-1 pt-5 text-[14px] font-bold text-slate-800 outline-none transition-all duration-300 placeholder-transparent ${focused
+                            ? 'border-[#C46A2D]/40 bg-white ring-4 ring-[#C46A2D]/5 shadow-sm'
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                    placeholder=" "
                 />
+
+                {rightEl && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10">
+                        {rightEl}
+                    </div>
+                )}
             </div>
         </div>
     );
 };
-const RegularInput = ({ label, value, onChange, type = "text", required }) => (
-    <div className="space-y-2 mb-4 last:mb-0">
-        <label className="text-[10px] font-black text-[#1B2B44] uppercase tracking-widest pl-1">{label}</label>
+
+// ─── Regular Input for Register Form ──────────────────────────────────────────
+const DarkInput = ({ label, value, onChange, type = 'text', required }) => (
+    <div className="space-y-1 mb-3 last:mb-0">
+        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">{label}</label>
         <input
             type={type}
             value={value}
             onChange={e => onChange(e.target.value)}
             required={required}
-            className="w-full bg-[#F1F3F6] border border-slate-100 rounded-[18px] px-6 py-4 text-[13px] font-bold text-[#1B2B44] focus:bg-white focus:border-[#00D2FF]/50 outline-none transition-all placeholder:text-slate-300"
+            className="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-[13px] font-bold text-slate-800 focus:bg-white focus:border-[#C46A2D]/40 focus:ring-4 focus:ring-[#C46A2D]/5 outline-none transition-all"
             placeholder={label}
         />
     </div>
 );
 
-// --- MAIN COMPONENT ---
+// ─── Main Admin Login Component ───────────────────────────────────────────────
 const AdminLogin = () => {
-    console.log("AdminLogin Rendering...");
     const [mode, setMode] = useState('login'); // 'login' | 'register'
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
-    const [successMsg, setSuccessMsg] = useState('');
     const navigate = useNavigate();
     const { login, user } = useAuth();
 
-    // Redirect if already logged in as admin
     useEffect(() => {
         if (user && user.role === 'admin') {
             navigate('/admin/dashboard');
         }
     }, [user, navigate]);
 
-    // Login State
+    // States
     const [loginData, setLoginData] = useState({ employeeId: '', password: '' });
-
-    // Register State (Admin Only)
     const [registerData, setRegisterData] = useState({
         fullName: '', mobile: '', email: '', password: '', adminSecret: ''
     });
@@ -100,9 +115,7 @@ const AdminLogin = () => {
             toast.success('Admin Session Established.');
             navigate('/admin/dashboard');
         } catch (err) {
-            const errMsg = err.response?.data?.error || 'Authorization Failed';
-            setError(errMsg);
-            toast.error(errMsg);
+            setError(err.response?.data?.error || 'Authorization Failed');
         }
         setIsLoading(false);
     };
@@ -113,149 +126,136 @@ const AdminLogin = () => {
         setIsLoading(true);
         try {
             const res = await authAPI.adminRegister(registerData);
-            const msg = `Admin Induction Success. ID: ${res.data.employeeId}. Proceed to Login.`;
-            setSuccessMsg(msg);
-            toast.success(msg);
+            toast.success(`Admin Induction Success. ID: ${res.data.employeeId}`);
             setMode('login');
             setLoginData({ employeeId: res.data.employeeId, password: '' });
         } catch (err) {
-            const errMsg = err.response?.data?.error || 'Induction failed';
-            setError(errMsg);
-            toast.error(errMsg);
+            setError(err.response?.data?.error || 'Induction failed');
         }
         setIsLoading(false);
     };
 
     return (
-        <div className="min-h-screen w-full relative overflow-hidden flex flex-col items-center justify-center p-6 bg-[#EBE9E4]">
-            {/* LUXURY BACKGROUND ACCENTS */}
-            <div className="fixed inset-0 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[120%] h-[120%] opacity-40">
-                    <svg className="w-full h-full" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
-                        <motion.path
-                            d="M -100 500 Q 200 200 500 500 T 1100 500"
-                            fill="none"
-                            stroke="url(#goldGradient)"
-                            strokeWidth="1.5"
-                            initial={{ pathLength: 0, opacity: 0 }}
-                            animate={{ pathLength: 1, opacity: 1 }}
-                            transition={{ duration: 4, repeat: Infinity, repeatType: 'reverse' }}
-                        />
-                        <motion.path
-                            d="M -100 600 Q 300 400 600 600 T 1100 600"
-                            fill="none"
-                            stroke="url(#goldGradient)"
-                            strokeWidth="1"
-                            initial={{ pathLength: 0, opacity: 0 }}
-                            animate={{ pathLength: 1, opacity: 0.8 }}
-                            transition={{ duration: 5, delay: 1, repeat: Infinity, repeatType: 'reverse' }}
-                        />
-                        <defs>
-                            <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#C46A2D" stopOpacity="0" />
-                                <stop offset="50%" stopColor="#D4AF37" stopOpacity="0.5" />
-                                <stop offset="100%" stopColor="#C46A2D" stopOpacity="0" />
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                </div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.8)_0%,transparent_70%)]" />
-            </div>
+        <div className="min-h-screen w-full bg-[#FDFDFD] flex flex-col lg:flex-row overflow-hidden">
 
-            {/* CONTENT CONTAINER */}
-            <div className="relative z-10 w-full max-w-[420px] flex flex-col items-center">
-                {/* LOGO TREATMENT */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="mb-6 relative"
-                >
-                    <div className="relative w-[120px] h-[120px] rounded-full p-1 bg-gradient-to-tr from-[#8A6E3C] via-[#D4AF37] to-[#8A6E3C] shadow-[0_10px_40px_rgba(138,110,60,0.3)]">
-                        <div className="w-full h-full rounded-full bg-white flex items-center justify-center p-4 overflow-hidden relative border border-white/50">
-                            <img src={logo} alt="Logo" className="w-full h-full object-contain relative z-10" />
-                            <div className="absolute inset-0 opacity-10 pointer-events-none">
-                                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,0,0,0.1)_50%,transparent_75%)] bg-[length:10px_10px]" />
+            {/* ─── LEFT SIDE: Login Form (100% on mobile, 40% on desktop) ───── */}
+            <div className="w-full lg:w-[450px] xl:w-[500px] flex flex-col relative z-20 bg-white">
+
+                {/* Background Accents (Mobile only) */}
+                <div className="fixed lg:hidden inset-0 pointer-events-none overflow-hidden -z-10">
+                    <div className="absolute top-0 right-0 w-80 h-80 bg-orange-50 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
+                    <div className="absolute bottom-0 left-0 w-80 h-80 bg-sky-50 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
+                </div>
+
+                <div className="flex-1 flex flex-col px-6 lg:px-12 py-10 overflow-y-auto scrollbar-hide">
+
+                    {/* Header: Logo & Branding */}
+                    <div className="mb-12 flex flex-col items-center lg:items-start">
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="relative group"
+                        >
+                            <div className="absolute inset-0 bg-[#C46A2D]/10 rounded-2xl blur-xl group-hover:blur-2xl transition-all" />
+                            <div className="relative w-16 h-16 rounded-2xl bg-white shadow-2xl shadow-slate-200/50 flex items-center justify-center p-3 border border-slate-50">
+                                <img src={logo} alt="Logo" className="w-full h-full object-contain" />
                             </div>
+                        </motion.div>
+
+                        <div className="mt-6 text-center lg:text-left">
+                            <h1 className="text-2xl font-black text-slate-900 tracking-tight">ANGLE ADMIN</h1>
+                            <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-[#C46A2D] mt-1.5 opacity-80">
+                                Global Governance Node
+                            </p>
                         </div>
                     </div>
-                    <div className="absolute inset-[-10px] rounded-full border border-white/30 blur-[2px] opacity-50" />
-                </motion.div>
 
-                {/* BRANDING */}
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-serif font-bold text-[#1B2B44] tracking-[0.05em] leading-none mb-2 uppercase text-center block w-full">
-                        ANGLE <span className="text-[#8A6E3C]">ADMIN</span>
-                    </h1>
-                    <p className="text-[10px] font-bold text-[#1B2B44] opacity-60 uppercase tracking-[0.5em]">GOVERNANCE NODE</p>
-                </div>
-
-                {/* LOGIN CARD */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                    className="w-full bg-white/60 backdrop-blur-3xl rounded-[40px] shadow-[0_40px_100px_rgba(0,0,0,0.08)] border border-white/80 p-9 pt-10 relative"
-                >
-                    {/* Header Tabs */}
-                    <div className="flex bg-[#F1F3F6]/80 p-1.5 rounded-[22px] mb-10 border border-slate-100">
+                    {/* Mode Switcher */}
+                    <div className="flex bg-slate-50 p-1 rounded-2xl mb-8 border border-slate-100 self-center lg:self-start w-full max-w-[280px]">
                         {['login', 'register'].map((m) => (
                             <button
                                 key={m}
-                                onClick={() => setMode(m)}
-                                className={cn(
-                                    "flex-1 py-3 text-[10px] font-black uppercase tracking-widest rounded-[18px] transition-all duration-500 border-none cursor-pointer",
-                                    mode === m ? "bg-white text-[#1B2B44] shadow-xl" : "text-slate-400 hover:text-slate-600 outline-none"
-                                )}
+                                onClick={() => { setMode(m); setError(''); }}
+                                className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 ${mode === m ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'
+                                    }`}
                             >
                                 {m}
                             </button>
                         ))}
                     </div>
 
+                    {/* Error Display */}
+                    <AnimatePresence>
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mb-6 bg-rose-50 border border-rose-100 rounded-2xl p-4 flex items-start gap-3"
+                            >
+                                <HiOutlineExclamation className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
+                                <p className="text-xs font-bold text-rose-600 leading-tight">{error}</p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Forms */}
                     <AnimatePresence mode="wait">
                         {mode === 'login' ? (
                             <motion.form
                                 key="login"
-                                initial={{ opacity: 0, x: -15 }}
+                                initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 15 }}
+                                exit={{ opacity: 0, x: 10 }}
                                 onSubmit={handleLogin}
-                                className="space-y-10"
+                                className="space-y-5"
                             >
-                                <div className="space-y-12">
-                                    <PremiumInput
-                                        label="Admin Identifier"
-                                        icon={HiOutlineIdentification}
-                                        value={loginData.employeeId}
-                                        onChange={v => setLoginData({ ...loginData, employeeId: v })}
-                                        placeholder="EX: ADMIN-01"
-                                    />
-                                    <PremiumInput
-                                        label="Secure Key"
-                                        icon={HiOutlineLockClosed}
-                                        type="password"
-                                        value={loginData.password}
-                                        onChange={v => setLoginData({ ...loginData, password: v })}
-                                        placeholder="••••••••"
-                                    />
+                                <div className="mb-4">
+                                    <h2 className="text-3xl font-black text-slate-900 tracking-tight">System Login</h2>
+                                    <p className="text-[14px] text-slate-500 font-medium mt-1">Authorized personnel restricted access.</p>
                                 </div>
 
-                                <div className="pt-4">
-                                    <motion.button
-                                        whileHover={{ scale: 1.02, boxShadow: '0 10px 25px rgba(0, 210, 255, 0.3)' }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="w-full h-15 bg-gradient-to-r from-[#00D2FF] via-[#0072FF] to-[#00D2FF] bg-[length:200%_auto] hover:bg-[100%_center] rounded-[20px] text-[13px] font-black text-white uppercase tracking-widest shadow-[0_10px_20px_rgba(0,114,255,0.2)] transition-all duration-500 flex items-center justify-center relative overflow-hidden group/loginbtn"
-                                        disabled={isLoading}
-                                    >
-                                        <span className="relative z-10">{isLoading ? 'ESTABLISHING...' : 'SECURE ADMIN LOGIN'}</span>
-                                        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[80%] h-8 bg-[#00D2FF]/60 blur-[20px] opacity-0 group-hover/loginbtn:opacity-100 transition-opacity" />
-                                    </motion.button>
-                                </div>
+                                <FloatingInput
+                                    id="employeeId"
+                                    label="Admin Identifier"
+                                    icon={HiOutlineIdentification}
+                                    value={loginData.employeeId}
+                                    onChange={v => { setLoginData({ ...loginData, employeeId: v }); setError(''); }}
+                                    placeholder="ADMIN-XXXX"
+                                />
+
+                                <FloatingInput
+                                    id="password"
+                                    label="Secure Key"
+                                    icon={HiOutlineLockClosed}
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={loginData.password}
+                                    onChange={v => { setLoginData({ ...loginData, password: v }); setError(''); }}
+                                    placeholder="••••••••"
+                                    rightEl={
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(s => !s)}
+                                            className="text-slate-300 hover:text-slate-600 transition-colors"
+                                        >
+                                            {showPassword ? <HiOutlineEyeOff className="w-5 h-5" /> : <HiOutlineEye className="w-5 h-5" />}
+                                        </button>
+                                    }
+                                />
+
+                                <motion.button
+                                    whileTap={{ scale: 0.97 }}
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full h-14 bg-slate-900 text-white font-black text-[13px] uppercase tracking-widest rounded-2xl shadow-xl shadow-slate-200 transition-all hover:bg-slate-800 disabled:opacity-50 flex items-center justify-center gap-3 pt-1"
+                                >
+                                    {isLoading ? 'Establishing...' : 'Execute Admin Login'}
+                                </motion.button>
 
                                 <button
                                     type="button"
                                     onClick={() => navigate('/auth/login')}
-                                    className="w-full text-center text-[10px] font-black text-slate-300 hover:text-[#C46A2D] transition-colors uppercase tracking-[0.3em] bg-transparent border-none cursor-pointer mt-4"
+                                    className="w-full text-center text-[10px] font-black text-slate-300 hover:text-[#C46A2D] transition-colors uppercase tracking-[0.3em] mt-2"
                                 >
                                     Personnel Portal
                                 </button>
@@ -263,54 +263,97 @@ const AdminLogin = () => {
                         ) : (
                             <motion.form
                                 key="register"
-                                initial={{ opacity: 0, scale: 0.95 }}
+                                initial={{ opacity: 0, scale: 0.98 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
+                                exit={{ opacity: 0, scale: 0.98 }}
                                 onSubmit={handleRegister}
-                                className="space-y-6 max-h-[450px] overflow-y-auto pr-1 custom-scrollbar"
+                                className="space-y-4"
                             >
-                                <div className="space-y-6">
-                                    <RegularInput label="Induction Name" value={registerData.fullName} onChange={v => setRegisterData({ ...registerData, fullName: v })} required />
-                                    <RegularInput label="Gov Mobile" type="tel" value={registerData.mobile} onChange={v => setRegisterData({ ...registerData, mobile: v })} required />
-                                    <RegularInput label="Admin Email" type="email" value={registerData.email} onChange={v => setRegisterData({ ...registerData, email: v })} required />
-                                    <RegularInput label="Secure Pass" type="password" value={registerData.password} onChange={v => setRegisterData({ ...registerData, password: v })} required />
+                                <div className="mb-4">
+                                    <h2 className="text-xl font-black text-slate-900 tracking-tight">Admin Induction</h2>
+                                    <p className="text-[11px] text-[#C46A2D] font-bold uppercase tracking-widest">Protocol Registration</p>
+                                </div>
 
-                                    <div className="pt-8 border-t border-slate-100 space-y-4">
-                                        <label className="text-[10px] font-black text-[#8A6E3C] uppercase tracking-[0.2em] pl-1 flex items-center gap-2">
+                                <div className="space-y-3">
+                                    <DarkInput label="Full Name" value={registerData.fullName} onChange={v => setRegisterData({ ...registerData, fullName: v })} required />
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <DarkInput label="Mobile" type="tel" value={registerData.mobile} onChange={v => setRegisterData({ ...registerData, mobile: v })} required />
+                                        <DarkInput label="Admin Email" type="email" value={registerData.email} onChange={v => setRegisterData({ ...registerData, email: v })} required />
+                                    </div>
+                                    <DarkInput label="Secure Pass" type="password" value={registerData.password} onChange={v => setRegisterData({ ...registerData, password: v })} required />
+
+                                    <div className="pt-4 border-t border-slate-100">
+                                        <label className="text-[10px] font-black text-[#8A6E3C] uppercase tracking-[0.2em] pl-1 flex items-center gap-2 mb-3">
                                             <HiOutlineKey className="w-5 h-5" />
                                             Master Secret Protocol
                                         </label>
-                                        <div className="relative flex items-center">
-                                            <input
-                                                type="password"
-                                                value={registerData.adminSecret}
-                                                onChange={e => setRegisterData({ ...registerData, adminSecret: e.target.value })}
-                                                className="w-full bg-[#F1F3F6] border border-slate-100 rounded-[18px] px-6 py-4.5 text-[14px] font-bold text-[#1B2B44] focus:bg-white focus:border-[#00D2FF]/50 outline-none transition-all placeholder:text-slate-300"
-                                                placeholder="Secret Required"
-                                                required
-                                            />
-                                        </div>
+                                        <input
+                                            type="password"
+                                            value={registerData.adminSecret}
+                                            onChange={e => setRegisterData({ ...registerData, adminSecret: e.target.value })}
+                                            className="w-full h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-[13px] font-bold text-slate-800 focus:bg-white focus:border-[#C46A2D]/40 outline-none transition-all placeholder:text-slate-300"
+                                            placeholder="Secret Required"
+                                            required
+                                        />
                                     </div>
                                 </div>
 
                                 <motion.button
-                                    whileHover={{ scale: 1.02, boxShadow: '0 10px 25px rgba(0, 210, 255, 0.3)' }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className="w-full h-16 bg-gradient-to-r from-[#00D2FF] via-[#0072FF] to-[#00D2FF] bg-[length:200%_auto] hover:bg-[100%_center] rounded-[22px] text-[13px] font-black text-white uppercase tracking-widest shadow-[0_10px_20px_rgba(0,114,255,0.2)] transition-all duration-500 flex items-center justify-center relative overflow-hidden group/regbtn"
+                                    whileTap={{ scale: 0.97 }}
+                                    type="submit"
                                     disabled={isLoading}
+                                    className="w-full h-14 bg-slate-900 text-white font-black text-[13px] uppercase tracking-widest rounded-2xl shadow-xl shadow-slate-200 transition-all hover:bg-slate-800 disabled:opacity-50 flex items-center justify-center gap-3 mt-4"
                                 >
-                                    <span className="relative z-10">{isLoading ? 'ESTABLISHING...' : 'ESTABLISH ADMIN UNIT'}</span>
-                                    <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[80%] h-8 bg-[#00D2FF]/60 blur-[20px] opacity-0 group-hover/regbtn:opacity-100 transition-opacity" />
+                                    {isLoading ? 'Inducting...' : 'Establish Admin Unit'}
                                 </motion.button>
                             </motion.form>
                         )}
                     </AnimatePresence>
-                </motion.div>
 
-                <p className="mt-12 text-[10px] font-black text-[#1B2B44]/30 uppercase tracking-[0.5em] text-center">
-                    GOVERNANCE NODE • AUTHORIZED PERSONNEL ONLY
-                </p>
+                    {/* Footer for Left Side */}
+                    <div className="mt-auto pt-10 text-center lg:text-left">
+                        <p className="text-[9px] font-black text-slate-200 uppercase tracking-widest">
+                            © 2026 Angle Courier & Logistics Pvt Ltd
+                        </p>
+                    </div>
+                </div>
             </div>
+
+            {/* ─── RIGHT SIDE: Hero Image (Desktop only) ─────────────────────── */}
+            <div className="hidden lg:block flex-1 relative bg-slate-100">
+                <img
+                    src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200"
+                    alt="Modern Office"
+                    className="absolute inset-0 w-full h-full object-cover"
+                />
+                {/* Visual Overlays */}
+                <div className="absolute inset-0 bg-slate-900/10 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-r from-white via-transparent to-transparent pointer-events-none" />
+
+                {/* Corporate Mantra Text */}
+                <div className="absolute bottom-12 left-12 right-12 z-10">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6, duration: 1 }}
+                        className="max-w-md"
+                    >
+                        <div className="flex items-center gap-2 text-white/60 mb-4">
+                            <HiOutlineTerminal className="w-5 h-5" />
+                            <span className="text-[10px] font-black tracking-[0.4em] uppercase">Control System V2.4</span>
+                        </div>
+                        <h2 className="text-4xl xl:text-5xl font-black text-white leading-tight tracking-tighter">
+                            Managing the future of <span className="text-white/40">logistics.</span>
+                        </h2>
+                        <div className="mt-8 flex gap-4">
+                            <div className="w-12 h-1 bg-white/20 rounded-full" />
+                            <div className="w-8 h-1 bg-white/40 rounded-full" />
+                            <div className="w-4 h-1 bg-[#C46A2D] rounded-full" />
+                        </div>
+                    </motion.div>
+                </div>
+            </div>
+
         </div>
     );
 };

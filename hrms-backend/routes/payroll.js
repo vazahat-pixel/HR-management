@@ -444,13 +444,26 @@ router.get('/payout/:id/pdf', authenticate, async (req, res) => {
         res.setHeader('Content-Disposition', `attachment; filename=payout_${payout.fhrid}_${payout.month}_${payout.year}.pdf`);
         doc.pipe(res);
 
-        // ─── HEADER ───────────────────────────────────────────────────────────
-        doc.rect(40, 40, 515, 3).fill('#C46A2D');
-        doc.fontSize(20).font('Helvetica-Bold').fillColor('#1e293b')
-            .text('ANGLE COURIER AND LOGISTICS', 40, 55, { align: 'center' });
-        doc.fontSize(10).font('Helvetica').fillColor('#64748b')
-            .text('ARAZI NO-372, PATANAVA BASANT NAGAR, VARANASI - 221110 | TEL: 9889122531', 40, 80, { align: 'center' });
-        doc.rect(40, 100, 515, 1).fill('#e2e8f0');
+        // ─── HEADER WITH LOGO ───────────────────────────────────────────────
+        const fs = require('fs');
+        const path = require('path');
+        const logoPath = path.join(__dirname, '..', 'assets', 'logo.png');
+
+        if (fs.existsSync(logoPath)) {
+            doc.image(logoPath, 40, 40, { width: 140 });
+        }
+
+        // Company Details (Right side - matches salary slip style)
+        doc.fontSize(24).font('Helvetica-Bold').fillColor('#1a365d')
+            .text('ANGLE COURIER AND LOGISTICS', 190, 45, { align: 'center', width: 365 });
+
+        doc.fontSize(11).font('Helvetica-Bold').fillColor('#000000')
+            .text('ARAZI NO-372, PATANAVA BASANT NAGAR VNS', 190, 72, { align: 'center', width: 365 });
+        doc.text('VARANASI-221110 UTTAR PRADESH', 190, 86, { align: 'center', width: 365 });
+        doc.text('TEL. NO.:9889122531', 190, 100, { align: 'center', width: 365 });
+
+        // Thin line separator
+        doc.moveTo(40, 125).lineTo(555, 125).strokeColor('#000000').lineWidth(0.5).stroke();
 
         // Title ribbon
         doc.rect(40, 108, 515, 28).fill('#1e293b');

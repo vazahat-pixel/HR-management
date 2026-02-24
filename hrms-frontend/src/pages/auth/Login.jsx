@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     HiOutlineLockClosed,
@@ -240,7 +240,7 @@ const Login = () => {
                                     </button>
 
                                     <p className="text-center text-[11px] text-slate-500 font-semibold">
-                                        Forgot Password?{' '}
+                                        <Link to="/auth/forgot-password" title="Recover Password">Forgot Password?</Link>{' '}
                                         <span className="text-[#1B2B44] font-black">Contact HR</span>
                                     </p>
                                 </motion.form>

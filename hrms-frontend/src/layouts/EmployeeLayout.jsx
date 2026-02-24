@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 import NotificationDropdown from '../components/common/NotificationDropdown';
 import GlobalPopup from '../components/common/OfferPopup';
+import AnimatedBottomNav from '../components/common/AnimatedBottomNav';
 import logo from '../assets/logo.png';
 
 const EmployeeLayout = () => {
@@ -114,7 +115,7 @@ const EmployeeLayout = () => {
             )}>
                 <div className="h-24 flex items-center px-8 border-b border-dashed border-slate-100">
                     <div className="flex items-center gap-3.5">
-                        <div className="w-12 h-12 flex items-center justify-center bg-white/50 rounded-xl p-1.5 shadow-sm border border-slate-100">
+                        <div className="w-12 h-12 flex items-center justify-center bg-white rounded-2xl p-2 shadow-sm border border-slate-100 transition-transform hover:scale-105 duration-300">
                             <img src={logo} alt="AC Logo" className="w-full h-full object-contain" />
                         </div>
                         <div className="flex flex-col">
@@ -173,22 +174,33 @@ const EmployeeLayout = () => {
             {/* Main Content Wrapper */}
             <div className="flex-1 flex flex-col h-screen overflow-hidden relative z-10 bg-transparent">
 
-                {/* Mobile Header */}
-                <header className="lg:hidden sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 px-4 h-16 flex items-center justify-between shadow-sm">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 flex items-center justify-center bg-white/50 rounded-xl p-1 shadow-sm border border-slate-100">
+                {/* Mobile Header - Compact Version */}
+                <header className="lg:hidden sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 h-14 flex items-center justify-between shadow-sm">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm border border-slate-100 p-1 transition-transform active:scale-95">
                             <img src={logo} alt="AC Logo" className="w-full h-full object-contain" />
                         </div>
-                        <span className="font-extrabold text-xs tracking-tight text-slate-900 uppercase">Angle Courier</span>
+                        <div className="flex flex-col leading-tight">
+                            <span className="font-black text-[9px] tracking-tight text-slate-900 uppercase">
+                                ANGLE COURIER AND LOGISTICS
+                            </span>
+                            <span className="text-[7px] font-black text-[#C46A2D] uppercase tracking-[0.2em] -mt-0.5">pvt ltd</span>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                         {isProfileIncomplete && (
                             <div className="px-2 py-0.5 bg-rose-50 border border-rose-100 rounded text-[9px] font-black text-rose-600 uppercase tracking-wide">
                                 Incomplete
                             </div>
                         )}
                         <NotificationDropdown />
+                        <button
+                            onClick={() => { logout(); navigate('/login'); }}
+                            className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors"
+                        >
+                            <HiOutlineLogout className="w-5 h-5" />
+                        </button>
                     </div>
                 </header>
 
@@ -210,47 +222,10 @@ const EmployeeLayout = () => {
                     </div>
                 </main>
 
-                {/* FIXED MOBILE BOTTOM NAV - ENSURING NO DISTORTION */}
-                <nav className={cn(
-                    "lg:hidden fixed bottom-6 left-4 right-4 z-50 transition-all duration-700",
-                    isProfileIncomplete ? "translate-y-32 opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
-                )}>
-                    {/* Glassmorphism Background */}
-                    <div className="absolute inset-0 bg-slate-900/95 backdrop-blur-2xl rounded-[32px] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.4)]" />
-
-                    <div className="relative z-10 flex items-center justify-between p-2">
-                        {navItems.map((item) => (
-                            <NavLink
-                                key={item.path}
-                                to={item.path}
-                                className={({ isActive }) => cn(
-                                    "flex items-center justify-center transition-all duration-500",
-                                    isActive ? "flex-[2.5]" : "flex-1 min-w-[40px]"
-                                )}
-                            >
-                                {({ isActive }) => (
-                                    <div className={cn(
-                                        "flex items-center gap-2 px-3 py-2.5 rounded-[20px] transition-all duration-300",
-                                        isActive
-                                            ? "bg-gradient-to-r from-[#C46A2D] to-[#A55522] text-white shadow-lg shadow-[#C46A2D]/40 w-full justify-center"
-                                            : "text-slate-500 hover:text-white"
-                                    )}>
-                                        <item.icon className={cn("w-5 h-5 shrink-0", isActive && "scale-110")} />
-                                        {isActive && (
-                                            <motion.span
-                                                initial={{ opacity: 0, width: 0 }}
-                                                animate={{ opacity: 1, width: 'auto' }}
-                                                className="text-[9px] font-black uppercase tracking-widest whitespace-nowrap overflow-hidden"
-                                            >
-                                                {item.label}
-                                            </motion.span>
-                                        )}
-                                    </div>
-                                )}
-                            </NavLink>
-                        ))}
-                    </div>
-                </nav>
+                {/* ANIMATED MOBILE BOTTOM NAV */}
+                {!isProfileIncomplete && (
+                    <AnimatedBottomNav items={navItems} />
+                )}
                 <GlobalPopup />
 
                 {/* Festival Effect Overlay */}
