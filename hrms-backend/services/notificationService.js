@@ -49,11 +49,16 @@ const sendPushNotification = async (fcmToken, title, body, data = {}) => {
             token: fcmToken
         };
 
+        if (!admin) {
+            console.warn('Skipping FCM: Firebase Admin not initialized');
+            return false;
+        }
+
         const response = await admin.messaging().send(message);
         console.log('Successfully sent FCM message:', response);
         return true;
     } catch (error) {
-        console.error('FCM Send Error:', error);
+        console.error('FCM Send Error:', error.message);
         return false;
     }
 };
