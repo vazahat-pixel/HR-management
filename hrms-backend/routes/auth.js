@@ -29,19 +29,21 @@ const generatePassword = () => {
 router.post('/login', async (req, res) => {
     try {
         const { employeeId, password, fhrId } = req.body;
-        console.log(`🔐 Login Attempt: fhrId=${fhrId}, empId=${employeeId}, passLen=${password?.length}`);
+        const rawIdentifier = (fhrId || employeeId || "").toString().trim();
 
-        const loginIdentifier = fhrId || employeeId;
+        console.log(`🔐 Login Attempt: identifier=${rawIdentifier}, passLen=${password?.length}`);
 
-        if (!loginIdentifier || !password) {
+        if (!rawIdentifier || !password) {
             return res.status(400).json({ error: 'Employee ID (FHRID) and password are required.' });
         }
 
         const user = await User.findOne({
             $or: [
-                { fhrId: { $regex: new RegExp(`^${loginIdentifier}$`, 'i') } },
-                { employeeId: { $regex: new RegExp(`^${loginIdentifier}$`, 'i') } },
-                { mobile: loginIdentifier }
+                { fhrId: rawIdentifier },
+                { employeeId: rawIdentifier },
+                { mobile: rawIdentifier },
+                { fhrId: { $regex: new RegExp(`^${rawIdentifier}$`, 'i') } },
+                { employeeId: { $regex: new RegExp(`^${rawIdentifier}$`, 'i') } }
             ]
         });
 
