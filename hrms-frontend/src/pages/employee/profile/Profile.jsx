@@ -21,7 +21,6 @@ const Profile = () => {
     const [loading, setLoading] = useState(false);
     const [profile, setProfile] = useState({
         fullName: '',
-        email: '',
         mobile: '',
         address: '',
         partnerName: '',
@@ -36,7 +35,6 @@ const Profile = () => {
         if (user) {
             setProfile({
                 fullName: user.fullName || '',
-                email: user.email || '',
                 mobile: user.mobile || '',
                 address: user.address || '',
                 partnerName: user.partnerName || '',
@@ -112,34 +110,42 @@ const Profile = () => {
                 </motion.div>
             )}
 
-            {/* HERO SECTION - Premium Gradient */}
-            <div className="relative h-72 rounded-[40px] overflow-hidden shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#1E293B] via-[#0F172A] to-[#C46A2D]/80" />
+            {/* HERO SECTION - Professional Minimalist */}
+            <div className="relative h-64 rounded-[48px] overflow-hidden shadow-2xl mx-2">
+                <div className="absolute inset-0 bg-slate-900" />
 
-                {/* Decorative Pattern Overlay */}
-                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:12px_12px]" />
+                {/* Subtle Gradient Glow */}
+                <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#C46A2D]/20 blur-[100px] rounded-full" />
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-slate-800 blur-[80px] rounded-full" />
 
-                <div className="relative h-full flex flex-col justify-center px-8 z-10">
+                <div className="relative h-full flex flex-col justify-center px-10 z-10">
                     <div className="flex items-center justify-between">
-                        <div className="space-y-2">
-                            <h1 className="text-3xl font-black text-white tracking-tighter drop-shadow-md">
-                                {user?.fullName || 'User Name'}
-                            </h1>
-                            <div className="inline-flex items-center px-4 py-1.5 bg-orange-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-orange-500/20">
-                                {user?.designation || 'Delivery Associate'}
+                        <div className="space-y-3">
+                            <div>
+                                <h1 className="text-4xl font-black text-white tracking-tighter">
+                                    {user?.fullName || 'User Name'}
+                                </h1>
+                                <p className="text-[#C46A2D] text-[11px] font-black uppercase tracking-[0.3em] mt-1 italic">
+                                    Professional Associate
+                                </p>
                             </div>
-                            <p className="text-white/60 text-[10px] font-bold uppercase tracking-[0.2em] mt-3">
-                                FHRID: {user?.empId || '54823901'}
-                            </p>
+
+                            <div className="flex items-center gap-4 pt-2">
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] text-white/30 font-black uppercase tracking-widest">Employee ID</span>
+                                    <span className="text-xs font-bold text-white tracking-widest">#{user?.fhrId || user?.empId || 'GEN-001'}</span>
+                                </div>
+                                <div className="w-px h-8 bg-white/10" />
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] text-white/30 font-black uppercase tracking-widest">Station</span>
+                                    <span className="text-xs font-bold text-white">{user?.hubName || 'HQ'}</span>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Avatar with Glow */}
+                        {/* Avatar with Ring */}
                         <div className="relative">
-                            <motion.div
-                                animate={{ boxShadow: ['0 0 20px rgba(255,255,255,0.2)', '0 0 40px rgba(255,255,255,0.4)', '0 0 20px rgba(255,255,255,0.2)'] }}
-                                transition={{ repeat: Infinity, duration: 3 }}
-                                className="w-28 h-28 rounded-full border-4 border-white/30 backdrop-blur-md overflow-hidden relative shadow-2xl"
-                            >
+                            <div className="w-24 h-24 rounded-[32px] border-4 border-white/10 backdrop-blur-md overflow-hidden relative shadow-2xl rotate-3">
                                 {user?.photoUrl ? (
                                     <img src={user.photoUrl} alt="Avatar" className="w-full h-full object-cover" />
                                 ) : (
@@ -147,7 +153,7 @@ const Profile = () => {
                                         <HiOutlineUserCircle className="w-20 h-20" />
                                     </div>
                                 )}
-                            </motion.div>
+                            </div>
                             <button
                                 onClick={() => setIsEditModalOpen(true)}
                                 className="absolute bottom-1 -right-1 w-8 h-8 bg-white text-orange-500 rounded-full flex items-center justify-center shadow-xl border-2 border-slate-900 group/edit transition-transform active:scale-90"
@@ -159,98 +165,37 @@ const Profile = () => {
                 </div>
             </div>
 
-            {/* CORE DATA - GLASSMORPHISM CARD */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="relative -mt-16 mx-4 z-20 group"
-            >
-                <div className="absolute inset-0 bg-white/40 backdrop-blur-3xl rounded-[32px] border border-white/40 shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all duration-500 group-hover:shadow-[0_30px_60px_rgba(0,0,0,0.15)] group-hover:-translate-y-1" />
-
-                <div className="relative p-6 space-y-6">
-                    <div className="flex items-center justify-between pb-4 border-b border-black/5">
-                        <div>
-                            <h3 className="text-lg font-black text-slate-900 tracking-tight">Active Node</h3>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">HUB: {user?.hubName || 'Base Station'}</p>
-                        </div>
-                        <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-600 rounded-full border border-emerald-500/20">
-                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Active</span>
-                            <HiChevronRight className="w-3 h-3 ml-1" />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 border border-slate-200 shadow-sm shrink-0">
-                                <HiOutlinePhone className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Phone</p>
-                                <p className="text-xs font-bold text-slate-900 truncate">{user?.mobile || 'Connect Number'}</p>
-                            </div>
-                        </div>
-                        <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 border border-slate-200 shadow-sm shrink-0">
-                                <HiOutlineMail className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Email</p>
-                                <p className="text-xs font-bold text-slate-900 truncate">{user?.email || 'N/A'}</p>
-                            </div>
-                        </div>
-                        <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 border border-slate-200 shadow-sm shrink-0">
-                                <HiOutlineBriefcase className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Joined</p>
-                                <p className="text-xs font-bold text-slate-900">05 Jan, 2024</p>
-                            </div>
-                        </div>
-                        <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 border border-slate-200 shadow-sm shrink-0">
-                                <HiOutlineUserGroup className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Partner</p>
-                                <p className="text-xs font-bold text-slate-900">{user?.partnerName || 'Required'}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </motion.div>
-
-            {/* IDENTITY & CONTACT MODULE */}
-            <div className="mx-4 p-8 bg-white border border-slate-100 rounded-[32px] shadow-xl shadow-slate-200/50 space-y-6">
+            {/* PROFESSIONAL DETAILS */}
+            <div className="mx-4 p-8 bg-white border border-slate-100 rounded-[32px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-8">
                 <div className="flex items-center justify-between border-b border-slate-50 pb-4">
                     <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em] flex items-center gap-2">
-                        <span className="w-3 h-3 bg-orange-500 rounded-full border-2 border-white shadow-sm" />
-                        Identity & Contact
+                        <span className="w-1.5 h-6 bg-orange-500 rounded-full" />
+                        Professional Profile
                     </h3>
-                    <HiOutlineMail className="w-5 h-5 text-slate-200" />
                 </div>
 
-                <div className="space-y-4">
-                    <ProfileItem
-                        icon={HiOutlineMail}
-                        label="Email Address"
-                        value={user?.email}
-                        isComplete={isComplete('email')}
-                        color="bg-slate-50"
-                    />
-                    <ProfileItem
-                        icon={HiOutlinePhone}
-                        label="Mobile Network"
-                        value={user?.mobile}
-                        isComplete={isComplete('mobile')}
-                    />
-                    <ProfileItem
-                        icon={HiOutlineLocationMarker}
-                        label="Base Address"
-                        value={user?.address}
-                        isComplete={isComplete('address')}
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                    <ProfileField label="Contact Number" value={user?.mobile} icon={HiOutlinePhone} />
+                    <ProfileField label="Hub Unit" value={user?.hubName} icon={HiOutlineLibrary} />
+                    <ProfileField label="Business Partner" value={user?.partnerName} icon={HiOutlineUserGroup} />
+                    <ProfileField label="Base Location" value={user?.address} icon={HiOutlineLocationMarker} />
+                </div>
+            </div>
+
+            {/* STATUTORY & BANKING */}
+            <div className="mx-4 p-8 bg-white border border-slate-100 rounded-[32px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-8">
+                <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                    <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em] flex items-center gap-2">
+                        <span className="w-1.5 h-6 bg-slate-900 rounded-full" />
+                        Statutory & Banking
+                    </h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+                    <ProfileField label="Bank Account" value={user?.bankAccount} icon={HiOutlineCash} />
+                    <ProfileField label="IFSC Code" value={user?.ifscCode} icon={HiOutlineLibrary} />
+                    <ProfileField label="Aadhaar Card" value={user?.aadhaar} icon={HiOutlineIdentification} />
+                    <ProfileField label="PAN Card" value={user?.pan} icon={HiOutlineDocumentText} />
                 </div>
             </div>
 
@@ -278,7 +223,6 @@ const Profile = () => {
                 <form onSubmit={handleSaveProfile} className="space-y-5 p-2">
                     <div className="grid grid-cols-1 gap-4">
                         <InputGroup label="Full Name" value={profile.fullName} onChange={(val) => setProfile({ ...profile, fullName: val })} required />
-                        <InputGroup label="Email ID" value={profile.email} onChange={(val) => setProfile({ ...profile, email: val })} type="email" required />
                         <div className="grid grid-cols-2 gap-4">
                             <InputGroup label="Mobile" value={profile.mobile} onChange={(val) => setProfile({ ...profile, mobile: val })} required />
                             <InputGroup label="Partner Name" value={profile.partnerName} onChange={(val) => setProfile({ ...profile, partnerName: val })} required />
@@ -314,34 +258,18 @@ const Profile = () => {
     );
 };
 
-const ProfileItem = ({ icon: Icon, label, value, isComplete }) => (
-    <div className="flex items-center gap-4 group p-4 bg-slate-50/50 hover:bg-white hover:shadow-xl hover:shadow-slate-200/40 rounded-3xl border border-transparent hover:border-slate-100 transition-all duration-300">
-        <div className={cn(
-            "w-11 h-11 rounded-2xl flex items-center justify-center transition-all border shadow-sm",
-            isComplete ? "bg-white text-orange-500 border-orange-100" : "bg-white text-slate-300 border-slate-100"
+const ProfileField = ({ icon: Icon, label, value }) => (
+    <div className="space-y-2">
+        <div className="flex items-center gap-2">
+            <Icon className="w-3.5 h-3.5 text-slate-400" />
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
+        </div>
+        <p className={cn(
+            "text-sm font-bold text-slate-900 tracking-tight pl-5",
+            !value && "text-slate-300 italic"
         )}>
-            <Icon className="w-5 h-5" />
-        </div>
-        <div className="flex-1 min-w-0">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{label}</p>
-            <p className={cn("text-xs font-bold tracking-tight truncate", !value && "text-slate-300 italic")}>
-                {value || 'Missing Required Information'}
-            </p>
-        </div>
-        <div className="shrink-0 flex items-center gap-3">
-            {isComplete ? (
-                <div className="w-6 h-6 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center border border-emerald-100 shadow-sm">
-                    <HiCheckCircle className="w-4 h-4" />
-                </div>
-            ) : (
-                <div className="w-6 h-6 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center border border-rose-100 shadow-sm animate-pulse">
-                    <HiExclamationCircle className="w-4 h-4" />
-                </div>
-            )}
-            <div className="p-2 bg-slate-100/50 rounded-xl text-slate-300">
-                <HiChevronRight className="w-4 h-4" />
-            </div>
-        </div>
+            {value || 'Not Configured'}
+        </p>
     </div>
 );
 

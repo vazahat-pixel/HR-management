@@ -175,19 +175,20 @@ const EmployeeLayout = () => {
             <div className="flex-1 flex flex-col h-screen overflow-hidden relative z-10 bg-transparent">
 
                 {/* Mobile Header - Compact Version */}
-                <header className="lg:hidden sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-100 px-4 h-14 flex items-center justify-between shadow-sm">
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 flex items-center justify-center bg-white rounded-lg shadow-sm border border-slate-100 p-1 transition-transform active:scale-95">
+                <header className="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-2xl border-b border-slate-100 px-5 h-16 flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-lg shadow-[#C46A2D]/10 border border-[#C46A2D]/20 p-1.5 transition-transform active:scale-95">
                             <img src={logo} alt="AC Logo" className="w-full h-full object-contain" />
                         </div>
                         <div className="flex flex-col leading-tight">
-                            <span className="font-black text-[9px] tracking-tight text-slate-900 uppercase">
+                            <span className="font-black text-[10px] tracking-tight text-slate-900 uppercase">
                                 ANGLE COURIER AND LOGISTICS
                             </span>
-                            <span className="text-[7px] font-black text-[#C46A2D] uppercase tracking-[0.2em] -mt-0.5">pvt ltd</span>
+                            <span className="text-[7px] font-black text-[#C46A2D] uppercase tracking-[0.25em] -mt-0.5 animate-pulse">
+                                premium logistics
+                            </span>
                         </div>
                     </div>
-
                     <div className="flex items-center gap-2">
                         {isProfileIncomplete && (
                             <div className="px-2 py-0.5 bg-rose-50 border border-rose-100 rounded text-[9px] font-black text-rose-600 uppercase tracking-wide">

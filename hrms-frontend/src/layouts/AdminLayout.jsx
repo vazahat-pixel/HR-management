@@ -22,9 +22,10 @@ import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 import NotificationDropdown from '../components/common/NotificationDropdown';
-import logo from '../assets/logo.png';
-import { getSocket } from '../services/socket';
 import { toast } from 'react-hot-toast';
+import { getSocket } from '../services/socket';
+import AnimatedBottomNav from '../components/common/AnimatedBottomNav';
+import logo from '../assets/logo.png';
 
 const AdminLayout = () => {
     const { user, logout } = useAuth();
@@ -92,7 +93,7 @@ const AdminLayout = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={() => setSidebarOpen(false)}
-                        className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[60] lg:hidden"
+                        className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[40] lg:hidden"
                     />
                 )}
             </AnimatePresence>
@@ -100,7 +101,7 @@ const AdminLayout = () => {
             {/* Sidebar */}
             <motion.aside
                 className={cn(
-                    "fixed lg:static inset-y-0 left-0 w-72 bg-white/80 backdrop-blur-3xl border-r border-slate-200/60 z-[70] flex flex-col transition-all duration-500 shadow-2xl shadow-slate-200/50",
+                    "fixed lg:static inset-y-0 left-0 w-72 bg-white/80 backdrop-blur-3xl border-r border-slate-200/60 z-[50] flex flex-col transition-all duration-500 shadow-2xl shadow-slate-200/50",
                     isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
                 )}
             >
@@ -206,7 +207,7 @@ const AdminLayout = () => {
                 </header>
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-y-auto p-6 lg:p-8 scrollbar-hide relative bg-background">
+                <main className="flex-1 overflow-y-auto p-6 pb-28 lg:p-8 scrollbar-hide relative bg-background">
                     <div className="max-w-7xl mx-auto min-h-full">
                         <AnimatePresence mode="wait">
                             <motion.div
@@ -221,6 +222,9 @@ const AdminLayout = () => {
                         </AnimatePresence>
                     </div>
                 </main>
+
+                {/* MOBILE BOTTOM NAV */}
+                <AnimatedBottomNav items={navItems.slice(0, 4)} />
             </div>
         </div>
     );

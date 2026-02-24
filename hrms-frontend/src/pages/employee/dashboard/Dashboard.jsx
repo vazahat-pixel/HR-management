@@ -217,18 +217,35 @@ const Dashboard = () => {
                 </AnimatePresence>
 
                 {/* ─── Hero ─── */}
-                <div className="relative overflow-hidden pt-3 pb-1 px-1 border-b border-dashed border-slate-100/50 mb-1">
-                    <div className="absolute inset-y-0 right-0 z-0 flex items-center justify-end pointer-events-none opacity-[0.15] translate-x-4">
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-[#C46A2D] blur-[60px] opacity-40 rounded-full" />
-                            <img src={logo} alt="" className="w-56 h-56 object-contain rotate-12 relative z-10 drop-shadow-[0_0_15px_rgba(196,106,45,0.3)]" />
-                        </div>
+                <div className="relative pt-3 pb-4 px-1 border-b border-dashed border-slate-200/50 mb-2 min-h-32">
+                    {/* Animated Top-Only Header Logo */}
+                    <div className="absolute inset-y-0 right-0 pointer-events-none z-0 overflow-hidden flex items-center justify-end">
+                        <motion.div
+                            initial={{ x: 100, opacity: 0, scale: 0.8 }}
+                            animate={{ x: 30, opacity: 0.4, scale: 1 }}
+                            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                            className="relative"
+                        >
+                            <motion.div
+                                animate={{
+                                    y: [-5, 5, -5],
+                                    rotate: [12, 15, 12]
+                                }}
+                                transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+                            >
+                                <img
+                                    src={logo}
+                                    alt=""
+                                    className="w-48 h-48 object-contain opacity-60 drop-shadow-[0_0_30px_rgba(196,106,45,0.25)]"
+                                />
+                            </motion.div>
+                        </motion.div>
                     </div>
 
-                    <div className="flex items-center justify-between relative z-10">
-                        <div>
-                            <p className="text-[7px] font-black text-[#C46A2D] uppercase tracking-widest">{greeting()} ✦</p>
-                            <h1 className="text-xl font-black tracking-tight text-slate-900">{user?.fullName?.split(' ')[0]}</h1>
+                    <div className="flex items-center justify-between relative z-10 transition-all duration-300">
+                        <div className="space-y-1">
+                            <p className="text-[8px] font-black text-[#C46A2D] uppercase tracking-[0.4em]">{greeting()} ✦</p>
+                            <h1 className="text-2xl font-black tracking-tighter text-slate-900 drop-shadow-sm">{user?.fullName?.split(' ')[0]}</h1>
                         </div>
                         <div className="flex items-center gap-2">
                             <button onClick={() => setShowProfileModal(true)} className="w-8 h-8 rounded-lg bg-white/60 backdrop-blur-md border border-slate-100 flex items-center justify-center text-slate-400">

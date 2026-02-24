@@ -4,12 +4,13 @@ import { HiOutlineSearch, HiOutlineFilter, HiOutlineDownload, HiOutlineEye, HiOu
 import { joiningAPI } from '../../../services/api';
 import { toast } from 'react-hot-toast';
 import { cn, getFileUrl } from '../../../lib/utils';
+import { createPortal } from 'react-dom';
 
 const RequestDetailsModal = ({ request, onClose, onApprove, onReject, isSubmitting }) => {
     if (!request) return null;
 
-    return (
-        <div className="fixed inset-0 bg-[#BBBBBB]/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    return createPortal(
+        <div className="fixed inset-0 bg-[#BBBBBB]/60 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -188,7 +189,8 @@ const RequestDetailsModal = ({ request, onClose, onApprove, onReject, isSubmitti
                     </div>
                 )}
             </motion.div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
@@ -433,8 +435,8 @@ const JoiningRequests = () => {
             </AnimatePresence>
             {/* Approval Success Modal */}
             <AnimatePresence>
-                {approvalData && (
-                    <div className="fixed inset-0 bg-white/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                {approvalData && createPortal(
+                    <div className="fixed inset-0 bg-white/40 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -512,7 +514,8 @@ const JoiningRequests = () => {
                                 </motion.button>
                             </div>
                         </motion.div>
-                    </div>
+                    </div>,
+                    document.body
                 )}
             </AnimatePresence>
         </div>
