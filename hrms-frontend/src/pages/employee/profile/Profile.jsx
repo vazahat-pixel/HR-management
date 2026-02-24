@@ -46,6 +46,31 @@ const Profile = () => {
                 aadhaar: user.aadhaar || '',
                 pan: user.pan || ''
             });
+
+            // Show persistent nudge if profile is incomplete
+            if (user.role === 'employee' && user.isProfileCompleted === false) {
+                toast((t) => (
+                    <div className="flex flex-col gap-1 pr-2">
+                        <span className="text-[11px] font-black text-slate-900 uppercase tracking-tighter flex items-center gap-2">
+                            <HiExclamationCircle className="w-4 h-4 text-orange-600" />
+                            Activation Protocol Required
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-500 leading-tight">
+                            Complete your professional profile below to authorize and unlock all system features.
+                        </span>
+                    </div>
+                ), {
+                    id: 'profile-nudge',
+                    duration: 6000,
+                    style: {
+                        borderRadius: '20px',
+                        background: '#FFF',
+                        color: '#333',
+                        border: '1px solid #F1F5F9',
+                        boxShadow: '0 20px 50px rgba(0,0,0,0.1)'
+                    }
+                });
+            }
         }
     }, [user]);
 
@@ -67,7 +92,26 @@ const Profile = () => {
     const isComplete = (field) => !!user?.[field];
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6 pb-12">
+        <div className="max-w-2xl mx-auto space-y-6 pb-12 pt-4">
+            {/* INCOMPLETE PROFILE WARNING */}
+            {user?.isProfileCompleted === false && (
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mx-4 p-5 bg-orange-50 border border-orange-200 rounded-[28px] flex items-start gap-4 shadow-sm"
+                >
+                    <div className="w-10 h-10 bg-orange-600 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-orange-600/20">
+                        <HiExclamationCircle className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                        <h4 className="text-[11px] font-black text-orange-900 uppercase tracking-widest mt-0.5">Profile Activation Pending</h4>
+                        <p className="text-[10px] text-orange-700/80 font-bold leading-relaxed mt-1">
+                            Your account is restricted. Please fill in all required fields below (Aadhaar, PAN, Bank Details) and click "Save Changes" to unlock your dashboard and payslips.
+                        </p>
+                    </div>
+                </motion.div>
+            )}
+
             {/* HERO SECTION - Premium Gradient */}
             <div className="relative h-72 rounded-[40px] overflow-hidden shadow-2xl">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#1E293B] via-[#0F172A] to-[#C46A2D]/80" />

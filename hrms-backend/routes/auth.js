@@ -37,11 +37,11 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ error: 'Employee ID (FHRID) and password are required.' });
         }
 
-        // Case-insensitive lookup for fhrId or employeeId
         const user = await User.findOne({
             $or: [
                 { fhrId: { $regex: new RegExp(`^${loginIdentifier}$`, 'i') } },
-                { employeeId: { $regex: new RegExp(`^${loginIdentifier}$`, 'i') } }
+                { employeeId: { $regex: new RegExp(`^${loginIdentifier}$`, 'i') } },
+                { mobile: loginIdentifier }
             ]
         });
 
