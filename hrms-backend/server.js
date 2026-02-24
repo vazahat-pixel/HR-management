@@ -42,7 +42,7 @@ app.use('/api/payroll', require('./routes/payroll'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 
 // Health check
-app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
+app.get('/api/health', (req, res) => res.json({ status: 'ok', version: 'v3', timestamp: new Date() }));
 
 // Error handler
 app.use((err, req, res, next) => {
