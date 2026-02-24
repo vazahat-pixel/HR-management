@@ -28,7 +28,7 @@ import toast from 'react-hot-toast';
 import { dailyReportsAPI } from '../../../services/api';
 
 // Profile completeness checker — fields that must be filled
-const isProfileComplete = (u) => !!(u?.email && u?.mobile && !u.mobile.startsWith('MISSING-') && u?.address);
+const isProfileComplete = (u) => !!(u?.isProfileCompleted || (u?.email && u?.mobile && !u.mobile.startsWith('MISSING-') && u?.address));
 
 // ─── Reusable Glass Card ────────────────────────────────────────────────────
 const GlassCard = ({ children, className = '', onClick, delay = 0 }) => (
@@ -218,8 +218,11 @@ const Dashboard = () => {
 
                 {/* ─── Hero ─── */}
                 <div className="relative overflow-hidden pt-3 pb-1 px-1 border-b border-dashed border-slate-100/50 mb-1">
-                    <div className="absolute inset-0 z-0 flex items-center justify-end pointer-events-none opacity-[0.05] translate-x-20">
-                        <img src={logo} alt="" className="w-40 h-40 object-contain rotate-6" />
+                    <div className="absolute inset-y-0 right-0 z-0 flex items-center justify-end pointer-events-none opacity-[0.15] translate-x-4">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-[#C46A2D] blur-[60px] opacity-40 rounded-full" />
+                            <img src={logo} alt="" className="w-56 h-56 object-contain rotate-12 relative z-10 drop-shadow-[0_0_15px_rgba(196,106,45,0.3)]" />
+                        </div>
                     </div>
 
                     <div className="flex items-center justify-between relative z-10">

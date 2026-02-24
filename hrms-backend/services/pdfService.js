@@ -19,7 +19,8 @@ exports.generateSalarySlip = async (data) => {
             // Using 0 margin for absolute control like a table
             const doc = new PDFDocument({ size: 'A4', margin: 0 });
 
-            const stream = fs.createWriteStream(filePath);
+            // Pipe to res/stream if provided, else to file
+            const stream = data.res || fs.createWriteStream(filePath);
             doc.pipe(stream);
 
             // --- HEADER BOX (Border) ---

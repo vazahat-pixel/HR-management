@@ -87,7 +87,7 @@ const EmployeeLayout = () => {
     const navItems = [
         { path: '/employee/dashboard', icon: HiOutlineHome, label: 'Home' },
         { path: '/employee/performance', icon: HiOutlineClipboardCheck, label: 'Reports' },
-        { path: '/employee/salary', icon: HiOutlineDocumentText, label: 'Salary Slips' },
+        { path: '/employee/salary', icon: HiOutlineDocumentText, label: 'Salaries' },
         { path: '/employee/advance', icon: HiOutlineCash, label: 'Advance' },
         { path: '/employee/feedback', icon: HiOutlineChatAlt2, label: 'Support' },
         { path: '/employee/offers', icon: HiOutlineTicket, label: 'Offers' },
@@ -205,7 +205,7 @@ const EmployeeLayout = () => {
                 </header>
 
                 {/* Content Area */}
-                <main className="flex-1 overflow-y-auto scrollbar-hide p-4 pb-28 lg:p-10 relative bg-background">
+                <main className="flex-1 overflow-y-auto scrollbar-hide p-4 pb-24 lg:p-10 relative bg-background">
                     <div className="max-w-2xl mx-auto space-y-5">
                         {isProfileIncomplete && location.pathname !== '/employee/profile' && (
                             <motion.div

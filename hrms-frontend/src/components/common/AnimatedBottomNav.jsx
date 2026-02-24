@@ -15,8 +15,8 @@ const AnimatedBottomNav = ({ items }) => {
     }, [location.pathname, items]);
 
     return (
-        <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 lg:hidden w-auto">
-            <div className="bg-slate-900/95 backdrop-blur-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] rounded-full border border-white/10 p-1.5 flex items-center justify-center gap-1.5 overflow-visible">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden w-full bg-slate-900/95 backdrop-blur-3xl border-t border-white/5 h-[75px] flex items-center shadow-[0_-8px_30px_rgba(0,0,0,0.4)]">
+            <div className="flex items-center justify-between w-full h-full px-2 pb-2">
                 {items.map((item, index) => {
                     const isActive = activeIndex === index;
                     const Icon = item.icon;
@@ -26,44 +26,29 @@ const AnimatedBottomNav = ({ items }) => {
                             key={item.path}
                             to={item.path}
                             className={cn(
-                                "relative flex items-center justify-center h-12 rounded-full transition-all duration-700",
-                                isActive ? "px-6" : "px-3"
+                                "relative flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all duration-300",
+                                isActive ? "opacity-100" : "opacity-60"
                             )}
                         >
-                            <div className="flex items-center gap-2.5 relative z-10 transition-all duration-500">
-                                <Icon className={cn(
-                                    "w-5 h-5 transition-all duration-300",
-                                    isActive ? "text-white" : "text-slate-500 hover:text-slate-300"
-                                )} />
-
-                                <AnimatePresence mode="popLayout" initial={false}>
-                                    {isActive && (
-                                        <motion.span
-                                            initial={{ opacity: 0, scale: 0.8, x: -10 }}
-                                            animate={{ opacity: 1, scale: 1, x: 0 }}
-                                            exit={{ opacity: 0, scale: 0.8, x: -10 }}
-                                            transition={{
-                                                type: "spring",
-                                                stiffness: 300,
-                                                damping: 25
-                                            }}
-                                            className="text-[11px] font-black text-white uppercase tracking-wider whitespace-nowrap"
-                                        >
-                                            {item.label}
-                                        </motion.span>
-                                    )}
-                                </AnimatePresence>
+                            <div className={cn(
+                                "p-1.5 rounded-xl transition-all duration-300",
+                                isActive ? "bg-[#C46A2D]/10 text-[#C46A2D]" : "text-slate-400"
+                            )}>
+                                <Icon className="w-5 h-5 shrink-0" />
                             </div>
+
+                            <span className={cn(
+                                "text-[8px] font-black uppercase tracking-tighter whitespace-nowrap",
+                                isActive ? "text-[#C46A2D]" : "text-slate-500"
+                            )}>
+                                {item.label}
+                            </span>
 
                             {isActive && (
                                 <motion.div
-                                    layoutId="active-pill-v2"
-                                    className="absolute inset-0 bg-gradient-to-r from-[#C46A2D] to-[#E07B3A] rounded-full shadow-lg shadow-[#C46A2D]/20"
-                                    transition={{
-                                        type: "spring",
-                                        stiffness: 300,
-                                        damping: 25
-                                    }}
+                                    layoutId="bottom-indicator"
+                                    className="absolute -top-1 w-6 h-1 bg-[#C46A2D] rounded-full"
+                                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
                                 />
                             )}
                         </NavLink>

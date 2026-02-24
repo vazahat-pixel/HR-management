@@ -406,16 +406,24 @@ router.get('/salary-slips/:id/pdf', authenticate, async (req, res) => {
             return res.status(403).json({ error: 'Unauthorized' });
         }
 
-        if (!slip.pdfPath) return res.status(404).json({ error: 'PDF not generated' });
-
-        const fs = require('fs');
-        const path = require('path');
-        const fullPath = path.join(__dirname, '..', slip.pdfPath);
-        if (!fs.existsSync(fullPath)) return res.status(404).json({ error: 'File missing' });
-
+        // If file missing or on live server, generate on the fly for reliability
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=salary_slip_${slip.fhrid}_${slip.month}_${slip.year}.pdf`);
-        fs.createReadStream(fullPath).pipe(res);
+
+        try {
+            await pdfService.generateSalarySlip({ ...slip.toObject(), res });
+        } catch (genErr) {
+            console.error('On-the-fly generation failed:', genErr);
+            // Fallback to static if generation fails and static exists
+            const fs = require('fs');
+            const path = require('path');
+            const fullPath = path.join(__dirname, '..', slip.pdfPath || '');
+            if (slip.pdfPath && fs.existsSync(fullPath)) {
+                fs.createReadStream(fullPath).pipe(res);
+            } else {
+                if (!res.headersSent) res.status(500).json({ error: 'Failed to generate PDF' });
+            }
+        }
     } catch (error) {
         console.error('Payslip download error:', error);
         res.status(500).json({ error: 'Failed' });
