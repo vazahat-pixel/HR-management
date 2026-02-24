@@ -42,8 +42,8 @@ router.post('/login', async (req, res) => {
 
         const user = await User.findOne({
             $or: [
-                { fhrId: escapedId },
-                { employeeId: escapedId },
+                { fhrId: rawIdentifier },
+                { employeeId: rawIdentifier },
                 { mobile: rawIdentifier },
                 { fhrId: { $regex: new RegExp(`^${escapedId}$`, 'i') } },
                 { employeeId: { $regex: new RegExp(`^${escapedId}$`, 'i') } },
@@ -52,28 +52,30 @@ router.post('/login', async (req, res) => {
         });
 
         if (!user) {
-            return res.status(401).json({ error: 'Invalid credentials.' });
+            console.log(`❌ Login Failed: User not found for [${rawIdentifier}]`);
+            return res.status(401).json({ error: `Identity [${rawIdentifier}] not recognized.` });
         }
 
         // Admin Bypass
         if (user.role === 'admin') {
-            // Admins are always allowed (unless we implement a specific ban for admins later)
+            // Admins are always allowed
         } else {
             // Strict checks for Employees/Pending
             if (user.role === 'pending' || !user.isAccountActivated) {
-                return res.status(403).json({ error: 'Your account is pending approval. Please wait for HR confirmation.' });
+                return res.status(403).json({ error: 'Account pending activation. Contact HR.' });
             }
             if (user.role === 'rejected') {
-                return res.status(403).json({ error: 'Your application was rejected.' });
+                return res.status(403).json({ error: 'Account access denied.' });
             }
             if (user.status !== 'Active') {
-                return res.status(403).json({ error: 'Account is inactive. Contact admin.' });
+                return res.status(403).json({ error: 'Account currently suspended.' });
             }
         }
 
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
-            return res.status(401).json({ error: 'Invalid credentials.' });
+            console.log(`❌ Login Failed: Password mismatch for ${user.fhrId || user.employeeId}`);
+            return res.status(401).json({ error: 'Verification failed: Incorrect password.' });
         }
 
         const token = generateToken(user);
