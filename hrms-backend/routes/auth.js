@@ -34,16 +34,20 @@ router.post('/login', async (req, res) => {
         console.log(`🔐 Login Attempt: identifier=${rawIdentifier}, passLen=${password?.length}`);
 
         if (!rawIdentifier || !password) {
-            return res.status(400).json({ error: 'Employee ID (FHRID) and password are required.' });
+            return res.status(400).json({ error: 'Employee ID/Mobile and password are required.' });
         }
+
+        // Escape regex special characters for safe matching
+        const escapedId = rawIdentifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
         const user = await User.findOne({
             $or: [
-                { fhrId: rawIdentifier },
-                { employeeId: rawIdentifier },
+                { fhrId: escapedId },
+                { employeeId: escapedId },
                 { mobile: rawIdentifier },
-                { fhrId: { $regex: new RegExp(`^${rawIdentifier}$`, 'i') } },
-                { employeeId: { $regex: new RegExp(`^${rawIdentifier}$`, 'i') } }
+                { fhrId: { $regex: new RegExp(`^${escapedId}$`, 'i') } },
+                { employeeId: { $regex: new RegExp(`^${escapedId}$`, 'i') } },
+                { email: { $regex: new RegExp(`^${escapedId}$`, 'i') } }
             ]
         });
 
