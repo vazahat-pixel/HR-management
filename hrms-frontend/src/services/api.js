@@ -40,7 +40,11 @@ api.interceptors.response.use(
 
 // ========== AUTH ==========
 export const authAPI = {
-    login: (id, password) => api.post('/auth/login', { fhrId: id, password }),
+    login: (id, password) => api.post('/auth/login', {
+        fhrId: id,
+        employeeId: id,
+        password
+    }),
     sendOtp: (mobile) => api.post('/auth/send-otp', { mobile }),
     verifyOtp: (data) => api.post('/auth/verify-otp', data),
     newJoining: (data) => api.post('/auth/new-joining', data, {

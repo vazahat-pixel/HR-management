@@ -38,7 +38,7 @@ export { auth, googleProvider, storage, db };
 
 // Messaging is only supported in secure contexts (HTTPS) or localhost
 let messaging = null;
-if (typeof window !== "undefined" && typeof navigator !== "undefined") {
+if (app && typeof window !== "undefined" && typeof navigator !== "undefined") {
     try {
         messaging = getMessaging(app);
     } catch (error) {
