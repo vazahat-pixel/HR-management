@@ -28,8 +28,8 @@ const FloatingInput = ({ label, icon: Icon, value, onChange, type = 'text', plac
                 <label
                     htmlFor={id}
                     className={`absolute left-11 transition-all duration-200 pointer-events-none z-10 ${isFloating
-                            ? 'top-2 text-[10px] font-bold text-[#C46A2D] uppercase tracking-wider'
-                            : 'top-1/2 -translate-y-1/2 text-[14px] font-medium text-slate-400'
+                        ? 'top-2 text-[10px] font-bold text-[#C46A2D] uppercase tracking-wider'
+                        : 'top-1/2 -translate-y-1/2 text-[14px] font-medium text-slate-400'
                         }`}
                 >
                     {isFloating ? label : placeholder}
@@ -48,8 +48,8 @@ const FloatingInput = ({ label, icon: Icon, value, onChange, type = 'text', plac
                     onFocus={() => setFocused(true)}
                     onBlur={() => setFocused(false)}
                     className={`w-full h-14 bg-slate-50 border rounded-2xl pl-11 pr-11 pb-1 pt-5 text-[14px] font-bold text-slate-800 outline-none transition-all duration-300 placeholder-transparent ${focused
-                            ? 'border-[#C46A2D]/40 bg-white ring-4 ring-[#C46A2D]/5 shadow-sm'
-                            : 'border-slate-200 hover:border-slate-300'
+                        ? 'border-[#C46A2D]/40 bg-white ring-4 ring-[#C46A2D]/5 shadow-sm'
+                        : 'border-slate-200 hover:border-slate-300'
                         }`}
                     placeholder=" "
                 />
@@ -147,26 +147,23 @@ const AdminLogin = () => {
                     <div className="absolute bottom-0 left-0 w-80 h-80 bg-sky-50 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
                 </div>
 
-                <div className="flex-1 flex flex-col px-6 lg:px-12 py-10 overflow-y-auto scrollbar-hide">
+                <div className="flex-1 flex flex-col px-6 lg:px-12 py-8 overflow-y-auto scrollbar-hide">
 
                     {/* Header: Logo & Branding */}
-                    <div className="mb-12 flex flex-col items-center lg:items-start">
+                    <div className="mb-6 flex flex-col items-center lg:items-start">
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             className="relative group"
                         >
                             <div className="absolute inset-0 bg-[#C46A2D]/10 rounded-2xl blur-xl group-hover:blur-2xl transition-all" />
-                            <div className="relative w-16 h-16 rounded-2xl bg-white shadow-2xl shadow-slate-200/50 flex items-center justify-center p-3 border border-slate-50">
+                            <div className="relative w-22 h-22 rounded-2xl bg-white shadow-xl shadow-slate-200/50 flex items-center justify-center p-4 border border-slate-50">
                                 <img src={logo} alt="Logo" className="w-full h-full object-contain" />
                             </div>
                         </motion.div>
 
-                        <div className="mt-6 text-center lg:text-left">
-                            <h1 className="text-2xl font-black text-slate-900 tracking-tight">ANGLE ADMIN</h1>
-                            <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-[#C46A2D] mt-1.5 opacity-80">
-                                Global Governance Node
-                            </p>
+                        <div className="mt-4 text-center lg:text-left">
+                            <h1 className="text-xl font-black text-slate-900 tracking-widest uppercase opacity-80">Angle Courier Service</h1>
                         </div>
                     </div>
 
@@ -313,7 +310,7 @@ const AdminLogin = () => {
                     {/* Footer for Left Side */}
                     <div className="mt-auto pt-10 text-center lg:text-left">
                         <p className="text-[9px] font-black text-slate-200 uppercase tracking-widest">
-                            © 2026 Angle Courier & Logistics Pvt Ltd
+                            © 2026 Angle Courier Service
                         </p>
                     </div>
                 </div>

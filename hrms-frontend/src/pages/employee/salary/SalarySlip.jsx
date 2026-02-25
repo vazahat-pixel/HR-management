@@ -308,8 +308,7 @@ const SalarySlip = () => {
                         {/* Financials */}
                         <Section title="Financials">
                             <Row label="LMA Base Pay" value={`₹${fmt(selectedPayout.lmaBasePayAmt)}`} />
-                            <Row label="SOPSY Pay (18/P)" value={`₹${fmt(selectedPayout.sopsyBasePayAmt18P)}`} />
-                            <Row label="GTNL Pay (6/P)" value={`₹${fmt(selectedPayout.gtnlBasePayAmt6P)}`} />
+                            <Row label="U2S Pay" value={`₹${fmt(selectedPayout.u25BaseAmt)}`} />
                             <Row label="Final Base Pay" value={`₹${fmt(selectedPayout.finalBasePayAmt)}`} bold />
                             <Row label="TDS (1%)" value={`-₹${fmt(selectedPayout.tds)}`} color="text-rose-600" />
                             <Row label="Advance" value={`-₹${fmt(selectedPayout.advance)}`} color="text-rose-600" />

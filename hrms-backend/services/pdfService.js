@@ -26,22 +26,27 @@ exports.generateSalarySlip = async (data) => {
             // --- HEADER BOX (Border) ---
             doc.rect(0, 0, 595, 120).stroke('#000000');
 
-            // Logo (Left side)
+            // Logo (Left side) - Centered and fitted within the 150px column
             const logoPath = path.join(__dirname, '..', 'assets', 'logo.png');
             if (fs.existsSync(logoPath)) {
-                doc.image(logoPath, 5, 5, { height: 110 });
+                // Fitting image in a 130x100 box centered at x=10, y=10
+                doc.image(logoPath, 10, 10, {
+                    fit: [130, 100],
+                    align: 'center',
+                    valign: 'center'
+                });
             }
             // Vertical line after logo
             doc.moveTo(150, 0).lineTo(150, 120).stroke('#000000');
 
             // Company Name and Address (Right side) - REDUCED FONT SIZE TO PREVENT OVERLAP
-            doc.fontSize(22).font('Helvetica-Bold').fillColor('#303F9F') // Reduced from 28
-                .text('ANGLE COURIER AND LOGISTICS', 150, 20, { align: 'center', width: 435 });
+            doc.fontSize(18).font('Helvetica-Bold').fillColor('#303F9F')
+                .text('Angle Courier and Logistic Private Limited', 150, 20, { align: 'center', width: 435 });
 
-            doc.fontSize(11).font('Helvetica-Bold').fillColor('#000000') // Reduced from 14
-                .text('ARAZI NO-372, PATANAVA BASANT NAGAR VNS', 150, 52, { align: 'center', width: 435 });
-            doc.text('VARANASI-221110 UTTAR PRADESH', 150, 70, { align: 'center', width: 435 });
-            doc.text('TEL. NO.:9889122531', 150, 88, { align: 'center', width: 435 });
+            doc.fontSize(10).font('Helvetica-Bold').fillColor('#000000')
+                .text('ARAZI NO-372, PATANAVA BASANT NAGAR VNS', 150, 50, { align: 'center', width: 435 });
+            doc.text('VARANASI-221110 UTTAR PRADESH', 150, 68, { align: 'center', width: 435 });
+            doc.text('TEL. NO.:9889122531', 150, 86, { align: 'center', width: 435 });
 
             // --- MONTH TITLE BAR ---
             let currentY = 120;
@@ -197,7 +202,7 @@ exports.generateDailyReportReceipt = async (report, user) => {
             doc.rect(0, 0, doc.page.width, 10).fill('#1B2B44');
 
             doc.fontSize(14).font('Helvetica-Bold').fillColor('#1e293b').text('PERFORMANCE RECEIPT', 30, 30);
-            doc.fontSize(8).font('Helvetica').fillColor('#64748b').text('ANGLE COURIER AND LOGISTICS', 30, 48);
+            doc.fontSize(8).font('Helvetica').fillColor('#64748b').text('Angle Courier and Logistic Private Limited', 30, 48);
 
             doc.rect(30, 65, doc.page.width - 60, 1).fill('#e2e8f0');
 

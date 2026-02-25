@@ -458,17 +458,22 @@ router.get('/payout/:id/pdf', authenticate, async (req, res) => {
         const logoPath = path.join(__dirname, '..', 'assets', 'logo.png');
 
         if (fs.existsSync(logoPath)) {
-            doc.image(logoPath, 40, 40, { width: 140 });
+            // Fitting image in a 140x100 box centered at x=40, y=10
+            doc.image(logoPath, 40, 10, {
+                fit: [140, 100],
+                align: 'center',
+                valign: 'center'
+            });
         }
 
         // Company Details (Right side - matches salary slip style)
-        doc.fontSize(24).font('Helvetica-Bold').fillColor('#1a365d')
-            .text('ANGLE COURIER AND LOGISTICS', 190, 45, { align: 'center', width: 365 });
+        doc.fontSize(18).font('Helvetica-Bold').fillColor('#1a365d')
+            .text('Angle Courier and Logistic Private Limited', 190, 20, { align: 'center', width: 365 });
 
-        doc.fontSize(11).font('Helvetica-Bold').fillColor('#000000')
-            .text('ARAZI NO-372, PATANAVA BASANT NAGAR VNS', 190, 72, { align: 'center', width: 365 });
-        doc.text('VARANASI-221110 UTTAR PRADESH', 190, 86, { align: 'center', width: 365 });
-        doc.text('TEL. NO.:9889122531', 190, 100, { align: 'center', width: 365 });
+        doc.fontSize(10).font('Helvetica-Bold').fillColor('#000000')
+            .text('ARAZI NO-372, PATANAVA BASANT NAGAR VNS', 190, 50, { align: 'center', width: 365 });
+        doc.text('VARANASI-221110 UTTAR PRADESH', 190, 68, { align: 'center', width: 365 });
+        doc.text('TEL. NO.:9889122531', 190, 86, { align: 'center', width: 365 });
 
         // Thin line separator
         doc.moveTo(40, 125).lineTo(555, 125).strokeColor('#000000').lineWidth(0.5).stroke();
@@ -531,8 +536,7 @@ router.get('/payout/:id/pdf', authenticate, async (req, res) => {
         };
 
         finRow('LMA Base Pay Amount', payout.lmaBasePayAmt, '#334155', '#f8fafc');
-        finRow('SOPSY Base Pay (18/P)', payout.sopsyBasePayAmt18P);
-        finRow('GTNL Base Pay (6/P)', payout.gtnlBasePayAmt6P, '#334155', '#f8fafc');
+        finRow('U2S Pay', payout.u25BaseAmt);
         finRow('Final Base Pay Amount', payout.finalBasePayAmt, '#0f172a', '#ffffff');
         finRow('TDS (1%)', payout.tds, '#dc2626', '#fff5f5');
         finRow('Advance Adjustment', payout.advance, '#dc2626', '#fff5f5');

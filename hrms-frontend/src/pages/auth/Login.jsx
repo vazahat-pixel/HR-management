@@ -122,45 +122,40 @@ const Login = () => {
             className="min-h-screen w-full flex flex-col"
             style={{ backgroundColor: '#1B2B44' }}
         >
-            {/* ── TOP: Navy logo section ──────────────────────────────────── */}
-            <div className="flex flex-col items-center pt-14 pb-10">
+            {/* ── TOP: Compact Logo Section ──────────────────────────────────── */}
+            <div className="flex flex-col items-center pt-6 pb-4">
                 {/* Logo circle */}
                 <motion.div
                     initial={{ scale: 0.7, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ type: 'spring', stiffness: 200, damping: 18 }}
-                    style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.30)' }}
-                    className="w-24 h-24 rounded-full bg-white flex items-center justify-center p-3 border-4 border-white"
+                    style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.30)' }}
+                    className="w-28 h-28 rounded-full bg-white flex items-center justify-center p-4 border-2 border-white/20"
                 >
                     <img src={logo} alt="Angle Courier Logo" className="w-full h-full object-contain" />
                 </motion.div>
 
                 {/* Brand text */}
                 <motion.div
-                    initial={{ opacity: 0, y: 6 }}
+                    initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
-                    className="mt-4 text-center"
+                    className="mt-3 text-center"
                 >
-                    <h1 className="text-xl font-black text-white tracking-tight">Angle Courier</h1>
-                    <p className="text-[9px] font-bold uppercase tracking-[0.3em] mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                        HRMS Portal
-                    </p>
+                    <h1 className="text-xl font-black text-white tracking-widest uppercase opacity-90">Angle Courier Service</h1>
                 </motion.div>
             </div>
 
-            {/* ── BOTTOM: White card section (flex-1 fills remaining height) ─ */}
+            {/* ── BOTTOM: Compact Card Section ─ */}
             <motion.div
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="flex-1 flex flex-col items-center rounded-t-[36px]"
-                style={{ backgroundColor: '#F2F4F8' }}
+                className="flex-1 flex flex-col items-center"
             >
-                <div className="w-full max-w-sm px-5 pt-8 pb-14">
+                <div className="w-full flex-1 flex flex-col">
                     <div
-                        className="bg-white rounded-[32px] border border-slate-100 p-7"
-                        style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.10)' }}
+                        className="bg-white rounded-t-[32px] flex-1 px-6 pt-8 pb-10 shadow-[0_-15px_40px_rgba(0,0,0,0.08)]"
                     >
                         <AnimatePresence mode="wait">
 

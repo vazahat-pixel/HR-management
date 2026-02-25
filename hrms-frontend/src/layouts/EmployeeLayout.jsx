@@ -182,10 +182,7 @@ const EmployeeLayout = () => {
                         </div>
                         <div className="flex flex-col leading-tight">
                             <span className="font-black text-[10px] tracking-tight text-slate-900 uppercase">
-                                ANGLE COURIER AND LOGISTICS
-                            </span>
-                            <span className="text-[7px] font-black text-[#C46A2D] uppercase tracking-[0.25em] -mt-0.5 animate-pulse">
-                                premium logistics
+                                Angle Courier and Logistic Private Limited
                             </span>
                         </div>
                     </div>
@@ -206,7 +203,7 @@ const EmployeeLayout = () => {
                 </header>
 
                 {/* Content Area */}
-                <main className="flex-1 overflow-y-auto scrollbar-hide p-4 pb-24 lg:p-10 relative bg-background">
+                <main className="flex-1 overflow-y-auto scrollbar-hide px-4 pt-0 pb-24 lg:p-10 relative bg-background">
                     <div className="max-w-2xl mx-auto space-y-5">
                         {isProfileIncomplete && location.pathname !== '/employee/profile' && (
                             <motion.div
