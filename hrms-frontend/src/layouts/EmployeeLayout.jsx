@@ -194,7 +194,7 @@ const EmployeeLayout = () => {
                         )}
                         <NotificationDropdown />
                         <button
-                            onClick={() => { logout(); navigate('/login'); }}
+                            onClick={() => { logout(); navigate('/auth/login'); }}
                             className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-500 transition-colors"
                         >
                             <HiOutlineLogout className="w-5 h-5" />

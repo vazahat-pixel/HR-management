@@ -69,7 +69,12 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     const { user } = useAuth();
     const location = useLocation();
 
-    if (!user) return <Navigate to="/auth/login" replace />;
+    if (!user) {
+        if (location.pathname.startsWith('/admin')) {
+            return <Navigate to="/admin-login" replace />;
+        }
+        return <Navigate to="/auth/login" replace />;
+    }
 
     // Force Profile Completion
     if (user.role === 'employee' && user.isProfileCompleted === false) {

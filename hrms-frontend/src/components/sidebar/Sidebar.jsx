@@ -21,7 +21,11 @@ const Sidebar = ({ role }) => {
 
     const handleLogout = () => {
         logout();
-        navigate('/auth/login');
+        if (role === 'admin') {
+            navigate('/admin-login');
+        } else {
+            navigate('/auth/login');
+        }
     };
 
     const menuItems = [
