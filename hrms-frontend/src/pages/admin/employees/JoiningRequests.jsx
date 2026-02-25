@@ -145,7 +145,7 @@ const RequestDetailsModal = ({ request, onClose, onApprove, onReject, isSubmitti
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase mb-1.5 block">Custom FHRID</label>
-                                    <input type="text" id="customEmployeeId" placeholder="Auto-Generate" autoComplete="new-password" className="w-full h-[42px] bg-[#F5F5F5] border border-[#DCDCDC] rounded-xl px-4 text-[11px] font-bold text-slate-900 focus:outline-none focus:border-[#C46A2D] uppercase tracking-wider" />
+                                    <input type="number" id="customEmployeeId" placeholder="Numeric ID Only" autoComplete="new-password" className="w-full h-[42px] bg-[#F5F5F5] border border-[#DCDCDC] rounded-xl px-4 text-[11px] font-bold text-slate-900 focus:outline-none focus:border-[#C46A2D] tracking-wider" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-slate-400 uppercase mb-1.5 block">Custom Password</label>

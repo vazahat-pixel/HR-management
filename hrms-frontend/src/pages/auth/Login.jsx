@@ -134,7 +134,6 @@ const Login = () => {
                 >
                     <img src={logo} alt="Angle Courier Logo" className="w-full h-full object-contain" />
                 </motion.div>
-
                 {/* Brand text */}
                 <motion.div
                     initial={{ opacity: 0, y: 4 }}
@@ -179,9 +178,10 @@ const Login = () => {
                                     <PlainInput
                                         label="Employee ID"
                                         icon={HiOutlineIdentification}
+                                        type="number"
                                         value={loginData.fhrId}
                                         onChange={v => setLoginData({ ...loginData, fhrId: v })}
-                                        placeholder="FHR-2026-001"
+                                        placeholder="123456"
                                     />
 
                                     <PlainInput
