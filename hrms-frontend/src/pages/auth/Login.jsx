@@ -178,7 +178,7 @@ const Login = () => {
                                     <PlainInput
                                         label="Employee ID"
                                         icon={HiOutlineIdentification}
-                                        type="number"
+                                        type="text"
                                         value={loginData.fhrId}
                                         onChange={v => setLoginData({ ...loginData, fhrId: v })}
                                         placeholder="123456"

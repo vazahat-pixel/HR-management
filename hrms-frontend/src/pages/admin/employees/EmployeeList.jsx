@@ -314,8 +314,8 @@ const EmployeeList = () => {
                                 <div className="space-y-4">
                                     {[
                                         { key: 'fullName', label: 'Legal Name', type: 'text' },
-                                        { key: 'fhrId', label: 'FHR ID (Main)', type: 'number' },
-                                        { key: 'employeeId', label: 'Legacy ID / Backup', type: 'number' },
+                                        { key: 'fhrId', label: 'FHR ID (Main)', type: 'text' },
+                                        { key: 'employeeId', label: 'Legacy ID / Backup', type: 'text' },
                                         { key: 'mobile', label: 'Primary Link', type: 'tel' },
                                         { key: 'email', label: 'Email Node', type: 'email' },
                                         { key: 'designation', label: 'Designation', type: 'text' },
@@ -450,7 +450,7 @@ const EmployeeList = () => {
                     <div className="grid grid-cols-2 gap-4">
                         {[
                             { key: 'fullName', label: 'Full Name *', type: 'text', required: true },
-                            { key: 'employeeId', label: 'Internal ID *', type: 'number', required: true },
+                            { key: 'employeeId', label: 'Internal ID *', type: 'text', required: true },
                             { key: 'mobile', label: 'Primary Contact *', type: 'tel', required: true },
                             { key: 'email', label: 'Email Node', type: 'email' },
                             { key: 'ehrId', label: 'EHR Reference', type: 'text' },
